@@ -1,4 +1,5 @@
 import { randomUUID } from 'crypto';
+import { createClient } from '@supabase/supabase-js';
 
 const DEFAULT_PERMISSIONS = {
   canBookAppointments: true,
