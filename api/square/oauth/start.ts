@@ -6,12 +6,32 @@ export default function handler(req: any, res: any) {
     process.env.VITE_SQUARE_OAUTH_SCOPES ||
     'MERCHANT_PROFILE_READ EMPLOYEES_READ ITEMS_READ CUSTOMERS_READ CUSTOMERS_WRITE APPOINTMENTS_READ APPOINTMENTS_ALL_READ APPOINTMENTS_WRITE SUBSCRIPTIONS_READ SUBSCRIPTIONS_WRITE';
 
-  if (!squareAppId || !squareRedirectUri) {
-    console.error('[OAUTH START] Missing config:', { hasAppId: !!squareAppId, hasRedirectUri: !!squareRedirectUri });
+  const forwardedProto = req.headers['x-forwarded-proto'];
+  const forwardedHost = req.headers['x-forwarded-host'] || req.headers['host'];
+  const resolvedProto = Array.isArray(forwardedProto) ? forwardedProto[0] : forwardedProto;
+  const resolvedHost = Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost;
+  const requestOrigin = resolvedHost
+    ? `${resolvedProto || (req.secure ? 'https' : 'http')}://${resolvedHost}`
+    : null;
+  const requestRedirectUri = requestOrigin ? `${requestOrigin}/square/callback` : null;
+
+  const resolvedRedirectUri = (() => {
+    if (squareRedirectUri && requestRedirectUri && squareRedirectUri !== requestRedirectUri) {
+      console.warn('[OAUTH START] Redirect URI mismatch, using request origin:', {
+        envRedirect: squareRedirectUri,
+        requestRedirect: requestRedirectUri,
+      });
+      return requestRedirectUri;
+    }
+    return squareRedirectUri || requestRedirectUri;
+  })();
+
+  if (!squareAppId || !resolvedRedirectUri) {
+    console.error('[OAUTH START] Missing config:', { hasAppId: !!squareAppId, hasRedirectUri: !!resolvedRedirectUri });
     return res.status(500).json({ message: 'Square OAuth environment variables are not configured on the server.' });
   }
 
-  console.log('[OAUTH START] Initiating OAuth with redirect_uri:', squareRedirectUri);
+  console.log('[OAUTH START] Initiating OAuth with redirect_uri:', resolvedRedirectUri);
 
   const authorizeBase =
     squareEnv === 'sandbox'
