@@ -19,11 +19,11 @@ export default function handler(req: any, res: any) {
 
   const resolvedRedirectUri = (() => {
     if (squareRedirectUri && requestRedirectUri && squareRedirectUri !== requestRedirectUri) {
-      console.warn('[OAUTH START] Redirect URI mismatch, using request origin:', {
+      console.warn('[OAUTH START] Redirect URI mismatch, using env redirect:', {
         envRedirect: squareRedirectUri,
         requestRedirect: requestRedirectUri,
       });
-      return requestRedirectUri;
+      return squareRedirectUri;
     }
     return squareRedirectUri || requestRedirectUri;
   })();
