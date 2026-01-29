@@ -26,20 +26,7 @@ const MissingCredentialsScreen = () => {
       return;
     }
 
-    const base =
-      squareEnv === 'sandbox'
-        ? 'https://connect.squareupsandbox.com/oauth2/authorize'
-        : 'https://connect.squareup.com/oauth2/authorize';
-
-    const url =
-      `${base}` +
-      `?client_id=${encodeURIComponent(squareAppId)}` +
-      `&response_type=code` +
-      `&scope=${encodeURIComponent(scopes)}` +
-      `&redirect_uri=${encodeURIComponent(squareRedirectUri)}` +
-      `&session=false`;
-
-    window.location.href = url;
+    window.location.href = '/api/square/oauth/start';
   };
 
   const handleTokenSubmit = async (e: React.FormEvent) => {
