@@ -31,10 +31,18 @@ export default function AdminDashboard({ role }: { role: UserRole }) {
   const [isCreatingPlan, setIsCreatingPlan] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
-  
-  const { 
-    branding, updateBranding, 
+  const [showInviteForm, setShowInviteForm] = useState(false);
+  const [inviteName, setInviteName] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteLevelId, setInviteLevelId] = useState('lvl_1');
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [inviteStatus, setInviteStatus] = useState<string | null>(null);
+
+  const {
+    branding, updateBranding,
     membershipConfig, updateMembershipConfig,
+    levels,
     stylists, updateStylists,
     clients, updateClients,
     services, updateServices,
