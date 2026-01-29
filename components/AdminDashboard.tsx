@@ -13,7 +13,7 @@ import {
     ChevronRightIcon,
     ChevronLeftIcon
 } from './icons';
-import type { Stylist, UserRole, GeneratedPlan, MembershipTier } from '../types';
+import type { Stylist, StylistLevel, UserRole, GeneratedPlan, MembershipTier } from '../types';
 import { GOOGLE_FONTS_LIST } from '../data/fonts';
 import AccountSettings from './AccountSettings';
 import PlanSummaryStep from './PlanSummaryStep';
