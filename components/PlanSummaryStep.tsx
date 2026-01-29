@@ -127,8 +127,12 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
   };
 
   const handleSendInvite = async () => {
+    if (!canViewClientContact && !isClient && user?.role === 'stylist') {
+      return;
+    }
+
     setIsSendingInvite(true);
-    
+
     const message = invitationMessage;
     const clientPhone = plan.client.phone || '';
     const clientEmail = plan.client.email || '';
@@ -137,7 +141,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
         if (deliveryMethod === 'sms') {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
             const separator = isIOS ? '&' : '?';
-            const cleanPhone = clientPhone.replace(/\D/g, ''); 
+            const cleanPhone = clientPhone.replace(/\D/g, '');
             window.location.href = `sms:${cleanPhone}${separator}body=${encodeURIComponent(message)}`;
         } else if (deliveryMethod === 'email') {
             window.location.href = `mailto:${clientEmail}?subject=${encodeURIComponent("Your Salon Roadmap & Membership Invitation")}&body=${encodeURIComponent(message)}`;
@@ -146,7 +150,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 navigator.clipboard.writeText(message);
             }
         }
-        
+
         await savePlan({ ...plan, membershipStatus: 'offered', membershipOfferSentAt: new Date().toISOString() });
         setInviteSent(true);
         setTimeout(() => {
