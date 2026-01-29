@@ -89,6 +89,91 @@ export default function AdminDashboard({ role }: { role: UserRole }) {
     return levels.find(level => level.id === levelId)?.defaultPermissions || fallbackPermissions;
   };
 
+  const levelPermissionKeys = Object.keys(fallbackPermissions) as (keyof typeof fallbackPermissions)[];
+
+  const handleLevelUpdate = (levelId: string, updates: Partial<StylistLevel>) => {
+    updateLevels(levels.map(level => (level.id === levelId ? { ...level, ...updates } : level)));
+  };
+
+  const handleLevelPermissionToggle = (levelId: string, permissionKey: keyof typeof fallbackPermissions) => {
+    updateLevels(
+      levels.map(level => {
+        if (level.id !== levelId) return level;
+        return {
+          ...level,
+          defaultPermissions: {
+            ...level.defaultPermissions,
+            [permissionKey]: !level.defaultPermissions[permissionKey],
+          },
+        };
+      })
+    );
+  };
+
+  const handleAddLevel = () => {
+    const nextLevel: StylistLevel = {
+      id: `lvl_${Date.now()}`,
+      name: 'New Tier',
+      color: '#111827',
+      order: levels.length + 1,
+      defaultPermissions: fallbackPermissions,
+    };
+    updateLevels([...levels, nextLevel]);
+  };
+
+  const handleMembershipToggle = () => {
+    updateMembershipConfig(prev => ({
+      ...prev,
+      enabled: !prev.enabled,
+    }));
+  };
+
+  const handleMembershipTierUpdate = (tierId: string, updates: Partial<MembershipTier>) => {
+    updateMembershipConfig(prev => ({
+      ...prev,
+      tiers: prev.tiers.map(tier => (tier.id === tierId ? { ...tier, ...updates } : tier)),
+    }));
+  };
+
+  const handleAddMembershipTier = () => {
+    const newTier: MembershipTier = {
+      id: `tier_${Date.now()}`,
+      name: 'New Tier',
+      minSpend: 0,
+      perks: [],
+      color: '#111827',
+    };
+    updateMembershipConfig(prev => ({
+      ...prev,
+      tiers: [...prev.tiers, newTier],
+    }));
+  };
+
+  const handleAddTierPerk = (tierId: string) => {
+    const nextPerk = perkDrafts[tierId]?.trim();
+    if (!nextPerk) return;
+    updateMembershipConfig(prev => ({
+      ...prev,
+      tiers: prev.tiers.map(tier => (
+        tier.id === tierId
+          ? { ...tier, perks: [...tier.perks, nextPerk] }
+          : tier
+      )),
+    }));
+    setPerkDrafts(prev => ({ ...prev, [tierId]: '' }));
+  };
+
+  const handleRemoveTierPerk = (tierId: string, perkIndex: number) => {
+    updateMembershipConfig(prev => ({
+      ...prev,
+      tiers: prev.tiers.map(tier => (
+        tier.id === tierId
+          ? { ...tier, perks: tier.perks.filter((_, index) => index !== perkIndex) }
+          : tier
+      )),
+    }));
+  };
+
   const handleInviteStylist = async (event: React.FormEvent) => {
     event.preventDefault();
     setInviteError(null);
