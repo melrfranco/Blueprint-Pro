@@ -541,13 +541,13 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             </span>
         </div>
 
-        {isClient && isMemberOffered && (
+        {membershipConfig.enabled && isClient && isMemberOffered && (
             <div className="mb-6 p-6 rounded-[32px] shadow-xl animate-fade-in border-4" style={{ borderColor: branding.primaryColor, backgroundColor: '#FFF' }}>
                 <h2 className="text-xl font-black tracking-tighter mb-4" style={{color: branding.primaryColor}}>Membership Invitation</h2>
                 <p className="text-sm font-bold text-gray-700 mb-4 leading-relaxed">
                     Your blueprint qualifies for a membership! Review the details to enjoy a more predictable and streamlined salon experience.
                 </p>
-                <button 
+                <button
                     onClick={() => setIsViewingMembershipDetails(true)}
                     className="w-full font-black py-4 rounded-2xl shadow-lg flex items-center justify-center space-x-3 active:scale-95 transition-all border-b-4 border-black/20"
                     style={buttonStyle}
@@ -557,7 +557,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             </div>
         )}
 
-        {isClient && isMemberActive && (
+        {membershipConfig.enabled && isClient && isMemberActive && (
              <div className="mb-6 p-6 rounded-[32px] shadow-lg animate-fade-in border-4 border-green-500 bg-green-50 text-center">
                 <CheckCircleIcon className="w-10 h-10 text-green-600 mx-auto mb-3" />
                 <h2 className="text-lg font-black tracking-tighter text-green-900">You’re enrolled! This blueprint is now your active membership.</h2>
@@ -646,8 +646,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 </button>
             )}
             
-            {!isClient && (
-                <button 
+            {!isClient && membershipConfig.enabled && (
+                <button
                     onClick={() => setMembershipModalOpen(true)}
                     className={`w-full py-5 rounded-2xl font-black text-lg flex items-center justify-center space-x-3 shadow-xl active:scale-95 transition-all border-b-4 ${isMemberOffered || isMemberActive ? 'bg-green-600 text-white border-green-900' : 'border-black/20'}`}
                     style={!(isMemberOffered || isMemberActive) ? { backgroundColor: branding.primaryColor, color: ensureAccessibleColor('#FFFFFF', branding.primaryColor, '#FFFFFF') } : {}}
