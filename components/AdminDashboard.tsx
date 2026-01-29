@@ -38,6 +38,8 @@ export default function AdminDashboard({ role }: { role: UserRole }) {
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteStatus, setInviteStatus] = useState<string | null>(null);
+  const [stylistSaveLoading, setStylistSaveLoading] = useState(false);
+  const [stylistSaveError, setStylistSaveError] = useState<string | null>(null);
 
   const {
     branding, updateBranding,
@@ -55,7 +57,7 @@ export default function AdminDashboard({ role }: { role: UserRole }) {
   const totalPipeline = plans.filter(p => p.status === 'active' || p.status === 'draft').reduce((sum, p) => sum + p.totalCost, 0);
 
   const pipelineGrowthData = useMemo(() => {
-    const sortedPlans = [...plans].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    const sortedPlans = [...plans].sort((a, b) => new Date(a.createdAt).getTime() - b.getTime());
     let cumulativeValue = 0;
     const dataMap = new Map<string, number>();
     sortedPlans.forEach(plan => {
@@ -104,6 +106,21 @@ export default function AdminDashboard({ role }: { role: UserRole }) {
     } finally {
       setIsSyncing(false);
     }
+  };
+
+  const fallbackPermissions = levels[0]?.defaultPermissions || {
+    canBookAppointments: true,
+    canOfferDiscounts: false,
+    requiresDiscountApproval: true,
+    viewGlobalReports: false,
+    viewClientContact: true,
+    viewAllSalonPlans: false,
+    can_book_own_schedule: true,
+    can_book_peer_schedules: false,
+  };
+
+  const resolveLevelDefaults = (levelId: string) => {
+    return levels.find(level => level.id === levelId)?.defaultPermissions || fallbackPermissions;
   };
 
   const handleInviteStylist = async (event: React.FormEvent) => {
