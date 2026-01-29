@@ -96,6 +96,25 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [stylists, setStylists] = useState<Stylist[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
 
+  const fallbackPermissions = useMemo(
+    () => ({
+      canBookAppointments: true,
+      canOfferDiscounts: false,
+      requiresDiscountApproval: true,
+      viewGlobalReports: false,
+      viewClientContact: true,
+      viewAllSalonPlans: false,
+      can_book_own_schedule: true,
+      can_book_peer_schedules: false,
+    }),
+    []
+  );
+
+  const resolveLevelDefaults = (levelId: string | null | undefined) => {
+    const level = levels.find((item) => item.id === levelId);
+    return level?.defaultPermissions || fallbackPermissions;
+  };
+
   const [membershipConfig, setMembershipConfig] = useState<MembershipConfig>({
     enabled: true,
     tiers: [],
