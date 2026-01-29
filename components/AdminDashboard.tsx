@@ -5,14 +5,11 @@ import { useSettings } from '../contexts/SettingsContext';
 import { usePlans } from '../contexts/PlanContext';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { SquareIntegrationService } from '../services/squareIntegration';
 import {
-    RefreshIcon,
     CheckCircleIcon,
-    TrashIcon,
     UsersIcon,
     GlobeIcon,
-    DatabaseIcon,
+    SettingsIcon,
     ChevronRightIcon,
     ChevronLeftIcon
 } from './icons';
