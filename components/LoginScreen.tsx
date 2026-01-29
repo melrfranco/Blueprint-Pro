@@ -7,9 +7,6 @@ import { ensureAccessibleColor } from '../utils/ensureAccessibleColor';
 const LoginScreen: React.FC = () => {
   const { branding } = useSettings();
   const { login } = useAuth();
-  const [token, setToken] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [stylistEmail, setStylistEmail] = useState('');
   const [stylistPassword, setStylistPassword] = useState('');
   const [stylistLoading, setStylistLoading] = useState(false);
@@ -21,105 +18,6 @@ const LoginScreen: React.FC = () => {
     // Use server-side OAuth start endpoint for secure state handling
     // Server sets state in HTTP-only cookie and redirects to Square
     window.location.href = '/api/square/oauth/start';
-  };
-
-  const handleTokenSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!token.trim()) {
-      setError('Please enter a Square access token');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const { supabase } = await import('../lib/supabase');
-
-      // Sync team members via local API endpoint (no auth needed, uses token-based UID)
-      const teamRes = await fetch('/api/square/team', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ squareAccessToken: token }),
-      });
-
-      const teamText = await teamRes.text();
-      console.log('Team sync response:', { status: teamRes.status, text: teamText });
-      if (!teamRes.ok) {
-        const data = teamText ? JSON.parse(teamText) : {};
-        console.warn('Team sync failed:', data?.message || `Team sync failed (${teamRes.status})`);
-        // Don't throw - team sync is not critical
-      } else {
-        console.log('Team sync succeeded');
-      }
-
-      // Sync clients via local API endpoint (no auth needed, uses token-based UID)
-      const clientRes = await fetch('/api/square/clients', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ squareAccessToken: token }),
-      });
-
-      const clientText = await clientRes.text();
-      console.log('Client sync response:', { status: clientRes.status, text: clientText });
-      if (!clientRes.ok) {
-        const data = clientText ? JSON.parse(clientText) : {};
-        console.warn('Client sync failed:', data?.message || `Client sync failed (${clientRes.status})`);
-        // Don't throw - client sync is not critical
-      } else {
-        console.log('Client sync succeeded');
-      }
-
-      // Get session from server
-      const sessionRes = await fetch('/api/square/create-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ squareAccessToken: token }),
-      });
-
-      if (!sessionRes.ok) {
-        const errorData = await sessionRes.json();
-        throw new Error(
-          `Failed to create session: ${errorData.message || 'Unknown error'}`
-        );
-      }
-
-      const { supabase_session } = await sessionRes.json();
-      if (!supabase_session?.access_token || !supabase_session?.refresh_token) {
-        throw new Error('Failed to get session tokens from server');
-      }
-
-      console.log('✓ Got session from server, setting session...');
-
-      // Set the session directly from the server tokens
-      const { error: setSessionError } = await supabase.auth.setSession({
-        access_token: supabase_session.access_token,
-        refresh_token: supabase_session.refresh_token,
-      });
-
-      if (setSessionError) {
-        throw new Error(`Failed to set session: ${setSessionError.message}`);
-      }
-
-      // Verify the session is set
-      const { data: sessionCheck } = await supabase.auth.getSession();
-      if (!sessionCheck?.session) {
-        throw new Error('Failed to verify session');
-      }
-
-      localStorage.removeItem('mock_admin_user');
-      console.log('✓ Authenticated as real account:', sessionCheck.session.user.id);
-      window.location.href = '/admin';
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      setLoading(false);
-    }
   };
 
   const handleStylistLogin = async (event: React.FormEvent) => {
