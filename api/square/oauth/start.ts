@@ -51,7 +51,7 @@ export default function handler(req: any, res: any) {
     `?client_id=${encodeURIComponent(squareAppId)}` +
     `&response_type=code` +
     `&scope=${encodeURIComponent(oauthScopes)}` +
-    `&redirect_uri=${encodeURIComponent(squareRedirectUri)}` +
+    `&redirect_uri=${encodeURIComponent(resolvedRedirectUri)}` +
     `&state=${encodeURIComponent(state)}` +
     `&session=false`;
 
