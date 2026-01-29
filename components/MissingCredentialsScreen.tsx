@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
 import { supabase } from '../lib/supabase';
 import { SettingsIcon } from './icons';
@@ -8,6 +8,17 @@ const MissingCredentialsScreen = () => {
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [oauthDebug, setOauthDebug] = useState<null | {
+    ok: boolean;
+    resolvedRedirectUri?: string;
+    requestOrigin?: string;
+    authorizeBase?: string;
+    squareEnv?: string;
+    oauthScopes?: string;
+    hasAppId?: boolean;
+    hasRedirectUri?: boolean;
+  }>(null);
+  const [oauthDebugError, setOauthDebugError] = useState<string | null>(null);
 
   const squareAppId =
     (import.meta as any).env.VITE_SQUARE_APPLICATION_ID ||
@@ -19,6 +30,33 @@ const MissingCredentialsScreen = () => {
   const scopes =
     ((import.meta as any).env.VITE_SQUARE_OAUTH_SCOPES as string | undefined) ??
     'MERCHANT_PROFILE_READ EMPLOYEES_READ ITEMS_READ CUSTOMERS_READ CUSTOMERS_WRITE APPOINTMENTS_READ APPOINTMENTS_ALL_READ APPOINTMENTS_WRITE SUBSCRIPTIONS_READ SUBSCRIPTIONS_WRITE';
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadOauthDebug = async () => {
+      try {
+        const res = await fetch('/api/square/oauth/start?debug=1', { cache: 'no-store' });
+        if (!res.ok) {
+          throw new Error(`Debug request failed (${res.status})`);
+        }
+        const data = await res.json();
+        if (isMounted) {
+          setOauthDebug(data);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setOauthDebugError(err instanceof Error ? err.message : 'Unable to load OAuth debug info');
+        }
+      }
+    };
+
+    loadOauthDebug();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const startOAuth = () => {
     if (!squareAppId || !squareRedirectUri) {
@@ -157,6 +195,39 @@ const MissingCredentialsScreen = () => {
               >
                 Continue with Square OAuth
               </button>
+            </div>
+          )}
+
+          {(oauthDebug || oauthDebugError) && (
+            <div className="mb-6 rounded-2xl border-2 border-gray-200 bg-white/70 p-4 text-xs font-semibold text-gray-700">
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">OAuth Debug Info</p>
+              {oauthDebugError ? (
+                <p className="mt-2 text-red-600">{oauthDebugError}</p>
+              ) : (
+                <div className="mt-2 space-y-2">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Request Origin</p>
+                    <p className="break-all font-mono text-[11px] text-gray-800">{oauthDebug?.requestOrigin || 'Not resolved'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Resolved Redirect</p>
+                    <p className="break-all font-mono text-[11px] text-gray-800">{oauthDebug?.resolvedRedirectUri || 'Not resolved'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Env Redirect</p>
+                    <p className="break-all font-mono text-[11px] text-gray-800">{squareRedirectUri || 'Not set'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Square Environment</p>
+                    <p className="font-mono text-[11px] text-gray-800">{oauthDebug?.squareEnv || 'Unknown'}</p>
+                  </div>
+                  {oauthDebug?.ok === false && (
+                    <p className="text-[11px] font-bold text-red-600">
+                      Missing config: App ID {oauthDebug?.hasAppId ? 'OK' : 'Missing'}, Redirect URI {oauthDebug?.hasRedirectUri ? 'OK' : 'Missing'}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
