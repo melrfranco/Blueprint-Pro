@@ -714,6 +714,20 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                             )}
 
                             <div className="bg-gray-50 p-4 rounded-3xl border-2 border-gray-100">
+                                <p className="text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Projected membership pricing</p>
+                                <div className="flex flex-col gap-3 text-gray-900">
+                                    <div>
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Projected yearly total</p>
+                                        <p className="text-lg font-black">{formatCurrency(plan.totalCost)}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Estimated monthly membership</p>
+                                        <p className="text-lg font-black">{formatCurrency(projectedMonthlySpend)}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="bg-gray-50 p-4 rounded-3xl border-2 border-gray-100">
                                 <p className="text-[10px] font-black text-gray-400 uppercase mb-2 tracking-widest">Message Preview</p>
                                 <div className="bg-white p-4 rounded-2xl border-2 border-gray-200 text-xs font-bold text-gray-800 leading-relaxed italic shadow-inner">
                                     "{invitationMessage}"
