@@ -765,6 +765,20 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                         <p className="text-2xl font-black" style={{ color: qualifyingTier?.color || '#000' }}>{qualifyingTier?.name || 'Standard'}</p>
                     </div>
 
+                    <div className="mb-6 bg-gray-50 p-5 rounded-3xl border-2 border-gray-100 text-center">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Projected membership pricing</p>
+                        <div className="space-y-3">
+                          <div>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Projected yearly total</p>
+                            <p className="text-xl font-black text-gray-950">{formatCurrency(plan.totalCost)}</p>
+                          </div>
+                          <div>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-gray-400">Estimated monthly membership</p>
+                            <p className="text-xl font-black text-gray-950">{formatCurrency(projectedMonthlySpend)}</p>
+                          </div>
+                        </div>
+                    </div>
+
                     <div className="mb-6">
                         <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-3 text-center">Included Perks</h3>
                         {qualifyingTier?.perks && qualifyingTier.perks.length > 0 ? (
