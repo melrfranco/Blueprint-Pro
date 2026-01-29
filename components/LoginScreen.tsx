@@ -1,12 +1,8 @@
 import React, { useState } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
-import { useAuth } from '../contexts/AuthContext';
-import { SettingsIcon } from './icons';
-import { ensureAccessibleColor } from '../utils/ensureAccessibleColor';
 
 const LoginScreen: React.FC = () => {
   const { branding } = useSettings();
-  const { login } = useAuth();
   const [stylistEmail, setStylistEmail] = useState('');
   const [stylistPassword, setStylistPassword] = useState('');
   const [stylistLoading, setStylistLoading] = useState(false);
@@ -43,12 +39,6 @@ const LoginScreen: React.FC = () => {
     }
 
     setStylistLoading(false);
-  };
-
-  const safeAccentColor = ensureAccessibleColor(branding.accentColor, '#FFFFFF', '#0F4C81');
-
-  const headerStyle = {
-    color: '#0F4C81', /* Blueprint Classic Blue for strong contrast on light background */
   };
 
   return (
