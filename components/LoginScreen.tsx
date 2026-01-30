@@ -177,7 +177,7 @@ const LoginScreen: React.FC = () => {
             <button
               type="submit"
               disabled={stylistLoading}
-              className="w-full font-black py-4 rounded-2xl border-4 border-gray-950 uppercase tracking-widest text-sm shadow-lg bg-gray-950 text-white"
+              className="w-full font-black py-4 rounded-2xl border-4 border-gray-950 uppercase tracking-widest text-sm shadow-lg bg-gray-950 text-white transition-colors hover:bg-white hover:text-gray-950"
             >
               {stylistLoading ? 'Signing in...' : 'Sign in as stylist'}
             </button>
