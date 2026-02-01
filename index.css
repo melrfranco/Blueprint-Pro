@@ -1,192 +1,204 @@
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
 
+/* =========================================================
+   DESIGN TOKENS — SOURCE OF TRUTH
+   Palette base: sky-reflection
+   Font: Quicksand
+========================================================= */
+
 :root {
-  /* Blueprint Brand Colors - Heritage Blue, Classic Blue, Sky Blue, Campanula */
-  --color-brand-primary: #0F4C81; /* Classic Blue */
-  --color-brand-secondary: #5D96BC; /* Heritage Blue */
-  --color-brand-accent: #8ABAD3; /* Sky Blue */
-  --color-brand-accent-dark: #0F4C81; /* Classic Blue for contrast on light backgrounds */
-  --color-brand-bg: #F8F9FA;
+  /* Typography */
+  --font-sans: "Quicksand", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
 
-  /* Accessible text colors for backgrounds */
-  --text-on-primary: #FFFFFF; /* White text on Classic Blue */
-  --text-on-secondary: #FFFFFF; /* White text on Heritage Blue */
-  --text-on-accent: #0F4C81; /* Dark text on Sky Blue */
-  --text-on-light: #1F2937; /* Dark gray for body text */
-  --text-muted: #374151; /* Medium gray for secondary text */
+  /* LIGHT MODE COLORS */
+  --bg: #ecf4f8;              /* sky-reflection-50 */
+  --surface: #dae9f1;         /* sky-reflection-100 */
+  --surface-2: #b5d3e3;       /* sky-reflection-200 */
+
+  --text: #0e1d25;            /* sky-reflection-900 */
+  --text-muted: #295770;      /* sky-reflection-700 */
+
+  --border: #8fbdd6;          /* sky-reflection-300 */
+  --border-strong: #6aa7c8;   /* sky-reflection-400 */
+
+  --brand: #009dff;           /* deep-space-blue-500 */
+  --brand-hover: #007ecc;     /* deep-space-blue-600 */
+
+  /* Near-invert interaction */
+  --interactive-bg: #0e1d25;
+  --interactive-text: #ecf4f8;
+  --interactive-border: #6aa7c8;
+
+  /* Spacing */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+
+  /* Radius */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-pill: 9999px;
+
+  /* Elevation */
+  --shadow-1: 0 2px 8px rgba(14, 29, 37, 0.12);
+  --shadow-2: 0 10px 30px rgba(14, 29, 37, 0.18);
+
+  /* Motion */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-fast: 120ms;
+  --dur-med: 180ms;
+  --press-y: 1px;
 }
 
-/* Tailwind Overrides for Dynamic Text Size */
-/* Small Size Setting */
-.text-size-s .text-xs { font-size: 0.6875rem; } /* ~11px */
-.text-size-s .text-sm { font-size: 0.75rem; } /* was text-xs */
-.text-size-s .text-base { font-size: 0.875rem; } /* was text-sm */
-.text-size-s .text-lg { font-size: 1rem; } /* was text-base */
-.text-size-s .text-xl { font-size: 1.125rem; } /* was text-lg */
-.text-size-s .text-2xl { font-size: 1.25rem; } /* was text-xl */
-.text-size-s .text-3xl { font-size: 1.5rem; } /* was text-2xl */
-.text-size-s .text-4xl { font-size: 1.875rem; } /* was text-3xl */
-.text-size-s .text-5xl { font-size: 2.25rem; } /* was text-4xl */
+/* DARK MODE */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a141a;
+    --surface: #0e1d25;
+    --surface-2: #1c3a4a;
 
-/* Medium Size is Tailwind's default, no overrides needed. */
+    --text: #ecf4f8;
+    --text-muted: #8fbdd6;
 
-/* Large Size Setting */
-.text-size-l .text-xs { font-size: 0.875rem; } /* was text-sm */
-.text-size-l .text-sm { font-size: 1rem; } /* was text-base */
-.text-size-l .text-base { font-size: 1.125rem; } /* was text-lg */
-.text-size-l .text-lg { font-size: 1.25rem; } /* was text-xl */
-.text-size-l .text-xl { font-size: 1.5rem; } /* was text-2xl */
-.text-size-l .text-2xl { font-size: 1.875rem; } /* was text-3xl */
-.text-size-l .text-3xl { font-size: 2.25rem; } /* was text-4xl */
-.text-size-l .text-4xl { font-size: 3rem; } /* was text-5xl */
-.text-size-l .text-5xl { font-size: 3.75rem; } /* was text-6xl */
+    --border: #295770;
+    --border-strong: #377495;
 
-/* LoginScreen responsive logo */
-.login-logo {
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-}
+    --brand: #33b1ff;
+    --brand-hover: #66c4ff;
 
-@media (max-width: 991px) {
-  .login-logo {
-    width: 100%;
-    height: auto;
+    --interactive-bg: #ecf4f8;
+    --interactive-text: #0a141a;
+    --interactive-border: #377495;
   }
 }
 
-/* Blueprint Button Styles */
-.blueprint-button {
-  border: 2px solid #0F4C81;
-  color: #0F4C81;
-  background-color: #ffffff;
-  font-weight: bold;
-  padding: 12px;
-  border-radius: 8px;
-  width: 100%;
-  text-align: center;
+/* =========================================================
+   GLOBAL BASELINE
+========================================================= */
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+}
+
+/* =========================================================
+   BUTTONS — ON BRAND, MATCH TOGGLES
+========================================================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-5);
+  font-weight: var(--fw-semibold);
+  border-radius: var(--r-pill);
+  border: 2px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
+
+  box-shadow: var(--shadow-1);
+  transition:
+    background var(--dur-med) var(--ease),
+    color var(--dur-med) var(--ease),
+    border-color var(--dur-med) var(--ease),
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur-med) var(--ease);
 }
 
-.blueprint-button:hover:not(:disabled) {
-  background-color: #0F4C81;
-  color: #ffffff;
-  box-shadow: 0 4px 12px rgba(15, 76, 129, 0.3);
-  transform: translateY(-2px);
+/* Primary button */
+.btn--primary {
+  background: var(--brand);
+  border-color: var(--brand-hover);
+  color: var(--interactive-text);
 }
 
-.blueprint-button:active:not(:disabled) {
-  transform: scale(0.95);
+/* Hover = near-invert */
+.btn:hover {
+  background: var(--interactive-bg);
+  color: var(--interactive-text);
+  border-color: var(--interactive-border);
 }
 
-.blueprint-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+/* Press */
+.btn:active {
+  transform: translateY(var(--press-y));
+  box-shadow: var(--shadow-1);
 }
 
-/* Submit Button Styles */
-.sync-button {
-  transition: background-color 0.2s ease, color 0.2s ease;
+/* =========================================================
+   TOGGLE — MATCHES BUTTON LANGUAGE
+========================================================= */
+
+.toggle {
+  position: relative;
+  width: 64px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  background: var(--surface-2);
+  border: 2px solid var(--border-strong);
+  box-shadow: var(--shadow-1);
+  cursor: pointer;
+
+  transition:
+    background var(--dur-med) var(--ease),
+    border-color var(--dur-med) var(--ease),
+    transform var(--dur-fast) var(--ease),
+    box-shadow var(--dur-med) var(--ease);
 }
 
-.sync-button:hover:not(:disabled) {
-  background-color: rgba(11, 52, 88, 0.9);
+/* Press */
+.toggle:active {
+  transform: translateY(var(--press-y));
 }
 
-.sync-button:active:not(:disabled) {
-  background-color: rgba(11, 52, 88, 0.8);
+/* Knob */
+.toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--r-pill);
+  background: #ffffff;
+  border: 2px solid rgba(14, 29, 37, 0.12);
+  box-shadow: 0 6px 16px rgba(14, 29, 37, 0.22);
+
+  transition:
+    transform var(--dur-med) var(--ease),
+    background var(--dur-med) var(--ease),
+    border-color var(--dur-med) var(--ease);
 }
 
-/* Square OAuth Button Responsive Styles */
-.square-oauth-button {
-  border: 4px solid rgb(15, 76, 129) !important;
-  border-radius: 338px !important;
+/* ON state */
+.toggle[data-state="on"],
+.toggle[aria-checked="true"] {
+  background: var(--brand);
+  border-color: var(--brand-hover);
 }
 
-@media (max-width: 991px) {
-  .square-oauth-button {
-    border-style: solid !important;
-    border-width: 4px !important;
-    font: 600 21px/24.5px Raleway, sans-serif;
-    font-size: 16px !important;
-    line-height: 14.5px;
-  }
+.toggle[data-state="on"]::after,
+.toggle[aria-checked="true"]::after {
+  transform: translateX(36px);
 }
 
-/* Stylist Sign In Button Responsive Styles */
-.stylist-signin-button {
-  border: 4px solid rgb(15, 76, 129) !important;
-  border-radius: 338px !important;
-}
-
-@media (max-width: 991px) {
-  .stylist-signin-button {
-    border-style: solid !important;
-    border-width: 4px !important;
-    font: 600 21px/24.5px Raleway, sans-serif;
-    font-size: 16px !important;
-    line-height: 14.5px;
-  }
-}
-
-/* Stylist Login Form Inputs */
-.stylist-email-input,
-.stylist-password-input {
-  border-radius: 338px !important;
-  border: 2px solid rgb(55, 65, 81) !important;
-}
-
-@media (max-width: 991px) {
-  .stylist-email-input,
-  .stylist-password-input {
-    border-style: solid !important;
-    border-width: 1px !important;
-  }
-}
-
-/* Help Text Responsive Styles */
-.help-text {
-  max-width: 100%;
-}
-
-@media (max-width: 991px) {
-  .help-text {
-    max-width: 230px;
-    margin: 0 auto;
-  }
-}
-
-/* Login Form Responsive Styles */
-.login-form {
-  display: block;
-}
-
-@media (max-width: 991px) {
-  .login-form {
-    display: flex !important;
-    flex-direction: column;
-  }
-}
-
-/* Stylist Access Divider Responsive */
-.stylist-divider {
-  margin: 32px 0;
-}
-
-@media (max-width: 991px) {
-  .stylist-divider {
-    justify-content: center;
-    align-items: center;
-    margin: -8px 0 14px;
-  }
-}
-
-/* Login Screen Content Responsive Padding */
-@media (max-width: 991px) {
-  .login-screen-content {
-    padding-top: 2px;
+/* Dark-mode knob swap */
+@media (prefers-color-scheme: dark) {
+  .toggle::after {
+    background: var(--surface);
+    border-color: rgba(236, 244, 248, 0.2);
   }
 }
