@@ -131,10 +131,6 @@ const LoginScreen: React.FC = () => {
                   borderRadius: "338px",
                   border: "1px dashed rgb(15, 76, 129)",
                   overflow: "hidden",
-                  "@media (max-width: 991px)": {
-                    fontSize: "18px",
-                    lineHeight: "14.5px",
-                  },
                 } as any}
               >
                 Login with Square
@@ -190,10 +186,6 @@ const LoginScreen: React.FC = () => {
                 borderRadius: "338px",
                 border: "1px dashed rgb(15, 76, 129)",
                 overflow: "hidden",
-                "@media (max-width: 991px)": {
-                  fontSize: "18px",
-                  lineHeight: "14.5px",
-                },
               } as any}
             >
               {stylistLoading ? 'Signing in...' : 'Sign in as stylist'}
