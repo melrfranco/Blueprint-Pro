@@ -110,6 +110,8 @@ const LoginScreen: React.FC = () => {
           className="p-10 login-screen-content"
           style={{
             backgroundColor: `rgba(${parseInt(branding.primaryColor.slice(1, 3), 16)}, ${parseInt(branding.primaryColor.slice(3, 5), 16)}, ${parseInt(branding.primaryColor.slice(5, 7), 16)}, 0.08)`,
+            marginRight: "-1px",
+            padding: "8px 40px 40px",
           } as any}
         >
 
