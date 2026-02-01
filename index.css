@@ -159,6 +159,31 @@
   }
 }
 
+/* Login Form Responsive Styles */
+.login-form {
+  display: block;
+}
+
+@media (max-width: 991px) {
+  .login-form {
+    display: flex !important;
+    flex-direction: column;
+  }
+}
+
+/* Stylist Access Divider Responsive */
+.stylist-divider {
+  margin: 32px 0;
+}
+
+@media (max-width: 991px) {
+  .stylist-divider {
+    justify-content: center;
+    align-items: center;
+    margin: -8px 0 14px;
+  }
+}
+
 /* Login Screen Content Responsive Padding */
 @media (max-width: 991px) {
   .login-screen-content {
