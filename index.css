@@ -121,3 +121,10 @@
     line-height: 14.5px;
   }
 }
+
+/* Login Screen Content Responsive Padding */
+@media (max-width: 991px) {
+  .login-screen-content {
+    padding-top: 2px;
+  }
+}
