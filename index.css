@@ -165,21 +165,21 @@ html, body {
 }
 
 /* =========================================================
-   TOGGLES — matches the spec you pasted
-   Works two ways:
-   1) Use class .toggle on a button/div
-   2) Auto-targets your existing Tailwind toggle pattern:
-      button.w-12.h-6.rounded-full.relative  (common)
+   TOGGLE — pill track + BIG pill knob (matches your mock)
+   Supports:
+   - .toggle (recommended)
+   - your existing Tailwind pattern: button.w-12.h-6.rounded-full.relative > div.absolute.top-1.w-4.h-4
 ========================================================= */
 
+/* Track */
 .toggle,
 button.w-12.h-6.rounded-full.relative {
   position: relative;
-  width: 64px;
-  height: 28px;
+  width: 64px !important;
+  height: 28px !important;
   border-radius: var(--r-pill);
-  background: var(--color-brand-accent); /* close to your #8ABAD3 */
-  border: 2px solid var(--border-strong); /* never blends */
+  background: var(--color-brand-accent);     /* close to your #8ABAD3 vibe */
+  border: 2px solid var(--border-strong);    /* never blends */
   box-shadow: var(--shadow-1);
   cursor: pointer;
 
@@ -195,59 +195,69 @@ button.w-12.h-6.rounded-full.relative:active {
   transform: translateY(var(--press-y));
 }
 
-/* Knob for .toggle (pseudo-element) */
+/* BIG pill knob — for .toggle via pseudo element */
 .toggle::after {
   content: "";
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 24px;
+  width: 39px;               /* key difference vs circle knob */
   height: 24px;
   border-radius: var(--r-pill);
   background: #ffffff;
   border: 2px solid rgba(14, 29, 37, 0.12);
-  box-shadow: 0 6px 16px rgba(14, 29, 37, 0.22);
-
-  transition:
-    transform var(--dur-med) var(--ease),
-    background var(--dur-med) var(--ease),
-    border-color var(--dur-med) var(--ease);
+  box-shadow: 0 6px 16px rgba(14, 29, 37, 0.18);
+  transition: transform var(--dur-med) var(--ease),
+              background var(--dur-med) var(--ease),
+              border-color var(--dur-med) var(--ease);
 }
 
-/* Knob for your existing Tailwind toggle pattern:
-   <button class="w-12 h-6 rounded-full relative ...">
-     <div class="absolute top-1 w-4 h-4 ..."></div>
-   </button>
-*/
+/* BIG pill knob — for your existing Tailwind inner div */
 button.w-12.h-6.rounded-full.relative > div.absolute.top-1.w-4.h-4 {
   top: 2px !important;
   left: 2px !important;
-  width: 24px !important;
+  width: 39px !important;
   height: 24px !important;
   border-radius: var(--r-pill) !important;
+
   background: #ffffff !important;
   border: 2px solid rgba(14, 29, 37, 0.12) !important;
-  box-shadow: 0 6px 16px rgba(14, 29, 37, 0.22) !important;
-  transition: transform var(--dur-med) var(--ease), background var(--dur-med) var(--ease) !important;
+  box-shadow: 0 6px 16px rgba(14, 29, 37, 0.18) !important;
+
+  /* IMPORTANT: kill any existing translate-x-* */
+  transform: translateX(0) !important;
+
+  transition: transform var(--dur-med) var(--ease),
+              background var(--dur-med) var(--ease) !important;
 }
 
-/* ON state positioning: support aria-checked or data-state */
+/* ON state track */
+.toggle[aria-checked="true"],
+.toggle[data-state="on"],
+button.w-12.h-6.rounded-full.relative[aria-checked="true"],
+button.w-12.h-6.rounded-full.relative[data-state="on"] {
+  background: var(--brand);
+  border-color: var(--brand-hover);
+}
+
+/* ON state knob movement:
+   64 - 39 - 2*2 = 21px */
 .toggle[aria-checked="true"]::after,
 .toggle[data-state="on"]::after {
-  transform: translateX(36px);
+  transform: translateX(21px);
 }
 
 button.w-12.h-6.rounded-full.relative[aria-checked="true"] > div.absolute.top-1.w-4.h-4,
 button.w-12.h-6.rounded-full.relative[data-state="on"] > div.absolute.top-1.w-4.h-4 {
-  transform: translateX(36px) !important;
+  transform: translateX(21px) !important;
 }
 
-/* Dark-mode knob swap so it stays distinct */
+/* Dark-mode knob swap */
 @media (prefers-color-scheme: dark) {
   .toggle::after,
   button.w-12.h-6.rounded-full.relative > div.absolute.top-1.w-4.h-4 {
     background: var(--surface) !important;
-    border-color: rgba(236, 244, 248, 0.2) !important;
+    border-color: rgba(236, 244, 248, 0.20) !important;
   }
 }
 
