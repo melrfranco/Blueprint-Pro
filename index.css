@@ -139,6 +139,26 @@
   border: 2px solid rgb(55, 65, 81) !important;
 }
 
+@media (max-width: 991px) {
+  .stylist-email-input,
+  .stylist-password-input {
+    border-style: solid !important;
+    border-width: 1px !important;
+  }
+}
+
+/* Help Text Responsive Styles */
+.help-text {
+  max-width: 100%;
+}
+
+@media (max-width: 991px) {
+  .help-text {
+    max-width: 230px;
+    margin: 0 auto;
+  }
+}
+
 /* Login Screen Content Responsive Padding */
 @media (max-width: 991px) {
   .login-screen-content {
