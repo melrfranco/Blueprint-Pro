@@ -173,11 +173,6 @@ const LoginScreen: React.FC = () => {
               type="submit"
               disabled={stylistLoading}
               className="blueprint-button font-black stylist-signin-button"
-              style={{
-                borderRadius: "338px",
-                border: "1px dashed rgb(15, 76, 129)",
-                overflow: "hidden",
-              } as any}
             >
               {stylistLoading ? 'Signing in...' : 'Sign in as stylist'}
             </button>
