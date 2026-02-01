@@ -99,3 +99,15 @@
 .sync-button:active:not(:disabled) {
   background-color: rgba(11, 52, 88, 0.8);
 }
+
+/* Square OAuth Button Responsive Styles */
+@media (max-width: 991px) {
+  .square-oauth-button {
+    border-style: dashed;
+    border-width: 1px;
+    font-weight: 400;
+    font-size: 27px;
+    border-radius: 338px;
+    overflow: hidden;
+  }
+}
