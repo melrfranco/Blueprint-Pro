@@ -103,11 +103,17 @@
 /* Square OAuth Button Responsive Styles */
 @media (max-width: 991px) {
   .square-oauth-button {
-    border-style: dashed;
-    border-width: 1px;
-    font-weight: 400;
-    font-size: 27px;
-    border-radius: 338px;
-    overflow: hidden;
+    border-style: solid;
+    border-width: 4px;
+    font: 600 21px/24.5px Raleway, sans-serif;
+  }
+}
+
+/* Stylist Sign In Button Responsive Styles */
+@media (max-width: 991px) {
+  .stylist-signin-button {
+    border-style: solid;
+    border-width: 4px;
+    font: 600 21px/24.5px Raleway, sans-serif;
   }
 }
