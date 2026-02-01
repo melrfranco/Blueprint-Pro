@@ -157,12 +157,6 @@ const LoginScreen: React.FC = () => {
                 onChange={(event) => setStylistEmail(event.target.value)}
                 placeholder="name@salon.com"
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl font-bold text-sm focus:outline-none focus:border-gray-950 stylist-email-input"
-                style={{
-                  "@media (max-width: 991px)": {
-                    borderStyle: "solid",
-                    borderWidth: "1px",
-                  },
-                } as any}
                 autoComplete="email"
                 disabled={stylistLoading}
               />
@@ -177,12 +171,6 @@ const LoginScreen: React.FC = () => {
                 onChange={(event) => setStylistPassword(event.target.value)}
                 placeholder="Your password"
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl font-bold text-sm focus:outline-none focus:border-gray-950 stylist-password-input"
-                style={{
-                  "@media (max-width: 991px)": {
-                    borderStyle: "solid",
-                    borderWidth: "1px",
-                  },
-                } as any}
                 autoComplete="current-password"
                 disabled={stylistLoading}
               />
@@ -199,12 +187,7 @@ const LoginScreen: React.FC = () => {
             >
               {stylistLoading ? 'Signing in...' : 'Sign in as stylist'}
             </button>
-            <p className="text-xs text-gray-500 font-semibold text-center" style={{
-              "@media (max-width: 991px)": {
-                maxWidth: "230px",
-                margin: "0 auto",
-              },
-            } as any}>
+            <p className="text-xs text-gray-500 font-semibold text-center help-text">
               Invited stylists can set a password from the invite email, then sign in here.
             </p>
           </form>
