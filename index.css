@@ -106,6 +106,8 @@
     border-style: solid;
     border-width: 4px;
     font: 600 21px/24.5px Raleway, sans-serif;
+    font-size: 18px;
+    line-height: 14.5px;
   }
 }
 
@@ -115,5 +117,7 @@
     border-style: solid;
     border-width: 4px;
     font: 600 21px/24.5px Raleway, sans-serif;
+    font-size: 18px;
+    line-height: 14.5px;
   }
 }
