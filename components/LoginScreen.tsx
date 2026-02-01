@@ -67,6 +67,7 @@ const LoginScreen: React.FC = () => {
               paddingTop: "63px",
               display: "flex",
               flexDirection: "column",
+              paddingBottom: "18px",
             },
           } as any}
         >
