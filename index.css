@@ -205,6 +205,7 @@ html, body {
   background: #ffffff;       /* White Knob */
   border: 2px solid rgba(236, 244, 248, 0.2); /* Light transparent border */
   box-shadow: 0 6px 16px rgba(14, 29, 37, 0.18);
+  transform: translateX(0);
   transition: transform var(--dur-med) var(--ease),
               background var(--dur-med) var(--ease),
               border-color var(--dur-med) var(--ease);
@@ -229,7 +230,6 @@ html, body {
 /* Dark-mode knob swap */
 @media (prefers-color-scheme: dark) {
   .toggle::after {
-    background: var(--surface) !important;
     border-color: rgba(236, 244, 248, 0.20) !important;
   }
 }
