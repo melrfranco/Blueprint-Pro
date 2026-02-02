@@ -177,7 +177,7 @@ html, body {
   width: 64px !important;
   height: 32px !important;
   border-radius: var(--r-pill);
-  background: #ecf4f8;               /* Matches AccountSettings "Off" (Light) */
+  background: #8abad4;               /* Static light blue */
   border: 2px solid var(--border-strong);
   box-shadow: var(--shadow-1);
   cursor: pointer;
@@ -202,7 +202,7 @@ html, body {
   width: 39px;               /* key difference vs circle knob */
   height: 24px;
   border-radius: var(--r-pill);
-  background: #0e1d25;       /* Matches AccountSettings Knob (Dark) */
+  background: #ffffff;       /* White Knob */
   border: 2px solid rgba(236, 244, 248, 0.2); /* Light transparent border */
   box-shadow: 0 6px 16px rgba(14, 29, 37, 0.18);
   transition: transform var(--dur-med) var(--ease),
@@ -211,11 +211,11 @@ html, body {
 }
 
 
-/* ON state track */
+/* ON state track - Static background */
 .toggle[aria-checked="true"],
 .toggle[data-state="on"] {
-  background: var(--color-brand-secondary); /* Matches AccountSettings "On" (Dark Blue) */
-  border-color: var(--color-brand-secondary);
+  /* background removed to keep it static #8abad4 */
+  /* border-color removed to keep it static */
 }
 
 /* ON state knob movement:
