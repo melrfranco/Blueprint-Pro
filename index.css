@@ -175,10 +175,10 @@ html, body {
 .toggle {
   position: relative;
   width: 64px !important;
-  height: 28px !important;
+  height: 32px !important;
   border-radius: var(--r-pill);
-  background: var(--color-brand-accent);     /* close to your #8ABAD3 vibe */
-  border: 2px solid var(--border-strong);    /* never blends */
+  background: #ecf4f8;               /* Matches AccountSettings "Off" (Light) */
+  border: 2px solid var(--border-strong);
   box-shadow: var(--shadow-1);
   cursor: pointer;
 
@@ -202,8 +202,8 @@ html, body {
   width: 39px;               /* key difference vs circle knob */
   height: 24px;
   border-radius: var(--r-pill);
-  background: #ffffff;
-  border: 2px solid rgba(14, 29, 37, 0.12);
+  background: #0e1d25;       /* Matches AccountSettings Knob (Dark) */
+  border: 2px solid rgba(236, 244, 248, 0.2); /* Light transparent border */
   box-shadow: 0 6px 16px rgba(14, 29, 37, 0.18);
   transition: transform var(--dur-med) var(--ease),
               background var(--dur-med) var(--ease),
@@ -214,8 +214,8 @@ html, body {
 /* ON state track */
 .toggle[aria-checked="true"],
 .toggle[data-state="on"] {
-  background: var(--brand);
-  border-color: var(--brand-hover);
+  background: var(--color-brand-secondary); /* Matches AccountSettings "On" (Dark Blue) */
+  border-color: var(--color-brand-secondary);
 }
 
 /* ON state knob movement:
