@@ -169,12 +169,13 @@ export default function ManageStylist({ onBack }: ManageStylistProps) {
 
     return (
       <div className="p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
-        <button onClick={() => setEditingStylist(null)} className="mb-6 flex items-center text-xs font-black uppercase text-gray-500 hover:text-gray-900 transition-colors"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
+        <button data-ui="button" onClick={() => setEditingStylist(null)} className="mb-6 flex items-center text-xs font-black uppercase text-gray-500 hover:text-gray-900 transition-colors"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
         <h2 className="text-4xl font-black mb-4 text-brand-accent">Editing {editingStylist.name}</h2>
         <p className="text-xs font-bold text-gray-500 mb-6">Level defaults are applied first, then individual overrides.</p>
         <div className="mb-6">
           <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Stylist level</label>
           <select
+            data-ui="field"
             value={editingStylist.levelId}
             onChange={(event) => {
               const nextLevelId = event.target.value;
@@ -243,6 +244,7 @@ export default function ManageStylist({ onBack }: ManageStylistProps) {
           </div>
         )}
         <button
+          data-ui="button"
           onClick={() => persistStylistUpdates(editingStylist)}
           disabled={stylistSaveLoading}
           className="w-full py-4 bg-gray-950 text-white font-black rounded-2xl mt-8 disabled:opacity-60"
@@ -255,7 +257,7 @@ export default function ManageStylist({ onBack }: ManageStylistProps) {
 
   return (
     <div className="p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
-      <button onClick={onBack} className="mb-6 flex items-center text-xs font-black uppercase text-gray-500 hover:text-gray-900 transition-colors"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
+      <button data-ui="button" onClick={onBack} className="mb-6 flex items-center text-xs font-black uppercase text-gray-500 hover:text-gray-900 transition-colors"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
       <h2 className="text-4xl font-black text-brand-accent tracking-tighter mb-8">Team Access</h2>
       <div className="space-y-6">
         <div className="bg-white border-4 border-gray-100 rounded-3xl p-6 shadow-sm">
@@ -264,7 +266,7 @@ export default function ManageStylist({ onBack }: ManageStylistProps) {
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Team tier setup</p>
               <p className="text-sm font-black text-gray-900">Define default feature access by tier.</p>
             </div>
-            <button onClick={handleAddLevel} className="px-4 py-2 bg-gray-950 text-white font-black rounded-2xl text-xs uppercase tracking-widest">
+            <button data-ui="button" onClick={handleAddLevel} className="px-4 py-2 bg-gray-950 text-white font-black rounded-2xl text-xs uppercase tracking-widest">
               Add tier
             </button>
           </div>
@@ -275,6 +277,7 @@ export default function ManageStylist({ onBack }: ManageStylistProps) {
                   <div>
                     <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Tier name</label>
                     <input
+                      data-ui="field"
                       type="text"
                       value={level.name}
                       onChange={(event) => handleLevelUpdate(level.id, { name: event.target.value })}
@@ -284,6 +287,7 @@ export default function ManageStylist({ onBack }: ManageStylistProps) {
                   <div>
                     <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Display order</label>
                     <input
+                      data-ui="field"
                       type="number"
                       min={1}
                       value={level.order}
@@ -294,6 +298,7 @@ export default function ManageStylist({ onBack }: ManageStylistProps) {
                   <div>
                     <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Tier color</label>
                     <input
+                      data-ui="field"
                       type="color"
                       value={level.color}
                       onChange={(event) => handleLevelUpdate(level.id, { color: event.target.value })}
@@ -331,6 +336,7 @@ export default function ManageStylist({ onBack }: ManageStylistProps) {
               <p className="text-sm font-black text-gray-900">Send a secure invite so a stylist can create their login.</p>
             </div>
             <button
+              data-ui="button"
               onClick={() => {
                 setShowInviteForm((prev) => !prev);
                 setInviteError(null);
@@ -352,6 +358,7 @@ export default function ManageStylist({ onBack }: ManageStylistProps) {
                     Stylist name
                   </label>
                   <input
+                    data-ui="field"
                     type="text"
                     value={inviteName}
                     onChange={(event) => setInviteName(event.target.value)}
@@ -365,6 +372,7 @@ export default function ManageStylist({ onBack }: ManageStylistProps) {
                     Stylist email
                   </label>
                   <input
+                    data-ui="field"
                     type="email"
                     value={inviteEmail}
                     onChange={(event) => setInviteEmail(event.target.value)}
@@ -379,6 +387,7 @@ export default function ManageStylist({ onBack }: ManageStylistProps) {
                   Stylist level
                 </label>
                 <select
+                  data-ui="field"
                   value={inviteLevelId}
                   onChange={(event) => setInviteLevelId(event.target.value)}
                   className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl font-bold text-sm focus:outline-none focus:border-gray-950"
@@ -402,6 +411,7 @@ export default function ManageStylist({ onBack }: ManageStylistProps) {
                 </div>
               )}
               <button
+                data-ui="button"
                 type="submit"
                 disabled={inviteLoading}
                 className="w-full py-4 bg-brand-accent text-white font-black rounded-2xl shadow-lg hover:shadow-xl transition-shadow disabled:opacity-60"
@@ -426,7 +436,7 @@ export default function ManageStylist({ onBack }: ManageStylistProps) {
               </div>
             )}
             {stylists.map(s => (
-              <button key={s.id} onClick={() => setEditingStylist(s)} className="w-full flex items-center p-6 bg-white border-4 border-gray-100 rounded-3xl hover:border-brand-accent hover:shadow-md transition-all shadow-sm group">
+              <button data-ui="button" key={s.id} onClick={() => setEditingStylist(s)} className="w-full flex items-center p-6 bg-white border-4 border-gray-100 rounded-3xl hover:border-brand-accent hover:shadow-md transition-all shadow-sm group">
                 <div className="w-14 h-14 bg-brand-primary text-white rounded-2xl flex items-center justify-center font-black mr-5 text-lg">{s.name[0]}</div>
                 <div className="flex-grow text-left">
                   <p className="font-black text-gray-950 text-lg">{s.name}</p>
@@ -438,7 +448,7 @@ export default function ManageStylist({ onBack }: ManageStylistProps) {
           </div>
         </div>
 
-        <button onClick={saveAll} className="w-full py-4 bg-gray-950 text-white font-black rounded-2xl">SAVE TEAM ACCESS</button>
+        <button data-ui="button" onClick={saveAll} className="w-full py-4 bg-gray-950 text-white font-black rounded-2xl">SAVE TEAM ACCESS</button>
       </div>
     </div>
   );
