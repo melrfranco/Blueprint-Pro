@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSettings } from '../contexts/SettingsContext';
+import { Toggle } from './Toggle';
 import { ChevronLeftIcon } from './icons';
 import type { MembershipTier } from '../types';
 
