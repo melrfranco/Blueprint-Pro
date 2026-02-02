@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { User, AppTextSize } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
+import { Toggle } from './Toggle';
 import { SettingsIcon, UsersIcon, TrashIcon } from './icons';
 import { ensureAccessibleColor } from '../utils/ensureAccessibleColor';
 
