@@ -174,10 +174,10 @@ html, body {
 /* Track */
 .toggle {
   position: relative;
-  width: 64px !important;
-  height: 32px !important;
+  width: 56px !important;
+  height: 28px !important;
   border-radius: var(--r-pill);
-  background: #8abad4;               /* Static light blue */
+  background: #8abad4;               /* Inactive: Light blue */
   border: 2px solid var(--border-strong);
   box-shadow: var(--shadow-1);
   cursor: pointer;
@@ -199,12 +199,12 @@ html, body {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 39px;               /* key difference vs circle knob */
-  height: 24px;
+  width: 32px;
+  height: 20px;
   border-radius: var(--r-pill);
   background: #ffffff;       /* White Knob */
   border: 2px solid rgba(236, 244, 248, 0.2); /* Light transparent border */
-  box-shadow: 0 6px 16px rgba(14, 29, 37, 0.18);
+  box-shadow: 0 4px 12px rgba(14, 29, 37, 0.18);
   transform: translateX(0);
   transition: transform var(--dur-med) var(--ease),
               background var(--dur-med) var(--ease),
@@ -212,21 +212,36 @@ html, body {
 }
 
 
-/* ON state track - Static background */
+/* ON state track - Brand color */
 .toggle[aria-checked="true"],
 .toggle[data-state="on"] {
-  /* background removed to keep it static #8abad4 */
-  /* border-color removed to keep it static */
+  background: var(--brand);
+  border-color: var(--brand-hover);
 }
 
 /* ON state knob movement:
-   64 - 39 - 2*2 (padding) - 2*2 (border) = 17px?
-   Inner Width: 60px. Knob: 39px. Left: 2px.
+   Width 56px.
+   Border 2px on each side.
+   Knob width 32px.
+   Left 2px.
+   Available inner space: 56 - 4 = 52px.
    Target Right Gap: 2px.
-   Travel = 60 - 39 - 2 - 2 = 17px */
+   Travel = 52 - 32 - 2 (left) - 2 (right gap? no, math is: width - knob_width - 2*left_offset)
+   Wait, if Left is 2px.
+   56 (total) - 2 (border L) - 2 (border R) = 52 inner.
+   Knob is 32.
+   Start: 2px from left border (so 4px from total left edge?). No, top/left are relative to padding box?
+   Usually border-box.
+   If absolute inside relative.
+   Let's assume travel needs to put it 2px from right.
+   56 - 2(border) - 2(gap) - 32(knob) - 2(border) - 2(gap) ?
+   Travel = (Width - Border*2) - KnobWidth - Gap*2 ?
+   (56 - 4) - 32 - 4 = 16px?
+   Let's try 18px.
+*/
 .toggle[aria-checked="true"]::after,
 .toggle[data-state="on"]::after {
-  transform: translateX(17px);
+  transform: translateX(18px);
 }
 
 

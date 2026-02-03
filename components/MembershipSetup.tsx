@@ -67,7 +67,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
 
   return (
     <div className="p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
-      <button onClick={onBack} className="mb-6 flex items-center text-xs font-black uppercase text-gray-500 hover:text-gray-900 transition-colors"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
+      <button data-ui="button" onClick={onBack} className="mb-6 flex items-center text-xs font-black uppercase text-gray-500 hover:text-gray-900 transition-colors"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
       <h2 className="text-4xl font-black mb-8 text-brand-accent">Memberships</h2>
       <div className="space-y-6">
         <div className="bg-white p-6 rounded-[32px] border-4 border-gray-100 shadow-sm">
@@ -90,7 +90,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
               <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Membership tiers</p>
               <p className="text-sm font-black text-gray-900">Set minimum spend and benefits.</p>
             </div>
-            <button onClick={handleAddMembershipTier} className="px-4 py-2 bg-gray-950 text-white font-black rounded-2xl text-xs uppercase tracking-widest">Add tier</button>
+            <button data-ui="button" onClick={handleAddMembershipTier} className="px-4 py-2 bg-gray-950 text-white font-black rounded-2xl text-xs uppercase tracking-widest">Add tier</button>
           </div>
 
           <div className="space-y-4">
@@ -105,6 +105,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
                   <div>
                     <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Tier name</label>
                     <input
+                      data-ui="field"
                       type="text"
                       value={tier.name}
                       onChange={(event) => handleMembershipTierUpdate(tier.id, { name: event.target.value })}
@@ -114,6 +115,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
                   <div>
                     <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Minimum monthly spend</label>
                     <input
+                      data-ui="field"
                       type="number"
                       min={0}
                       value={tier.minSpend}
@@ -124,6 +126,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
                   <div>
                     <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Tier color</label>
                     <input
+                      data-ui="field"
                       type="color"
                       value={tier.color}
                       onChange={(event) => handleMembershipTierUpdate(tier.id, { color: event.target.value })}
@@ -141,6 +144,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
                       <div key={`${tier.id}-perk-${index}`} className="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-1 text-xs font-bold text-gray-700">
                         <span>{perk}</span>
                         <button
+                          data-ui="button"
                           type="button"
                           onClick={() => handleRemoveTierPerk(tier.id, index)}
                           className="text-gray-400 hover:text-gray-900"
@@ -152,6 +156,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <input
+                      data-ui="field"
                       type="text"
                       value={perkDrafts[tier.id] || ''}
                       onChange={(event) => setPerkDrafts(prev => ({ ...prev, [tier.id]: event.target.value }))}
@@ -159,6 +164,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
                       className="flex-1 min-w-[200px] px-4 py-3 border-2 border-gray-200 rounded-2xl font-bold text-sm focus:outline-none focus:border-gray-950"
                     />
                     <button
+                      data-ui="button"
                       type="button"
                       onClick={() => handleAddTierPerk(tier.id)}
                       className="px-4 py-3 bg-gray-950 text-white font-black rounded-2xl text-xs uppercase tracking-widest"
@@ -172,7 +178,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
           </div>
         </div>
 
-        <button onClick={saveAll} className="w-full py-4 bg-gray-950 text-white font-black rounded-2xl">SAVE MEMBERSHIP SETTINGS</button>
+        <button data-ui="button" onClick={saveAll} className="w-full py-4 bg-gray-950 text-white font-black rounded-2xl">SAVE MEMBERSHIP SETTINGS</button>
       </div>
     </div>
   );
