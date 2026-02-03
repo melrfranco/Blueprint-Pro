@@ -59,7 +59,6 @@ const App: React.FC = () => {
       <AuthProvider>
         <PlanProvider>
           <AppContent />
-          <div className="build-label">Build 1b0d566</div>
           <SpeedInsights />
         </PlanProvider>
       </AuthProvider>
