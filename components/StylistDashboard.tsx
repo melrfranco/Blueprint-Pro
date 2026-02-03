@@ -176,7 +176,7 @@ const StylistDashboard: React.FC<StylistDashboardProps> = ({ onLogout, role: pro
                     <p className="text-gray-500 font-black text-sm uppercase tracking-widest mt-1">Stylist Dashboard</p>
                 </div>
                 <img
-                    src="https://cdn.builder.io/api/v1/image/assets%2F8d6a989189ff4d9e8633804d5d0dbd86%2Ff696039a46fe41c5b3ed739d192f7f66"
+                    src="https://cdn.builder.io/api/v1/image/assets%2F8d6a989189ff4d9e8633804d5d0dbd86%2F87d223f875d04b3f94fa29b7d9b783a6"
                     alt="Favicon"
                     className="w-16 h-16 object-cover"
                 />
