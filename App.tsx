@@ -60,8 +60,11 @@ const AppContent: React.FC = () => {
     return <MissingCredentialsScreen />;
   }
 
-  // Debug: Log the role being used for switching
-  console.log('[[APP DEBUG]] Switching based on role:', user.role);
+  const isSquareOAuthUser = user.email?.includes('@square-oauth.blueprint');
+
+  if (isSquareOAuthUser) {
+    return <AdminDashboard role="admin" />;
+  }
 
   switch (user.role) {
     case 'admin':
@@ -69,7 +72,6 @@ const AppContent: React.FC = () => {
     case 'stylist':
       return <StylistDashboard onLogout={logout} role="stylist" />;
     default:
-      console.warn('[[APP DEBUG]] Unknown role, defaulting to LoginScreen:', user.role);
       return <LoginScreen />;
   }
 };
