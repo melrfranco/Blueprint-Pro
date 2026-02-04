@@ -62,7 +62,7 @@ export default function AdminDashboard({ role }: { role: UserRole }) {
 
   const renderDashboard = () => (
     <div className="p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
-      <h1 className="text-4xl font-black text-brand-accent tracking-tighter mb-8">Admin Dashboard</h1>
+      <h1 className="text-4xl font-black text-brand-accent tracking-tighter mb-8">Admin Dashboard v2</h1>
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="col-span-2 bg-gray-950 text-white p-8 rounded-[32px] border-4 border-gray-950 shadow-lg hover:shadow-xl transition-shadow">
           <p className="text-sm font-black uppercase text-gray-400 mb-2 tracking-widest">Roadmap Pipeline</p>
@@ -147,7 +147,7 @@ export default function AdminDashboard({ role }: { role: UserRole }) {
 
     return (
       <div className="p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
-        <h1 className="text-4xl font-black text-black tracking-tighter mb-8">Settings</h1>
+        <h1 className="text-4xl font-black text-black tracking-tighter mb-8">Settings v2</h1>
         <div className={`grid gap-6 mb-8 ${canCustomizeBranding(user) ? 'grid-cols-2' : 'grid-cols-1'}`}>
           <button onClick={() => setActiveSettingsView('account')} className="p-8 bg-white border-4 border-gray-100 rounded-3xl flex flex-col items-center justify-center space-y-3 hover:border-brand-accent hover:shadow-md transition-all shadow-sm">
             <SettingsIcon className="w-10 h-10 text-brand-primary"/>
