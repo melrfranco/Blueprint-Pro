@@ -238,6 +238,9 @@ export default function AdminDashboard({ role }: { role: UserRole }) {
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab);
     setEditingPlan(undefined);
+    if (tab === 'settings') {
+      setActiveSettingsView('menu');
+    }
   };
 
   return (
