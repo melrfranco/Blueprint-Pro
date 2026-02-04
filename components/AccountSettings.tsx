@@ -25,7 +25,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ user, onLogout, subti
 
   return (
     <div className="p-4 flex flex-col h-full bg-gray-50 overflow-y-auto pb-48">
-        <h1 className="text-3xl font-black tracking-tighter px-2 pt-2 mb-8" style={{ color: ensureAccessibleColor(branding.accentColor, '#F9FAFB', '#1E3A8A') }}>Account</h1>
+        <h1 className="text-3xl font-black tracking-tighter px-2 pt-2 mb-8" style={{ color: ensureAccessibleColor(branding.accentColor, '#F9FAFB', '#1E3A8A') }}>Account v2</h1>
 
         <div className="space-y-6 animate-fade-in px-1">
             <div className="bg-white p-8 rounded-[40px] border-4 border-gray-950 shadow-2xl text-center">

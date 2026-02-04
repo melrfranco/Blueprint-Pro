@@ -172,7 +172,7 @@ const StylistDashboard: React.FC<StylistDashboardProps> = ({ onLogout, role: pro
         <div className="p-6 overflow-y-auto h-full pb-24 bg-gradient-to-b from-gray-50 to-white">
             <div className="flex justify-between items-start mb-8">
                 <div>
-                    <h1 className="text-4xl font-black tracking-tighter" style={{ color: safeAccentColor }}>Welcome, {user?.name?.split(' ')[0]}</h1>
+                    <h1 className="text-4xl font-black tracking-tighter" style={{ color: safeAccentColor }}>Welcome v2, {user?.name?.split(' ')[0]}</h1>
                     <p className="text-gray-500 font-black text-sm uppercase tracking-widest mt-1">Stylist Dashboard</p>
                 </div>
                 <img
