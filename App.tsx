@@ -60,12 +60,16 @@ const AppContent: React.FC = () => {
     return <MissingCredentialsScreen />;
   }
 
+  // Debug: Log the role being used for switching
+  console.log('[[APP DEBUG]] Switching based on role:', user.role);
+
   switch (user.role) {
     case 'admin':
       return <AdminDashboard role="admin" />;
     case 'stylist':
       return <StylistDashboard onLogout={logout} role="stylist" />;
     default:
+      console.warn('[[APP DEBUG]] Unknown role, defaulting to LoginScreen:', user.role);
       return <LoginScreen />;
   }
 };
