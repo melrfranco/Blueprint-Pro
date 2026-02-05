@@ -4,8 +4,6 @@ import { useSettings } from '../contexts/SettingsContext';
 const LoginScreen: React.FC = () => {
   const { branding } = useSettings();
 
-  const squareRedirectUri = (import.meta as any).env.VITE_SQUARE_REDIRECT_URI;
-
   const startSquareOAuth = () => {
     // Use server-side OAuth start endpoint for secure state handling
     // Server sets state in HTTP-only cookie and redirects to Square
@@ -93,16 +91,14 @@ const LoginScreen: React.FC = () => {
             <div className="flex-1 h-0.5 bg-gray-200" />
           </div>
 
-          {squareRedirectUri && (
-            <div className="mb-6" style={{ marginBottom: "16px" } as any}>
-              <button
-                onClick={startSquareOAuth}
-                className="blueprint-button font-black square-oauth-button"
-              >
-                Login with Square
-              </button>
-            </div>
-          )}
+          <div className="mb-6" style={{ marginBottom: "16px" } as any}>
+            <button
+              onClick={startSquareOAuth}
+              className="blueprint-button font-black square-oauth-button"
+            >
+              Login with Square
+            </button>
+          </div>
 
         </div>
       </div>
