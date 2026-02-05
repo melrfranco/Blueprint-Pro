@@ -210,7 +210,11 @@ export default async function handler(req: any, res: any) {
       throw new Error(`Failed to check existing merchant settings: ${settingsLookupError.message}`);
     }
 
-        console.log('[OAUTH TOKEN] Using standard OAuth credentials:', {
+    // Generate email from merchant data and a random password for Supabase user
+    const email = `${merchant_id.replace(/[^a-z0-9]/g, '_')}@square-oauth.blueprint`;
+    const password = Math.random().toString(36).slice(-16) + Math.random().toString(36).slice(-16);
+
+    console.log('[OAUTH TOKEN] Using Square OAuth credentials:', {
       email,
       passwordLength: password.length,
     });
