@@ -346,7 +346,12 @@ export default async function handler(req: any, res: any) {
 
     // Return helpful error message
     const errorMessage = e.message || 'An unknown error occurred during OAuth';
-    return res.status(500).json({
+    const statusCode = e?.status || e?.statusCode || 500;
+    console.log('[OAUTH TOKEN] Returning error response:', {
+      statusCode,
+      message: errorMessage,
+    });
+    return res.status(statusCode).json({
       message: errorMessage,
       timestamp: new Date().toISOString(),
     });
