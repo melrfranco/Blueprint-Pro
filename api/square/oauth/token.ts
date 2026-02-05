@@ -23,6 +23,15 @@ const squareApiFetch = async (
 };
 
 export default async function handler(req: any, res: any) {
+  console.log('[OAUTH TOKEN] Handler called:', {
+    method: req.method,
+    headers: {
+      contentType: req.headers['content-type'],
+      authorization: req.headers['authorization'] ? 'present' : 'missing',
+    },
+    timestamp: new Date().toISOString(),
+  });
+
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ message: 'Method not allowed' });
@@ -30,6 +39,11 @@ export default async function handler(req: any, res: any) {
 
   try {
     let body = req.body;
+    console.log('[OAUTH TOKEN] Raw body:', {
+      type: typeof body,
+      isString: typeof body === 'string',
+      length: typeof body === 'string' ? body.length : 'N/A',
+    });
     if (typeof body === 'string') {
       try {
         body = JSON.parse(body);
