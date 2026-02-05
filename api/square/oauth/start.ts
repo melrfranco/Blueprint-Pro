@@ -17,21 +17,15 @@ export default function handler(req: any, res: any) {
   const requestOrigin = resolvedHost ? `${protocol}://${resolvedHost}` : null;
   const requestRedirectUri = requestOrigin ? `${requestOrigin}/square/callback` : null;
 
-  const resolvedRedirectUri = (() => {
-    // IMPORTANT: Prefer the request-based redirect URI (dynamic) over the env variable
-    // This ensures OAuth callback works correctly even when Vercel preview domains change
-    if (requestRedirectUri) {
-      if (squareRedirectUri && squareRedirectUri !== requestRedirectUri) {
-        console.warn('[OAUTH START] Redirect URI mismatch, using request origin:', {
-          envRedirect: squareRedirectUri,
-          requestRedirect: requestRedirectUri,
-        });
-      }
-      return requestRedirectUri;
-    }
-    // Fall back to env variable only if request origin couldn't be determined
-    return squareRedirectUri;
-  })();
+  const resolvedRedirectUri = squareRedirectUri || requestRedirectUri;
+
+  if (squareRedirectUri && requestRedirectUri && squareRedirectUri !== requestRedirectUri) {
+    console.log('[OAUTH START] Using registered redirect URI from env:', {
+      envRedirect: squareRedirectUri,
+      requestRedirect: requestRedirectUri,
+      note: 'Square only accepts the registered redirect URI, using env variable',
+    });
+  }
 
   const authorizeBase =
     squareEnv === 'sandbox'
