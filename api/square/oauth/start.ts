@@ -18,14 +18,19 @@ export default function handler(req: any, res: any) {
   const requestRedirectUri = requestOrigin ? `${requestOrigin}/square/callback` : null;
 
   const resolvedRedirectUri = (() => {
-    if (squareRedirectUri && requestRedirectUri && squareRedirectUri !== requestRedirectUri) {
-      console.warn('[OAUTH START] Redirect URI mismatch, using env redirect:', {
-        envRedirect: squareRedirectUri,
-        requestRedirect: requestRedirectUri,
-      });
-      return squareRedirectUri;
+    // IMPORTANT: Prefer the request-based redirect URI (dynamic) over the env variable
+    // This ensures OAuth callback works correctly even when Vercel preview domains change
+    if (requestRedirectUri) {
+      if (squareRedirectUri && squareRedirectUri !== requestRedirectUri) {
+        console.warn('[OAUTH START] Redirect URI mismatch, using request origin:', {
+          envRedirect: squareRedirectUri,
+          requestRedirect: requestRedirectUri,
+        });
+      }
+      return requestRedirectUri;
     }
-    return squareRedirectUri || requestRedirectUri;
+    // Fall back to env variable only if request origin couldn't be determined
+    return squareRedirectUri;
   })();
 
   const authorizeBase =
