@@ -155,9 +155,23 @@ export default async function handler(req: any, res: any) {
     const business_name =
       merchantData?.merchant?.business_name || 'Admin';
 
+    // Extract merchant email from Square data
+    const email = merchantData?.merchant?.email;
+
+    if (!email) {
+      console.error('[OAUTH TOKEN] ❌ No email found in Square merchant data:', {
+        merchantId: merchant_id,
+        merchantDataKeys: Object.keys(merchantData?.merchant || {}),
+      });
+      return res.status(400).json({
+        message: 'Cannot authenticate: no email associated with Square merchant account. Please add an email to your Square account and try again.'
+      });
+    }
+
     console.log('[OAUTH TOKEN] ✅ Merchant details retrieved:', {
       merchant_id,
       business_name,
+      email,
     });
 
     const supabaseUrl = process.env.VITE_SUPABASE_URL;
@@ -177,11 +191,10 @@ export default async function handler(req: any, res: any) {
       auth: { autoRefreshToken: false, persistSession: false }
     });
 
-    // Generate email and password for this merchant
-    const email = `${merchant_id.replace(/[^a-z0-9]/g, '_')}@square-oauth.blueprint`;
+    // Generate a random password for this user (they authenticated via Square OAuth, not email/password)
     const password = Math.random().toString(36).slice(-16) + Math.random().toString(36).slice(-16);
 
-    console.log('[OAUTH TOKEN] Generated credentials:', { email, passwordLength: password.length });
+    console.log('[OAUTH TOKEN] Using Square merchant email:', { email, passwordLength: password.length });
 
     // Use admin API to create or update user
     const { data: createData, error: createError } = await (supabaseAdmin.auth as any).admin.createUser({
