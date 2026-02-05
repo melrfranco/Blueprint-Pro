@@ -20,7 +20,7 @@ import { canCustomizeBranding } from '../utils/isEnterpriseAccount';
 
 export default function AdminDashboardV2({ role }: { role: UserRole }) {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
-  const [activeSettingsView, setActiveSettingsView] = useState<'menu' | 'branding' | 'account' | 'memberships'>('menu');
+  const [activeSettingsView, setActiveSettingsView] = useState<'menu' | 'branding' | 'account' | 'memberships' | 'teamAccess'>('menu');
   const [editingPlan, setEditingPlan] = useState<GeneratedPlan | null>(null);
   const [isCreatingPlan, setIsCreatingPlan] = useState(false);
 
