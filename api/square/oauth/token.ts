@@ -467,12 +467,21 @@ export default async function handler(req: any, res: any) {
       user.id
     );
 
+    if (verifyError) {
+      console.error('[OAUTH TOKEN] ❌ User verification failed:', {
+        userId: user.id,
+        error: verifyError.message,
+      });
+      throw new Error(`User verification failed: ${verifyError.message}`);
+    }
+
     console.log('[OAUTH TOKEN] User verification result:', {
       userExists: !!verifyData?.user,
       userEmail: verifyData?.user?.email,
       userEmailConfirmed: !!verifyData?.user?.email_confirmed_at,
-      hasError: !!verifyError,
-      errorMessage: verifyError?.message,
+      userCreatedAt: verifyData?.user?.created_at,
+      userUpdatedAt: verifyData?.user?.updated_at,
+      userMetadata: verifyData?.user?.user_metadata,
     });
 
     // Create a regular Supabase client (not service role) to sign in
