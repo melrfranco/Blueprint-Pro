@@ -443,75 +443,45 @@ export default async function handler(req: any, res: any) {
       auth: { autoRefreshToken: false, persistSession: false }
     });
 
-    console.log('[OAUTH TOKEN] Generating access token for user:', user.id);
+    console.log('[OAUTH TOKEN] Creating session by signing in with newly created credentials:', email);
 
-    // Use admin API to generate a magic link, then extract the session from the token
-    // This is the reliable way to get a valid session for the user
-    const { data: linkData, error: linkError } = await (supabaseAdmin.auth as any).admin.generateLink({
-      type: 'magiclink',
-      email: user.email,
+    // Create a regular Supabase client (not service role) to sign in
+    // Use just the publishable key (anon key) - this is the standard way
+    const publishableKey = process.env.VITE_SUPABASE_ANON_KEY;
+    if (!publishableKey) {
+      console.error('[OAUTH TOKEN] ❌ Missing VITE_SUPABASE_ANON_KEY for session creation');
+      throw new Error('Supabase anon key not configured');
+    }
+
+    const publicSupabase = createClient(supabaseUrl, publishableKey, {
+      auth: { autoRefreshToken: false, persistSession: false }
     });
 
-    console.log('[OAUTH TOKEN] Magic link generation result:', {
-      hasLink: !!linkData?.properties?.email_link,
-      hasError: !!linkError,
-      errorMessage: linkError?.message,
+    const { data: signInData, error: signInError } = await publicSupabase.auth.signInWithPassword({
+      email,
+      password,
     });
 
-    if (linkError) {
-      console.error('[OAUTH TOKEN] ❌ Failed to generate magic link:', {
-        userId: user.id,
-        error: linkError.message,
+    console.log('[OAUTH TOKEN] Sign-in result:', {
+      hasSession: !!signInData?.session,
+      hasUser: !!signInData?.user,
+      hasError: !!signInError,
+      errorMessage: signInError?.message,
+    });
+
+    if (signInError) {
+      console.error('[OAUTH TOKEN] ❌ Failed to sign in with new user credentials:', {
+        email,
+        error: signInError.message,
       });
-      throw new Error(`Failed to generate link: ${linkError.message}`);
+      throw new Error(`Failed to create session: ${signInError.message}`);
     }
 
-    // Extract the token from the magic link
-    const emailLink = linkData?.properties?.email_link;
-    if (!emailLink) {
-      throw new Error('Failed to generate email link');
-    }
+    const session = signInData?.session;
 
-    const linkUrl = new URL(emailLink);
-    const token = linkUrl.searchParams.get('token');
-
-    if (!token) {
-      throw new Error('Failed to extract token from email link');
-    }
-
-    console.log('[OAUTH TOKEN] Exchanging token for session...');
-
-    // Exchange the token for a session using the Supabase REST API
-    const tokenExchangeRes = await fetch(`${supabaseUrl}/auth/v1/verify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': serviceRoleKey,
-      },
-      body: JSON.stringify({ token, type: 'magiclink' }),
-    });
-
-    const tokenExchangeData = await tokenExchangeRes.json();
-
-    if (!tokenExchangeRes.ok) {
-      console.error('[OAUTH TOKEN] ❌ Token exchange failed:', tokenExchangeData);
-      throw new Error(`Token exchange failed: ${tokenExchangeData?.error_description || 'Unknown error'}`);
-    }
-
-    console.log('[OAUTH TOKEN] ✅ Token exchanged successfully');
-
-    // The response should contain access_token and refresh_token
-    const session = {
-      access_token: tokenExchangeData.access_token,
-      refresh_token: tokenExchangeData.refresh_token,
-      expires_in: tokenExchangeData.expires_in,
-      token_type: tokenExchangeData.token_type,
-      user: tokenExchangeData.user,
-    };
-
-    if (!session.access_token) {
-      console.error('[OAUTH TOKEN] ❌ CRITICAL: No access token in response');
-      throw new Error('Failed to generate access token');
+    if (!session) {
+      console.error('[OAUTH TOKEN] ❌ CRITICAL: No session returned after sign-in');
+      throw new Error('Failed to create session for user');
     }
 
     console.log('[OAUTH TOKEN] ✅ Session created successfully:', {
