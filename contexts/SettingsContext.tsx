@@ -145,7 +145,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   // Load data once per auth session; no loops, no state that triggers re-subscribe.
   useEffect(() => {
-    if (!supabase) return;
+    const bypassLogin = (import.meta as any).env.VITE_BYPASS_LOGIN === '1';
+    if (bypassLogin || !supabase) return;
 
     let cancelled = false;
 
