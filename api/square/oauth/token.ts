@@ -155,13 +155,19 @@ export default async function handler(req: any, res: any) {
     const business_name =
       merchantData?.merchant?.business_name || 'Admin';
 
-    // Extract merchant email from Square data
-    const email = merchantData?.merchant?.email;
+    // Log full merchant data for debugging
+    console.log('[OAUTH TOKEN] Full merchant data:', JSON.stringify(merchantData, null, 2));
+
+    // Extract merchant email from Square data - could be in different fields
+    let email = merchantData?.merchant?.email ||
+                merchantData?.merchant?.contact_email ||
+                merchantData?.merchant?.business_email;
 
     if (!email) {
       console.error('[OAUTH TOKEN] ❌ No email found in Square merchant data:', {
         merchantId: merchant_id,
         merchantDataKeys: Object.keys(merchantData?.merchant || {}),
+        fullMerchantData: merchantData?.merchant,
       });
       return res.status(400).json({
         message: 'Cannot authenticate: no email associated with Square merchant account. Please add an email to your Square account and try again.'
