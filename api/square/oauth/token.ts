@@ -83,21 +83,15 @@ export default async function handler(req: any, res: any) {
     const requestOrigin = resolvedHost ? `${protocol}://${resolvedHost}` : null;
     const requestRedirectUri = requestOrigin ? `${requestOrigin}/square/callback` : null;
 
-    const resolvedRedirectUri = (() => {
-      // IMPORTANT: Prefer the request-based redirect URI (dynamic) over the env variable
-      // This ensures OAuth callback works correctly even when Vercel preview domains change
-      if (requestRedirectUri) {
-        if (redirectUri && redirectUri !== requestRedirectUri) {
-          console.warn('[OAUTH TOKEN] Redirect URI mismatch, using request origin:', {
-            envRedirect: redirectUri,
-            requestRedirect: requestRedirectUri,
-          });
-        }
-        return requestRedirectUri;
-      }
-      // Fall back to env variable only if request origin couldn't be determined
-      return redirectUri;
-    })();
+    const resolvedRedirectUri = redirectUri || requestRedirectUri;
+
+    if (redirectUri && requestRedirectUri && redirectUri !== requestRedirectUri) {
+      console.log('[OAUTH TOKEN] Using registered redirect URI from env:', {
+        envRedirect: redirectUri,
+        requestRedirect: requestRedirectUri,
+        note: 'Square only accepts the registered redirect URI, using env variable',
+      });
+    }
 
     console.log('[OAUTH TOKEN] Config check:', {
       env,
