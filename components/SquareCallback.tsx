@@ -6,12 +6,26 @@ export default function SquareCallback() {
   const [needsEmail, setNeedsEmail] = useState(false);
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
+  const [squareTokenData, setSquareTokenData] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleTokenExchange = async (emailValue?: string) => {
     try {
-      const body: any = { code };
-      if (emailValue) {
+      const body: any = {};
+
+      // First attempt: use code
+      if (!squareTokenData && code) {
+        body.code = code;
+      }
+
+      // Retry with email: use saved token data
+      if (squareTokenData) {
+        body.email = emailValue;
+        body.access_token = squareTokenData.access_token;
+        body.merchant_id = squareTokenData.merchant_id;
+      }
+
+      if (emailValue && !squareTokenData) {
         body.email = emailValue;
       }
 
