@@ -127,53 +127,64 @@ export default async function handler(req: any, res: any) {
       return res.status(500).json({ message: 'Square OAuth credentials not configured on server.' });
     }
 
-    const basicAuth = Buffer.from(
-      `${appId}:${appSecret}`
-    ).toString('base64');
+    let access_token = providedAccessToken;
+    let merchant_id = providedMerchantId;
 
-    console.log('[OAUTH TOKEN] Exchanging code with Square:', {
-      code: code.substring(0, 10) + '...',
-      redirectUri: resolvedRedirectUri,
-      hasAppId: !!appId,
-      hasAppSecret: !!appSecret,
-    });
+    // Only exchange code with Square if we don't already have access_token
+    if (!access_token && code) {
+      const basicAuth = Buffer.from(
+        `${appId}:${appSecret}`
+      ).toString('base64');
 
-    const tokenRes = await fetch(`${baseUrl}/oauth2/token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Basic ${basicAuth}`,
-      },
-      body: JSON.stringify({
-        client_id: appId,
-        client_secret: appSecret,
-        grant_type: 'authorization_code',
-        code,
-        redirect_uri: resolvedRedirectUri,
-      }),
-    });
+      console.log('[OAUTH TOKEN] Exchanging code with Square:', {
+        code: code.substring(0, 10) + '...',
+        redirectUri: resolvedRedirectUri,
+        hasAppId: !!appId,
+        hasAppSecret: !!appSecret,
+      });
 
-    console.log('[OAUTH TOKEN] Square token response:', {
-      status: tokenRes.status,
-      ok: tokenRes.ok,
-    });
+      const tokenRes = await fetch(`${baseUrl}/oauth2/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Basic ${basicAuth}`,
+        },
+        body: JSON.stringify({
+          client_id: appId,
+          client_secret: appSecret,
+          grant_type: 'authorization_code',
+          code,
+          redirect_uri: resolvedRedirectUri,
+        }),
+      });
 
-    const tokenData = await tokenRes.json();
-
-    if (!tokenRes.ok) {
-      console.error('[OAUTH TOKEN] ❌ Square OAuth Token Error:', {
+      console.log('[OAUTH TOKEN] Square token response:', {
         status: tokenRes.status,
-        error: tokenData?.error,
-        errorDescription: tokenData?.error_description,
-        fullError: JSON.stringify(tokenData),
+        ok: tokenRes.ok,
       });
-      return res.status(tokenRes.status).json({
-        message: 'Failed to exchange Square OAuth token.',
-        square_error: tokenData,
-      });
-    }
 
-    const { access_token, merchant_id } = tokenData;
+      const tokenData = await tokenRes.json();
+
+      if (!tokenRes.ok) {
+        console.error('[OAUTH TOKEN] ❌ Square OAuth Token Error:', {
+          status: tokenRes.status,
+          error: tokenData?.error,
+          errorDescription: tokenData?.error_description,
+          fullError: JSON.stringify(tokenData),
+        });
+        return res.status(tokenRes.status).json({
+          message: 'Failed to exchange Square OAuth token.',
+          square_error: tokenData,
+        });
+      }
+
+      access_token = tokenData.access_token;
+      merchant_id = tokenData.merchant_id;
+    } else if (providedAccessToken && providedMerchantId) {
+      console.log('[OAUTH TOKEN] Using provided access_token (retry with email)');
+    } else {
+      throw new Error('No way to get Square access token');
+    }
 
     console.log('[OAUTH TOKEN] ✅ Square OAuth token exchanged successfully:', {
       merchant_id,
