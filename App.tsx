@@ -108,7 +108,7 @@ const AppContent: React.FC = () => {
     return <LoginScreen />;
   }
 
-  if (needsSquareConnect) {
+  if (needsSquareConnect && !bypassLogin) {
     return <MissingCredentialsScreen />;
   }
 
