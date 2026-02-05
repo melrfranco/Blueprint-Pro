@@ -93,16 +93,14 @@ const LoginScreen: React.FC = () => {
             <div className="flex-1 h-0.5 bg-gray-200" />
           </div>
 
-          {squareRedirectUri && (
-            <div className="mb-6" style={{ marginBottom: "16px" } as any}>
-              <button
-                onClick={startSquareOAuth}
-                className="blueprint-button font-black square-oauth-button"
-              >
-                Login with Square
-              </button>
-            </div>
-          )}
+          <div className="mb-6" style={{ marginBottom: "16px" } as any}>
+            <button
+              onClick={startSquareOAuth}
+              className="blueprint-button font-black square-oauth-button"
+            >
+              Login with Square
+            </button>
+          </div>
 
         </div>
       </div>
