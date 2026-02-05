@@ -239,7 +239,7 @@ export default async function handler(req: any, res: any) {
         errorMessage: getUserError?.message,
       });
 
-      // If user exists, use it and update metadata
+      // If user exists, use it and update metadata + password
       if (existingUserData?.user && !getUserError) {
         console.log('[OAUTH TOKEN] ✅ Existing user found, reusing for OAuth reconnection:', {
           userId: existingUserData.user.id,
@@ -247,21 +247,25 @@ export default async function handler(req: any, res: any) {
         });
         user = existingUserData.user;
 
-        // Update user metadata for existing user
-        console.log('[OAUTH TOKEN] Updating metadata for existing user:', user.id);
+        // Update user metadata AND password for existing user (password must match what we'll sign in with)
+        console.log('[OAUTH TOKEN] Updating metadata and password for existing user:', user.id);
         const { error: updateError } = await (supabaseAdmin.auth as any).admin.updateUserById(
           user.id,
-          { user_metadata: { role: 'admin', merchant_id, business_name } }
+          {
+            password,
+            email_confirm: true,
+            user_metadata: { role: 'admin', merchant_id, business_name }
+          }
         );
 
         if (updateError) {
-          console.warn('[OAUTH TOKEN] ⚠️ Failed to update user metadata:', {
+          console.warn('[OAUTH TOKEN] ⚠️ Failed to update user password/metadata:', {
             userId: user.id,
             error: updateError.message,
           });
           // Continue anyway - this is not critical
         } else {
-          console.log('[OAUTH TOKEN] ✅ User metadata updated successfully');
+          console.log('[OAUTH TOKEN] ✅ User password and metadata updated successfully');
         }
       } else {
         // User was deleted but merchant_settings still exists - create new user
