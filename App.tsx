@@ -86,8 +86,8 @@ const AppContent: React.FC = () => {
 
   if (!authInitialized) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin h-10 w-10 border-4 border-gray-300 border-t-transparent rounded-full" />
+      <div className="flex items-center justify-center h-screen bg-ds-bg">
+        <div className="animate-spin h-10 w-10 border-4 border-ds-border border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -95,8 +95,8 @@ const AppContent: React.FC = () => {
   if (bypassLogin) {
     if (!user) {
       return (
-        <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin h-10 w-10 border-4 border-gray-300 border-t-transparent rounded-full" />
+        <div className="flex items-center justify-center h-screen bg-ds-bg">
+          <div className="animate-spin h-10 w-10 border-4 border-ds-border border-t-transparent rounded-full" />
         </div>
       );
     }

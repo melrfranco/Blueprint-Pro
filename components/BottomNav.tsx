@@ -21,7 +21,7 @@ export default function BottomNav({ activeTab, onChange }: BottomNavProps) {
   const safePrimaryColor = ensureAccessibleColor(branding.primaryColor, '#111827', '#0F4C81');
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 bg-white border-t-4 border-gray-900 z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.1)]">
+    <nav className="fixed bottom-0 inset-x-0 bg-ds-surface border-t-4 border-ds-border-strong z-50 shadow-ds-2">
       <div className="flex justify-around max-w-md mx-auto p-2 pb-6 pt-3">
         {NAV_ITEMS.map(({ key, label, icon: Icon }) => {
           const isActive = activeTab === key;
@@ -30,9 +30,9 @@ export default function BottomNav({ activeTab, onChange }: BottomNavProps) {
             <button
               key={key}
               onClick={() => onChange(key)}
-              className={`flex flex-col items-center justify-center w-full p-1 rounded-lg transition-all ${isActive ? 'bg-blue-50' : ''}`}
+              className={`flex flex-col items-center justify-center w-full p-1 rounded-lg transition-all ${isActive ? 'bg-ds-surface-2' : ''}`}
               style={{
-                color: isActive ? safePrimaryColor : '#374151',
+                color: isActive ? safePrimaryColor : 'var(--text-muted)',
               }}
               aria-label={label}
               aria-current={isActive ? 'page' : undefined}

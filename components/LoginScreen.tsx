@@ -16,7 +16,7 @@ const LoginScreen: React.FC = () => {
       style={{ backgroundColor: branding.primaryColor }}
     >
       <div
-        className="bg-white rounded-[80px] shadow-2xl w-full max-w-md overflow-hidden relative border-4 border-gray-950"
+        className="bg-ds-surface rounded-[80px] shadow-ds-2 w-full max-w-md overflow-hidden relative border-4 border-ds-border-strong"
         style={{
           "@media (max-width: 991px)": {
             maxWidth: "656px",
@@ -24,7 +24,7 @@ const LoginScreen: React.FC = () => {
         } as any}
       >
         <div
-          className="bg-gray-50 p-10 text-center border-b-4"
+          className="bg-ds-bg p-10 text-center border-b-4"
           style={{
             borderColor: branding.primaryColor,
             "@media (max-width: 991px)": {
@@ -86,9 +86,9 @@ const LoginScreen: React.FC = () => {
         >
 
           <div className="my-8 flex items-center gap-3">
-            <div className="flex-1 h-0.5 bg-gray-200" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Admin access</span>
-            <div className="flex-1 h-0.5 bg-gray-200" />
+            <div className="flex-1 h-0.5 bg-ds-border" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-ds-text-muted">Admin access</span>
+            <div className="flex-1 h-0.5 bg-ds-border" />
           </div>
 
           <div className="mb-6" style={{ marginBottom: "16px" } as any}>
