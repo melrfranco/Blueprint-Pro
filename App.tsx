@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { UserRole } from './types';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { Analytics } from '@vercel/analytics/react';
 
 import AdminDashboard from './components/AdminDashboardV2';
 import LoginScreen from './components/LoginScreen';
@@ -142,6 +143,7 @@ const App: React.FC = () => {
         <PlanProvider>
           <AppContent />
           <SpeedInsights />
+          <Analytics />
         </PlanProvider>
       </AuthProvider>
     </SettingsProvider>
