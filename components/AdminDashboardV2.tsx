@@ -58,24 +58,24 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
   }, [plans]);
 
   const renderDashboard = () => (
-    <div className="p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
+    <div className="p-6 bg-ds-bg min-h-screen">
       <h1 className="text-4xl font-black text-brand-accent tracking-tighter mb-8">Admin Dashboard v2</h1>
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="col-span-2 bg-gray-950 text-white p-8 rounded-[32px] border-4 border-gray-950 shadow-lg hover:shadow-xl transition-shadow">
-          <p className="text-sm font-black uppercase text-gray-400 mb-2 tracking-widest">Roadmap Pipeline</p>
+        <div className="col-span-2 bg-ds-interactive-bg text-ds-interactive-text p-8 rounded-[32px] border-4 border-ds-border-strong shadow-ds-2 hover:shadow-ds-2 transition-shadow">
+          <p className="text-sm font-black uppercase text-ds-text-muted mb-2 tracking-widest">Roadmap Pipeline</p>
           <p className="text-6xl font-black text-brand-secondary">${totalPipeline.toLocaleString()}</p>
         </div>
-        <div className="bg-white p-6 rounded-3xl border-4 border-gray-100 shadow-sm hover:shadow-md hover:border-brand-accent transition-all">
-          <p className="text-[10px] text-gray-500 font-black uppercase mb-3 tracking-widest">Active Plans</p>
-          <p className="text-5xl font-black text-brand-primary">{stats.activePlansCount}</p>
+        <div className="bg-ds-surface p-6 rounded-3xl border-4 border-ds-border shadow-ds-1 hover:shadow-ds-2 hover:border-brand-accent transition-all">
+          <p className="text-[10px] text-ds-text-muted font-black uppercase mb-3 tracking-widest">Active Plans</p>
+          <p className="text-5xl font-black text-ds-brand">{stats.activePlansCount}</p>
         </div>
-        <div className="bg-white p-6 rounded-3xl border-4 border-gray-100 shadow-sm hover:shadow-md hover:border-brand-accent transition-all">
-          <p className="text-[10px] text-gray-500 font-black uppercase mb-3 tracking-widest">Total Clients</p>
-          <p className="text-5xl font-black text-brand-primary">{clients.length}</p>
+        <div className="bg-ds-surface p-6 rounded-3xl border-4 border-ds-border shadow-ds-1 hover:shadow-ds-2 hover:border-brand-accent transition-all">
+          <p className="text-[10px] text-ds-text-muted font-black uppercase mb-3 tracking-widest">Total Clients</p>
+          <p className="text-5xl font-black text-ds-brand">{clients.length}</p>
         </div>
       </div>
-      <div className="bg-white p-7 rounded-3xl border-4 border-gray-100 shadow-sm hover:shadow-md transition-shadow mb-6">
-        <h3 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-4">Pipeline Growth</h3>
+      <div className="bg-ds-surface p-7 rounded-3xl border-4 border-ds-border shadow-ds-1 hover:shadow-ds-2 transition-shadow mb-6">
+        <h3 className="text-sm font-black text-ds-text uppercase tracking-widest mb-4">Pipeline Growth</h3>
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={pipelineGrowthData}>
@@ -95,31 +95,31 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
       // ENTERPRISE FEATURE: Branding customization is only available for enterprise accounts
       // This view should not be accessible for standard accounts (menu item is conditionally hidden)
       return (
-        <div className="p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
-          <button onClick={() => setActiveSettingsView('menu')} className="mb-6 flex items-center text-xs font-black uppercase text-gray-500 hover:text-gray-900 transition-colors"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
+        <div className="p-6 bg-ds-bg min-h-screen">
+          <button onClick={() => setActiveSettingsView('menu')} className="mb-6 flex items-center text-xs font-black uppercase text-ds-text-muted hover:text-ds-text transition-colors"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
           <h2 className="text-4xl font-black mb-8 text-brand-accent">Branding</h2>
           <div className="space-y-6">
             <div>
-              <label className="block text-[10px] font-black uppercase mb-2">Salon Name</label>
-              <input type="text" value={branding.salonName} onChange={e => updateBranding({...branding, salonName: e.target.value})} className="w-full p-4 border-4 border-gray-100 rounded-2xl font-black outline-none focus:border-brand-accent"/>
+              <label className="block text-[10px] font-black uppercase mb-2 text-ds-text">Salon Name</label>
+              <input type="text" value={branding.salonName} onChange={e => updateBranding({...branding, salonName: e.target.value})} className="w-full p-4 border-4 border-ds-border rounded-2xl font-black outline-none focus:border-brand-accent bg-ds-surface text-ds-text"/>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-[10px] font-black uppercase mb-2">Primary Color</label>
+                <label className="block text-[10px] font-black uppercase mb-2 text-ds-text">Primary Color</label>
                 <input type="color" value={branding.primaryColor} onChange={e => updateBranding({...branding, primaryColor: e.target.value})} className="w-full h-12 rounded-xl cursor-pointer"/>
               </div>
               <div>
-                <label className="block text-[10px] font-black uppercase mb-2">Accent Color</label>
+                <label className="block text-[10px] font-black uppercase mb-2 text-ds-text">Accent Color</label>
                 <input type="color" value={branding.accentColor} onChange={e => updateBranding({...branding, accentColor: e.target.value})} className="w-full h-12 rounded-xl cursor-pointer"/>
               </div>
             </div>
             <div>
-              <label className="block text-[10px] font-black uppercase mb-2">Font</label>
-              <select value={branding.font} onChange={e => updateBranding({...branding, font: e.target.value})} className="w-full p-4 border-4 border-gray-100 rounded-2xl font-black outline-none">
+              <label className="block text-[10px] font-black uppercase mb-2 text-ds-text">Font</label>
+              <select value={branding.font} onChange={e => updateBranding({...branding, font: e.target.value})} className="w-full p-4 border-4 border-ds-border rounded-2xl font-black outline-none bg-ds-surface text-ds-text">
                 {GOOGLE_FONTS_LIST.map(f => <option key={f} value={f}>{f}</option>)}
               </select>
             </div>
-            <button onClick={() => { saveAll(); setActiveSettingsView('menu'); }} className="w-full py-4 bg-gray-950 text-white font-black rounded-2xl">SAVE CHANGES</button>
+            <button onClick={() => { saveAll(); setActiveSettingsView('menu'); }} className="w-full py-4 bg-ds-interactive-bg text-ds-interactive-text font-black rounded-2xl">SAVE CHANGES</button>
           </div>
         </div>
       );
@@ -127,8 +127,8 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
 
     if (activeSettingsView === 'account') {
       return (
-        <div className="p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
-          <button onClick={() => setActiveSettingsView('menu')} className="mb-6 flex items-center text-xs font-black uppercase text-gray-500 hover:text-gray-900 transition-colors"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
+        <div className="p-6 bg-ds-bg min-h-screen">
+          <button onClick={() => setActiveSettingsView('menu')} className="mb-6 flex items-center text-xs font-black uppercase text-ds-text-muted hover:text-ds-text transition-colors"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
           <AccountSettings user={user} onLogout={logout} subtitle="System Controller" />
         </div>
       );
@@ -143,25 +143,25 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
     }
 
     return (
-      <div className="p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
-        <h1 className="text-4xl font-black text-black tracking-tighter mb-8">Settings v2</h1>
+      <div className="p-6 bg-ds-bg min-h-screen">
+        <h1 className="text-4xl font-black text-ds-text tracking-tighter mb-8">Settings v2</h1>
         <div className={`grid gap-6 mb-8 ${canCustomizeBranding(user) ? 'grid-cols-2' : 'grid-cols-2'}`}>
-          <button onClick={() => setActiveSettingsView('account')} className="p-8 bg-white border-4 border-gray-100 rounded-3xl flex flex-col items-center justify-center space-y-3 hover:border-brand-accent hover:shadow-md transition-all shadow-sm">
-            <SettingsIcon className="w-10 h-10 text-brand-primary"/>
-            <span className="text-[10px] font-black uppercase tracking-widest">Account</span>
+          <button onClick={() => setActiveSettingsView('account')} className="p-8 bg-ds-surface border-4 border-ds-border rounded-3xl flex flex-col items-center justify-center space-y-3 hover:border-brand-accent hover:shadow-ds-2 transition-all shadow-ds-1">
+            <SettingsIcon className="w-10 h-10 text-ds-brand"/>
+            <span className="text-[10px] font-black uppercase tracking-widest text-ds-text">Account</span>
           </button>
-          <button onClick={() => setActiveSettingsView('teamAccess')} className="p-8 bg-white border-4 border-gray-100 rounded-3xl flex flex-col items-center justify-center space-y-3 hover:border-brand-accent hover:shadow-md transition-all shadow-sm">
-            <CheckCircleIcon className="w-10 h-10 text-brand-primary"/>
-            <span className="text-[10px] font-black uppercase tracking-widest">Team Access</span>
+          <button onClick={() => setActiveSettingsView('teamAccess')} className="p-8 bg-ds-surface border-4 border-ds-border rounded-3xl flex flex-col items-center justify-center space-y-3 hover:border-brand-accent hover:shadow-ds-2 transition-all shadow-ds-1">
+            <CheckCircleIcon className="w-10 h-10 text-ds-brand"/>
+            <span className="text-[10px] font-black uppercase tracking-widest text-ds-text">Team Access</span>
           </button>
-          <button onClick={() => setActiveSettingsView('memberships')} className="p-8 bg-white border-4 border-gray-100 rounded-3xl flex flex-col items-center justify-center space-y-3 hover:border-brand-accent hover:shadow-md transition-all shadow-sm">
-            <CheckCircleIcon className="w-10 h-10 text-brand-primary"/>
-            <span className="text-[10px] font-black uppercase tracking-widest">Memberships</span>
+          <button onClick={() => setActiveSettingsView('memberships')} className="p-8 bg-ds-surface border-4 border-ds-border rounded-3xl flex flex-col items-center justify-center space-y-3 hover:border-brand-accent hover:shadow-ds-2 transition-all shadow-ds-1">
+            <CheckCircleIcon className="w-10 h-10 text-ds-brand"/>
+            <span className="text-[10px] font-black uppercase tracking-widest text-ds-text">Memberships</span>
           </button>
           {canCustomizeBranding(user) && (
-            <button onClick={() => setActiveSettingsView('branding')} className="p-8 bg-white border-4 border-gray-100 rounded-3xl flex flex-col items-center justify-center space-y-3 hover:border-brand-accent hover:shadow-md transition-all shadow-sm">
-              <GlobeIcon className="w-10 h-10 text-brand-primary"/>
-              <span className="text-[10px] font-black uppercase tracking-widest">Branding</span>
+            <button onClick={() => setActiveSettingsView('branding')} className="p-8 bg-ds-surface border-4 border-ds-border rounded-3xl flex flex-col items-center justify-center space-y-3 hover:border-brand-accent hover:shadow-ds-2 transition-all shadow-ds-1">
+              <GlobeIcon className="w-10 h-10 text-ds-brand"/>
+              <span className="text-[10px] font-black uppercase tracking-widest text-ds-text">Branding</span>
             </button>
           )}
         </div>
@@ -170,32 +170,32 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
   };
 
   const renderPlans = () => (
-    <div className="p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
+    <div className="p-6 bg-ds-bg min-h-screen">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-4xl font-black text-black tracking-tighter">Plans</h1>
-        <button onClick={() => setIsCreatingPlan(true)} className="bg-brand-accent text-white px-8 py-3 rounded-2xl font-black text-sm active:scale-95 transition-transform shadow-lg hover:shadow-xl">+ NEW PLAN</button>
+        <h1 className="text-4xl font-black text-ds-text tracking-tighter">Plans</h1>
+        <button onClick={() => setIsCreatingPlan(true)} className="bg-brand-accent text-ds-text-on-accent px-8 py-3 rounded-2xl font-black text-sm active:scale-95 transition-transform shadow-ds-1 hover:shadow-ds-2">+ NEW PLAN</button>
       </div>
       <div className="space-y-4">
         {plans.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white border-4 border-gray-100 rounded-3xl shadow-sm">
-            <p className="font-black text-lg mb-2 text-gray-950">No plans yet</p>
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Create your first plan to get started</p>
+          <div className="flex flex-col items-center justify-center py-20 bg-ds-surface border-4 border-ds-border rounded-3xl shadow-ds-1">
+            <p className="font-black text-lg mb-2 text-ds-text">No plans yet</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-ds-text-muted">Create your first plan to get started</p>
           </div>
         ) : (
           plans.map(plan => (
             <button
               key={plan.id}
               onClick={() => setEditingPlan(plan)}
-              className="w-full text-left p-6 bg-white border-4 border-gray-100 rounded-3xl shadow-sm hover:shadow-md hover:border-brand-accent active:scale-95 transition-all"
+              className="w-full text-left p-6 bg-ds-surface border-4 border-ds-border rounded-3xl shadow-ds-1 hover:shadow-ds-2 hover:border-brand-accent active:scale-95 transition-all"
             >
               <div className="flex justify-between items-start mb-3">
-                <h3 className="font-black text-gray-950 text-xl">{plan.client?.name || 'Unnamed Client'}</h3>
-                <span className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-full ${plan.status === 'active' ? 'bg-green-100 text-green-700' : plan.status === 'draft' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}>
+                <h3 className="font-black text-ds-text text-xl">{plan.client?.name || 'Unnamed Client'}</h3>
+                <span className={`text-[10px] font-black uppercase px-3 py-1.5 rounded-full ${plan.status === 'active' ? 'bg-green-100 text-green-700' : plan.status === 'draft' ? 'bg-blue-100 text-blue-700' : 'bg-ds-surface-2 text-ds-text-muted'}`}>
                   {plan.status}
                 </span>
               </div>
-              <p className="text-lg font-black text-brand-primary mb-2">${plan.totalCost?.toLocaleString() || '0'}</p>
-              <p className="text-sm text-gray-500 font-bold">{plan.description || 'No description'}</p>
+              <p className="text-lg font-black text-ds-brand mb-2">${plan.totalCost?.toLocaleString() || '0'}</p>
+              <p className="text-sm text-ds-text-muted font-bold">{plan.description || 'No description'}</p>
             </button>
           ))
         )}

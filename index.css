@@ -2,6 +2,60 @@
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
 
 /* =========================================================
+   TAILWIND v4 THEME — Maps CSS design tokens to utilities
+   Usage: bg-ds-bg, text-ds-text, border-ds-border, etc.
+========================================================= */
+@theme inline {
+  --font-sans: "Quicksand", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+
+  /* Backgrounds */
+  --color-ds-bg: var(--bg);
+  --color-ds-surface: var(--surface);
+  --color-ds-surface-2: var(--surface-2);
+
+  /* Text */
+  --color-ds-text: var(--text);
+  --color-ds-text-muted: var(--text-muted);
+
+  /* Borders */
+  --color-ds-border: var(--border);
+  --color-ds-border-strong: var(--border-strong);
+
+  /* Brand */
+  --color-ds-brand: var(--brand);
+  --color-ds-brand-hover: var(--brand-hover);
+
+  /* Interactive (near-invert) */
+  --color-ds-interactive-bg: var(--interactive-bg);
+  --color-ds-interactive-text: var(--interactive-text);
+  --color-ds-interactive-border: var(--interactive-border);
+
+  /* Back-compat brand aliases */
+  --color-brand-primary: var(--brand);
+  --color-brand-secondary: var(--color-brand-secondary);
+  --color-brand-accent: var(--color-brand-accent);
+  --color-brand-accent-dark: var(--color-brand-accent-dark);
+  --color-brand-bg: var(--bg);
+
+  /* Text-on colors */
+  --color-ds-text-on-primary: var(--text-on-primary);
+  --color-ds-text-on-secondary: var(--text-on-secondary);
+  --color-ds-text-on-accent: var(--text-on-accent);
+  --color-ds-text-on-light: var(--text-on-light);
+
+  /* Radius */
+  --radius-sm: var(--r-sm);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --radius-pill: var(--r-pill);
+
+  /* Shadows */
+  --shadow-ds-1: var(--shadow-1);
+  --shadow-ds-2: var(--shadow-2);
+}
+
+/* =========================================================
    DESIGN TOKENS — SOURCE OF TRUTH (accessible)
    Palette base: sky-reflection
    Font: Quicksand

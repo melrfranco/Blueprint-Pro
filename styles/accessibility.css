@@ -2,26 +2,26 @@
 input:not(.toggle):not([data-ui="toggle"]):not([data-ui="field"]):not(.sr-only):not([type="checkbox"]):not([type="radio"]),
 textarea:not([data-ui="field"]),
 select:not([data-ui="field"]) {
-  background-color: #ffffff;
-  border: 2px solid #374151; /* Dark gray border for better contrast */
-  color: #1F2937; /* Ensure text color is dark enough */
+  background-color: var(--bg);
+  border: 2px solid var(--border-strong);
+  color: var(--text);
 }
 
 input:not(.toggle):not([data-ui="toggle"]):not([data-ui="field"]):not(.sr-only):not([type="checkbox"]):not([type="radio"])::placeholder,
 textarea:not([data-ui="field"])::placeholder {
-  color: #6B7280; /* Medium gray placeholder text */
+  color: var(--text-muted);
 }
 
 /* Buttons must be visible via shape, not icon color */
 button:not(.toggle):not(.btn):not(.blueprint-button):not([data-ui="toggle"]):not([data-ui="button"]) {
-  background-color: #ffffff;
-  border: 2px solid #1F2937; /* Dark border for visibility */
-  color: #1F2937; /* Dark text by default */
+  background-color: var(--surface);
+  border: 2px solid var(--border-strong);
+  color: var(--text);
 }
 
 /* Focus visibility (keyboard accessibility) */
 :focus-visible {
-  outline: 3px solid #0F4C81; /* Blueprint Classic Blue */
+  outline: 3px solid var(--brand);
   outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(15, 76, 129, 0.1); /* Subtle backdrop highlight */
+  box-shadow: 0 0 0 4px rgba(0, 157, 255, 0.15);
 }

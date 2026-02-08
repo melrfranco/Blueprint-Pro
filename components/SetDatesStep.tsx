@@ -49,22 +49,22 @@ const SetDatesStep: React.FC<SetDatesStepProps> = ({ selectedServices, planDetai
 
   const getButtonClass = (isSelected: boolean, isDisabled: boolean) => {
       let base = "p-3 rounded-lg transition-all ";
-      if (isDisabled) return base + "bg-gray-100 text-gray-500 border border-gray-300 cursor-not-allowed";
-      if (isSelected) return base + "shadow-md"; // Style will be applied
-      return base + "bg-white text-gray-800 border border-gray-400 hover:border-gray-600 hover:bg-gray-50 shadow-sm";
+      if (isDisabled) return base + "bg-ds-surface-2 text-ds-text-muted border border-ds-border cursor-not-allowed";
+      if (isSelected) return base + "shadow-ds-1";
+      return base + "bg-ds-surface text-ds-text border border-ds-border hover:border-ds-border-strong hover:bg-ds-bg shadow-ds-1";
   };
 
   return (
     <div className="flex flex-col h-full p-4 pb-12">
       <div className="text-center p-4">
-        <div className="relative w-full h-2 bg-gray-200 mb-4 rounded-full"><div className="absolute top-0 left-0 h-2 bg-brand-secondary rounded-full" style={{width: '33%'}}></div></div>
-        <h1 className="text-2xl font-bold text-gray-900">First Service Date</h1>
+        <div className="relative w-full h-2 bg-ds-surface-2 mb-4 rounded-full"><div className="absolute top-0 left-0 h-2 bg-brand-secondary rounded-full" style={{width: '33%'}}></div></div>
+        <h1 className="text-2xl font-bold text-ds-text">First Service Date</h1>
       </div>
       
       <div className="flex-grow overflow-y-auto p-4 space-y-6">
         {selectedServices.map(service => (
-          <div key={service.id} className="p-4 rounded-xl bg-gray-50 border border-gray-200 shadow-sm">
-            <h3 className="font-bold text-lg text-gray-900 mb-3">{service.name}</h3>
+          <div key={service.id} className="p-4 rounded-xl bg-ds-bg border border-ds-border shadow-ds-1">
+            <h3 className="font-bold text-lg text-ds-text mb-3">{service.name}</h3>
             
             <div className="grid grid-cols-2 gap-3 text-sm font-bold">
                 <button 
