@@ -1,39 +1,83 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;900&family=Comfortaa:wght@400;500;600;700&display=swap');
 
 /* =========================================================
-   DESIGN TOKENS — SOURCE OF TRUTH (accessible)
-   Palette base: sky-reflection
-   Font: Quicksand
+   DESIGN TOKENS — SOURCE OF TRUTH
+   Blueprint Design System v1.0.0
+   Core: Navy #0B3559, Steel #42708C, Sky #5890A6, Frost #8EB1BF
+   Fonts: Raleway (headings/UI), Comfortaa (body)
 ========================================================= */
 
 :root {
+  /* Core Blueprint Palette */
+  --blueprint-navy: #0B3559;
+  --blueprint-steel: #42708C;
+  --blueprint-sky: #5890A6;
+  --blueprint-frost: #8EB1BF;
+
   /* Typography */
-  --font-sans: "Quicksand", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+  --font-sans: "Comfortaa", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  --font-heading: "Raleway", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
   --fw-regular: 400;
   --fw-medium: 500;
   --fw-semibold: 600;
   --fw-bold: 700;
+  --fw-black: 900;
 
-  /* LIGHT MODE COLORS */
-  --bg: #ecf4f8;              /* sky-reflection-50 */
-  --surface: #dae9f1;         /* sky-reflection-100 */
-  --surface-2: #b5d3e3;       /* sky-reflection-200 */
+  /* LIGHT MODE — Semantic tokens */
+  --background: #F0F4F8;
+  --foreground: #0B3559;
 
-  --text: #0e1d25;            /* sky-reflection-900 */
-  --text-muted: #295770;      /* sky-reflection-700 */
+  --card: #FFFFFF;
+  --card-foreground: #0B3559;
 
-  --border: #8fbdd6;          /* sky-reflection-300 */
-  --border-strong: #6aa7c8;   /* sky-reflection-400 */
+  --popover: #FFFFFF;
+  --popover-foreground: #0B3559;
 
-  --brand: #009dff;           /* deep-space-blue-500 */
-  --brand-hover: #007ecc;     /* deep-space-blue-600 */
+  --primary: #0B3559;
+  --primary-foreground: #F0F4F8;
 
-  /* Near-invert interaction */
-  --interactive-bg: #0e1d25;
-  --interactive-text: #ecf4f8;
-  --interactive-border: #6aa7c8;
+  --secondary: #42708C;
+  --secondary-foreground: #F0F4F8;
+
+  --accent: #5890A6;
+  --accent-foreground: #FFFFFF;
+
+  --muted: #E2EAF0;
+  --muted-foreground: #42708C;
+
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+
+  --border: #C5D5DE;
+  --input: #C5D5DE;
+  --input-background: #FFFFFF;
+  --ring: #5890A6;
+
+  /* Sidebar tokens */
+  --sidebar: #0B3559;
+  --sidebar-foreground: #F0F4F8;
+  --sidebar-border: #1A4A73;
+  --sidebar-primary: #5890A6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1A4A73;
+  --sidebar-accent-foreground: #F0F4F8;
+
+  /* Legacy aliases */
+  --bg: var(--background);
+  --surface: var(--card);
+  --surface-2: var(--muted);
+  --text: var(--foreground);
+  --text-muted: var(--muted-foreground);
+  --border-strong: var(--blueprint-steel);
+  --brand: var(--primary);
+  --brand-hover: #093050;
+
+  --interactive-bg: var(--primary);
+  --interactive-text: var(--primary-foreground);
+  --interactive-border: var(--blueprint-steel);
 
   /* Spacing */
   --s-1: 4px;
@@ -48,10 +92,11 @@
   --r-md: 14px;
   --r-lg: 18px;
   --r-pill: 9999px;
+  --radius: 0.75rem;
 
   /* Elevation */
-  --shadow-1: 0 2px 8px rgba(14, 29, 37, 0.12);
-  --shadow-2: 0 10px 30px rgba(14, 29, 37, 0.18);
+  --shadow-1: 0 2px 8px rgba(11, 53, 89, 0.10);
+  --shadow-2: 0 10px 30px rgba(11, 53, 89, 0.16);
 
   /* Motion */
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -61,53 +106,83 @@
 
   /* ---------------------------------------------------------
      Back-compat aliases (IMPORTANT)
-     Your existing Tailwind classes like bg-brand-primary rely
-     on these Tailwind v4 CSS variables.
+     Tailwind v4 CSS variables for bg-brand-primary etc.
   --------------------------------------------------------- */
-  --color-brand-primary: var(--brand);
-  --color-brand-secondary: #295770;   /* sky-reflection-700 */
-  --color-brand-accent: #8fbdd6;      /* sky-reflection-300 (toggle vibe) */
-  --color-brand-accent-dark: #1c3a4a; /* sky-reflection-800 */
-  --color-brand-bg: var(--bg);
+  --color-brand-primary: var(--primary);
+  --color-brand-secondary: var(--secondary);
+  --color-brand-accent: var(--blueprint-frost);
+  --color-brand-accent-dark: var(--blueprint-navy);
+  --color-brand-bg: var(--background);
 
-  /* Accessible text colors (keep names) */
-  --text-on-primary: #ecf4f8;
-  --text-on-secondary: #ecf4f8;
-  --text-on-accent: #0e1d25;
-  --text-on-light: var(--text);
+  /* Accessible text colors */
+  --text-on-primary: #F0F4F8;
+  --text-on-secondary: #F0F4F8;
+  --text-on-accent: #FFFFFF;
+  --text-on-light: var(--foreground);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0a141a;
-    --surface: #0e1d25;
-    --surface-2: #1c3a4a;
+/* Dark Mode */
+.dark {
+  --background: #0A1628;
+  --foreground: #E8EEF4;
 
-    --text: #ecf4f8;
-    --text-muted: #8fbdd6;
+  --card: #0F2035;
+  --card-foreground: #E8EEF4;
 
-    --border: #295770;
-    --border-strong: #377495;
+  --popover: #0F2035;
+  --popover-foreground: #E8EEF4;
 
-    --brand: #33b1ff;
-    --brand-hover: #66c4ff;
+  --primary: #5890A6;
+  --primary-foreground: #0A1628;
 
-    --interactive-bg: #ecf4f8;
-    --interactive-text: #0a141a;
-    --interactive-border: #377495;
+  --secondary: #8EB1BF;
+  --secondary-foreground: #0A1628;
 
-    /* Keep Tailwind v4 variable names working in dark mode */
-    --color-brand-primary: var(--brand);
-    --color-brand-secondary: #377495;
-    --color-brand-accent: #6aa7c8;
-    --color-brand-accent-dark: #ecf4f8;
-    --color-brand-bg: var(--bg);
+  --accent: #42708C;
+  --accent-foreground: #E8EEF4;
 
-    --text-on-primary: #0a141a;
-    --text-on-secondary: #0a141a;
-    --text-on-accent: #0a141a;
-    --text-on-light: #ecf4f8;
-  }
+  --muted: #1A3350;
+  --muted-foreground: #8EB1BF;
+
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+
+  --border: #1A3350;
+  --input: #1A3350;
+  --input-background: #0F2035;
+  --ring: #5890A6;
+
+  --sidebar: #0A1628;
+  --sidebar-foreground: #E8EEF4;
+  --sidebar-border: #1A3350;
+  --sidebar-primary: #5890A6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #1A3350;
+  --sidebar-accent-foreground: #E8EEF4;
+
+  --bg: var(--background);
+  --surface: var(--card);
+  --surface-2: var(--muted);
+  --text: var(--foreground);
+  --text-muted: var(--muted-foreground);
+  --border-strong: var(--blueprint-sky);
+  --brand: var(--primary);
+  --brand-hover: #6FA8BE;
+
+  --interactive-bg: var(--primary-foreground);
+  --interactive-text: var(--primary);
+  --interactive-border: var(--blueprint-sky);
+
+  --color-brand-primary: var(--primary);
+  --color-brand-secondary: var(--secondary);
+  --color-brand-accent: var(--blueprint-sky);
+  --color-brand-accent-dark: var(--foreground);
+  --color-brand-bg: var(--background);
+
+  --text-on-primary: #0A1628;
+  --text-on-secondary: #0A1628;
+  --text-on-accent: #E8EEF4;
+  --text-on-light: var(--foreground);
 }
 
 /* =========================================================
@@ -115,9 +190,116 @@
 ========================================================= */
 
 html, body {
-  background: var(--bg);
-  color: var(--text);
+  background: var(--background);
+  color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4, h5, h6, label, button, [data-ui="button"] {
+  font-family: var(--font-heading);
+}
+
+/* =========================================================
+   BLUEPRINT DESIGN SYSTEM — Utility Classes
+   Glassmorphism, Depth, Grid patterns, Glow effects
+========================================================= */
+
+/* Glass card effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+}
+
+.dark .glass-card {
+  background: rgba(15, 32, 53, 0.7);
+}
+
+/* Depth / elevation */
+.depth-1 { box-shadow: 0 2px 8px rgba(11, 53, 89, 0.08); }
+.depth-2 { box-shadow: 0 4px 16px rgba(11, 53, 89, 0.12); }
+.depth-3 { box-shadow: 0 8px 32px rgba(11, 53, 89, 0.16); }
+
+/* Elevated card hover effect */
+.elevated-card {
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.elevated-card:hover {
+  transform: translateY(-2px);
+}
+
+/* Blueprint grid patterns */
+.blueprint-grid {
+  background-image:
+    linear-gradient(var(--blueprint-frost) 1px, transparent 1px),
+    linear-gradient(90deg, var(--blueprint-frost) 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-position: center center;
+}
+
+.blueprint-grid-large {
+  background-image:
+    linear-gradient(var(--blueprint-frost) 1px, transparent 1px),
+    linear-gradient(90deg, var(--blueprint-frost) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center center;
+}
+
+/* Blueprint corner decorations */
+.blueprint-corners::before,
+.blueprint-corners::after {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-color: var(--blueprint-sky);
+  border-style: solid;
+}
+.blueprint-corners::before {
+  top: 8px;
+  left: 8px;
+  border-width: 2px 0 0 2px;
+}
+.blueprint-corners::after {
+  bottom: 8px;
+  right: 8px;
+  border-width: 0 2px 2px 0;
+}
+
+/* Glow effects */
+.glow-primary {
+  filter: drop-shadow(0 0 8px rgba(88, 144, 166, 0.4));
+}
+
+/* Shine effect for buttons */
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+.shine-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+  transition: left 0.5s ease;
+}
+.shine-effect:hover::before {
+  left: 100%;
+}
+
+/* Texture dot pattern */
+.texture-dots {
+  background-image: radial-gradient(circle, var(--blueprint-frost) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+/* Gradient overlay */
+.gradient-overlay {
+  background: linear-gradient(135deg, rgba(11, 53, 89, 0.03) 0%, rgba(88, 144, 166, 0.06) 100%);
 }
 
 /* =========================================================
@@ -177,8 +359,8 @@ html, body {
   width: 56px !important;
   height: 28px !important;
   border-radius: var(--r-pill);
-  background: #8abad4;               /* Inactive: Light blue */
-  border: 2px solid var(--border-strong);
+  background: var(--muted);
+  border: 2px solid var(--border);
   box-shadow: var(--shadow-1);
   cursor: pointer;
 
@@ -193,7 +375,7 @@ html, body {
   transform: translateY(var(--press-y));
 }
 
-/* BIG pill knob — for .toggle via pseudo element */
+/* BIG pill knob */
 .toggle::after {
   content: "";
   position: absolute;
@@ -202,54 +384,30 @@ html, body {
   width: 32px;
   height: 20px;
   border-radius: var(--r-pill);
-  background: #ffffff;       /* White Knob */
-  border: 2px solid rgba(236, 244, 248, 0.2); /* Light transparent border */
-  box-shadow: 0 4px 12px rgba(14, 29, 37, 0.18);
+  background: #ffffff;
+  border: 2px solid rgba(11, 53, 89, 0.1);
+  box-shadow: 0 4px 12px rgba(11, 53, 89, 0.18);
   transform: translateX(0);
   transition: transform var(--dur-med) var(--ease),
               background var(--dur-med) var(--ease),
               border-color var(--dur-med) var(--ease);
 }
 
-
-/* ON state track - Brand color */
+/* ON state track - Blueprint Sky */
 .toggle[aria-checked="true"],
 .toggle[data-state="on"] {
-  background: #8abad4;
-  border-color: #377495;
+  background: var(--blueprint-sky);
+  border-color: var(--blueprint-steel);
 }
 
-/* ON state knob movement:
-   Width 56px.
-   Border 2px on each side.
-   Knob width 32px.
-   Left 2px.
-   Available inner space: 56 - 4 = 52px.
-   Target Right Gap: 2px.
-   Travel = 52 - 32 - 2 (left) - 2 (right gap? no, math is: width - knob_width - 2*left_offset)
-   Wait, if Left is 2px.
-   56 (total) - 2 (border L) - 2 (border R) = 52 inner.
-   Knob is 32.
-   Start: 2px from left border (so 4px from total left edge?). No, top/left are relative to padding box?
-   Usually border-box.
-   If absolute inside relative.
-   Let's assume travel needs to put it 2px from right.
-   56 - 2(border) - 2(gap) - 32(knob) - 2(border) - 2(gap) ?
-   Travel = (Width - Border*2) - KnobWidth - Gap*2 ?
-   (56 - 4) - 32 - 4 = 16px?
-   Let's try 18px.
-*/
 .toggle[aria-checked="true"]::after,
 .toggle[data-state="on"]::after {
   transform: translateX(18px);
 }
 
-
 /* Dark-mode knob swap */
-@media (prefers-color-scheme: dark) {
-  .toggle::after {
-    border-color: rgba(236, 244, 248, 0.20) !important;
-  }
+.dark .toggle::after {
+  border-color: rgba(232, 238, 244, 0.20) !important;
 }
 
 /* =========================================================
@@ -295,14 +453,15 @@ html, body {
   }
 }
 
-/* Blueprint Button Styles (updated to tokens, same class name) */
+/* Blueprint Button Styles */
 .blueprint-button {
-  border: 2px solid var(--border-strong);
-  color: var(--text);
+  border: 2px solid var(--blueprint-navy);
+  color: var(--blueprint-navy);
   background-color: #ffffff;
+  font-family: var(--font-heading);
   font-weight: var(--fw-bold);
   padding: 12px;
-  border-radius: var(--r-md);
+  border-radius: var(--r-pill);
   width: 100%;
   text-align: center;
   cursor: pointer;
@@ -316,9 +475,9 @@ html, body {
 }
 
 .blueprint-button:hover:not(:disabled) {
-  background: var(--interactive-bg);
-  color: var(--interactive-text);
-  border-color: var(--interactive-border);
+  background: var(--blueprint-navy);
+  color: var(--primary-foreground);
+  border-color: var(--blueprint-navy);
   box-shadow: var(--shadow-2);
   transform: translateY(-1px);
 }
@@ -338,18 +497,18 @@ html, body {
 }
 
 .sync-button:hover:not(:disabled) {
-  background-color: rgba(0, 126, 204, 0.9); /* brand-hover-ish */
+  background-color: rgba(11, 53, 89, 0.9);
 }
 
 .sync-button:active:not(:disabled) {
-  background-color: rgba(0, 126, 204, 0.8);
+  background-color: rgba(11, 53, 89, 0.8);
 }
 
 /* Square OAuth Button Responsive Styles */
 .square-oauth-button {
-  border: 3px solid #0f4773 !important;
-  border-radius: 97px !important;
-  color: rgba(0, 0, 0, 1);
+  border: 3px solid var(--blueprint-navy) !important;
+  border-radius: var(--r-pill) !important;
+  color: var(--blueprint-navy);
   margin-bottom: 16px;
   overflow: hidden;
 }
@@ -366,17 +525,17 @@ html, body {
 
 /* Stylist Sign In Button Responsive Styles */
 .stylist-signin-button {
-  border: 3px solid #0f4773 !important;
-  border-radius: 97px !important;
-  color: rgba(0, 0, 0, 1);
+  border: 3px solid var(--blueprint-navy) !important;
+  border-radius: var(--r-pill) !important;
+  color: var(--blueprint-navy);
   overflow: hidden;
 }
 
 .stylist-email-input,
 .stylist-password-input {
-  border: 1px solid rgb(55, 65, 81) !important;
-  border-radius: 106px !important;
-  background-color: rgba(255, 255, 255, 1);
-  color: rgba(0, 0, 0, 1);
+  border: 1px solid var(--border) !important;
+  border-radius: var(--r-pill) !important;
+  background-color: #ffffff;
+  color: var(--blueprint-navy);
   overflow: hidden;
 }

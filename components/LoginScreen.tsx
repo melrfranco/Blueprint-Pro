@@ -5,40 +5,27 @@ const LoginScreen: React.FC = () => {
   const { branding } = useSettings();
 
   const startSquareOAuth = () => {
-    // Use server-side OAuth start endpoint for secure state handling
-    // Server sets state in HTTP-only cookie and redirects to Square
     window.location.href = '/api/square/oauth/start';
   };
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center p-6 transition-colors duration-500"
+      className="min-h-screen flex flex-col items-center justify-center p-6 transition-colors duration-500 relative overflow-hidden"
       style={{ backgroundColor: branding.primaryColor }}
     >
-      <div
-        className="bg-white rounded-[80px] shadow-2xl w-full max-w-md overflow-hidden relative border-4 border-gray-950"
-        style={{
-          "@media (max-width: 991px)": {
-            maxWidth: "656px",
-          },
-        } as any}
-      >
+      {/* Blueprint grid background */}
+      <div className="absolute inset-0 opacity-10" style={{
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)',
+        backgroundSize: '20px 20px',
+      }} />
+
+      <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-md overflow-hidden relative border-4 depth-3" style={{ borderColor: branding.primaryColor }}>
         <div
-          className="bg-gray-50 p-10 text-center border-b-4"
+          className="p-10 text-center border-b-4 relative"
           style={{
             borderColor: branding.primaryColor,
-            "@media (max-width: 991px)": {
-              backgroundImage:
-                "url(https://cdn.builder.io/api/v1/image/assets%2F8d6a989189ff4d9e8633804d5d0dbd86%2F6d20c9ec074b40608799512dc6ed08ca)",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-              backgroundSize: "cover",
-              paddingTop: "63px",
-              display: "flex",
-              flexDirection: "column",
-              paddingBottom: "23px",
-            },
-          } as any}
+            background: 'linear-gradient(135deg, #F0F4F8 0%, #E2EAF0 100%)',
+          }}
         >
           <img
             src="https://cdn.builder.io/api/v1/image/assets%2F8d6a989189ff4d9e8633804d5d0dbd86%2F7093acbcb2ca4ac783c4b84bc621e52f"
@@ -48,50 +35,33 @@ const LoginScreen: React.FC = () => {
               maxWidth: "100%",
               width: "100%",
               display: "block",
-              "@media (max-width: 991px)": {
-                maxWidth: "100%",
-                width: "100%",
-              },
-            } as any}
+            }}
           />
 
           <h1
-            className="text-3xl tracking-tighter"
+            className="text-3xl tracking-tighter font-semibold text-left"
             style={{
               color: branding.primaryColor,
-              fontFamily: "Quicksand, sans-serif",
-              fontWeight: "600",
-              textAlign: "left",
-              "@media (max-width: 991px)": {
-                color: "rgba(11, 52, 88, 1)",
-                fontFamily: "Quicksand, sans-serif",
-                fontWeight: "400",
-                textAlign: "left",
-                margin: "0 auto 0 27px",
-                marginBottom: "-23px",
-              },
-            } as any}
+            }}
           >
             Pro Access
           </h1>
         </div>
 
         <div
-          className="p-10 login-screen-content"
+          className="login-screen-content"
           style={{
-            backgroundColor: `rgba(${parseInt(branding.primaryColor.slice(1, 3), 16)}, ${parseInt(branding.primaryColor.slice(3, 5), 16)}, ${parseInt(branding.primaryColor.slice(5, 7), 16)}, 0.08)`,
-            marginRight: "-1px",
+            backgroundColor: `rgba(${parseInt(branding.primaryColor.slice(1, 3), 16)}, ${parseInt(branding.primaryColor.slice(3, 5), 16)}, ${parseInt(branding.primaryColor.slice(5, 7), 16)}, 0.06)`,
             padding: "8px 40px 40px",
-          } as any}
+          }}
         >
-
           <div className="my-8 flex items-center gap-3">
-            <div className="flex-1 h-0.5 bg-gray-200" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Admin access</span>
-            <div className="flex-1 h-0.5 bg-gray-200" />
+            <div className="flex-1 h-0.5" style={{ backgroundColor: '#C5D5DE' }} />
+            <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#42708C' }}>Admin access</span>
+            <div className="flex-1 h-0.5" style={{ backgroundColor: '#C5D5DE' }} />
           </div>
 
-          <div className="mb-6" style={{ marginBottom: "16px" } as any}>
+          <div className="mb-4">
             <button
               onClick={startSquareOAuth}
               className="blueprint-button font-black square-oauth-button"
@@ -99,7 +69,6 @@ const LoginScreen: React.FC = () => {
               Login with Square
             </button>
           </div>
-
         </div>
       </div>
     </div>

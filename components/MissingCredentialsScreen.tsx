@@ -153,12 +153,18 @@ const MissingCredentialsScreen = () => {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center p-6 transition-colors duration-500"
+      className="min-h-screen flex flex-col items-center justify-center p-6 transition-colors duration-500 relative overflow-hidden"
       style={{ backgroundColor: branding.primaryColor }}
     >
-      <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-md overflow-hidden relative border-4 border-gray-950">
+      {/* Blueprint grid background */}
+      <div className="absolute inset-0 opacity-10" style={{
+        backgroundImage: 'linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)',
+        backgroundSize: '20px 20px',
+      }} />
+
+      <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-md overflow-hidden relative border-4 depth-3" style={{ borderColor: branding.primaryColor }}>
         {/* Header Section with Branding */}
-        <div className="bg-gray-50 p-10 text-center border-b-4" style={{ borderColor: branding.primaryColor }}>
+        <div className="p-10 text-center border-b-4" style={{ borderColor: branding.primaryColor, background: 'linear-gradient(135deg, #F0F4F8 0%, #E2EAF0 100%)' }}>
           {branding.logoUrl ? (
             <img
               src={branding.logoUrl}
@@ -176,14 +182,14 @@ const MissingCredentialsScreen = () => {
           <h1 className="text-3xl font-black tracking-tighter" style={{ color: branding.primaryColor }}>
             Connect Square
           </h1>
-          <p className="text-xs font-black uppercase tracking-widest mt-2" style={{ color: branding.primaryColor }}>
+          <p className="text-xs font-black uppercase tracking-widest mt-2" style={{ color: branding.secondaryColor }}>
             Pro Access Required
           </p>
         </div>
 
         {/* Content Section */}
-        <div className="p-10" style={{ backgroundColor: 'rgba(138, 186, 211, 0.25)' }}>
-          <p className="text-center text-sm font-bold mb-8" style={{ color: '#374151' }}>
+        <div className="p-10" style={{ backgroundColor: 'rgba(11, 53, 89, 0.05)' }}>
+          <p className="text-center text-sm font-bold mb-8" style={{ color: '#42708C' }}>
             Connect your Square account to access the Pro/Admin dashboard.
           </p>
 
@@ -239,7 +245,7 @@ const MissingCredentialsScreen = () => {
 
           <form onSubmit={handleTokenSubmit} className="space-y-4">
             <div>
-              <label className="block text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: '#374151' }}>
+              <label className="block text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: '#42708C' }}>
                 Square Access Token
               </label>
               <input
@@ -247,7 +253,8 @@ const MissingCredentialsScreen = () => {
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
                 placeholder="Paste your Square access token"
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl font-bold text-sm focus:outline-none focus:border-gray-950"
+                className="w-full px-4 py-3 border-2 rounded-xl font-bold text-sm focus:outline-none"
+                style={{ borderColor: '#C5D5DE', color: '#0B3559' }}
                 disabled={loading}
               />
             </div>
@@ -257,8 +264,8 @@ const MissingCredentialsScreen = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full font-black py-4 rounded-2xl border-4 border-gray-950 uppercase tracking-widest text-sm shadow-lg active:scale-95 transition-all flex items-center justify-center"
-              style={{ backgroundColor: branding.accentColor, color: '#FFFFFF' }}
+              className="w-full font-black py-4 rounded-2xl border-4 uppercase tracking-widest text-sm shadow-lg active:scale-95 transition-all flex items-center justify-center"
+              style={{ backgroundColor: branding.primaryColor, borderColor: branding.primaryColor, color: '#F0F4F8' }}
             >
               {loading ? 'Syncing...' : 'Sync with Token'}
             </button>

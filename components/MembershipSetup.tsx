@@ -66,15 +66,15 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
   };
 
   return (
-    <div className="p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
-      <button data-ui="button" onClick={onBack} className="mb-6 flex items-center text-xs font-black uppercase text-gray-500 hover:text-gray-900 transition-colors"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
-      <h2 className="text-4xl font-black mb-8 text-brand-accent">Memberships</h2>
+    <div className="p-6 min-h-screen" style={{ background: 'linear-gradient(180deg, #F0F4F8 0%, #FFFFFF 100%)' }}>
+      <button data-ui="button" onClick={onBack} className="mb-6 flex items-center text-xs font-black uppercase hover:opacity-80 transition-colors" style={{ color: '#42708C' }}><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
+      <h2 className="text-4xl font-black mb-8" style={{ color: '#0B3559' }}>Memberships</h2>
       <div className="space-y-6">
-        <div className="bg-white p-6 rounded-[32px] border-4 border-gray-100 shadow-sm">
+        <div className="bg-white p-6 rounded-[32px] border-4 shadow-sm" style={{ borderColor: '#E2EAF0' }}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Memberships</p>
-              <p className="text-sm font-black text-gray-900">Offer memberships from projected yearly totals.</p>
+              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#42708C' }}>Memberships</p>
+              <p className="text-sm font-black" style={{ color: '#0B3559' }}>Offer memberships from projected yearly totals.</p>
             </div>
             <Toggle
               checked={membershipConfig.enabled}
@@ -87,10 +87,10 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
         <div className="bg-white p-6 rounded-[32px] border-4 border-gray-100 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Membership tiers</p>
-              <p className="text-sm font-black text-gray-900">Set minimum spend and benefits.</p>
+              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#42708C' }}>Membership tiers</p>
+              <p className="text-sm font-black" style={{ color: '#0B3559' }}>Set minimum spend and benefits.</p>
             </div>
-            <button data-ui="button" onClick={handleAddMembershipTier} className="px-4 py-2 bg-gray-950 text-white font-black rounded-2xl text-xs uppercase tracking-widest">Add tier</button>
+            <button data-ui="button" onClick={handleAddMembershipTier} className="px-4 py-2 font-black rounded-2xl text-xs uppercase tracking-widest" style={{ backgroundColor: '#0B3559', color: '#F0F4F8' }}>Add tier</button>
           </div>
 
           <div className="space-y-4">
@@ -103,7 +103,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
               <div key={tier.id} className="rounded-2xl border-2 border-gray-100 p-4 space-y-4">
                 <div className="grid gap-4 md:grid-cols-3">
                   <div>
-                    <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Tier name</label>
+                    <label className="block text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: '#42708C' }}>Tier name</label>
                     <input
                       data-ui="field"
                       type="text"
@@ -113,7 +113,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
                     />
                   </div>
                   <div>
-                    <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Minimum monthly spend</label>
+                    <label className="block text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: '#42708C' }}>Minimum monthly spend</label>
                     <input
                       data-ui="field"
                       type="number"
@@ -124,7 +124,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
                     />
                   </div>
                   <div>
-                    <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Tier color</label>
+                    <label className="block text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: '#42708C' }}>Tier color</label>
                     <input
                       data-ui="field"
                       type="color"

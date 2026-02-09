@@ -18,10 +18,10 @@ const NAV_ITEMS: { key: Tab; label: string; icon: any }[] = [
 
 export default function BottomNav({ activeTab, onChange }: BottomNavProps) {
   const { branding } = useSettings();
-  const safePrimaryColor = ensureAccessibleColor(branding.primaryColor, '#111827', '#0F4C81');
+  const safePrimaryColor = ensureAccessibleColor(branding.primaryColor, '#111827', '#0B3559');
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 bg-white border-t-4 border-gray-900 z-50 shadow-[0_-10px_20px_rgba(0,0,0,0.1)]">
+    <nav className="fixed bottom-0 inset-x-0 bg-white border-t-4 z-50" style={{ borderColor: '#0B3559', boxShadow: '0 -10px 30px rgba(11, 53, 89, 0.1)' }}>
       <div className="flex justify-around max-w-md mx-auto p-2 pb-6 pt-3">
         {NAV_ITEMS.map(({ key, label, icon: Icon }) => {
           const isActive = activeTab === key;
@@ -30,9 +30,10 @@ export default function BottomNav({ activeTab, onChange }: BottomNavProps) {
             <button
               key={key}
               onClick={() => onChange(key)}
-              className={`flex flex-col items-center justify-center w-full p-1 rounded-lg transition-all ${isActive ? 'bg-blue-50' : ''}`}
+              className={`flex flex-col items-center justify-center w-full p-1 rounded-lg transition-all ${isActive ? '' : ''}`}
               style={{
-                color: isActive ? safePrimaryColor : '#374151',
+                color: isActive ? safePrimaryColor : '#42708C',
+                backgroundColor: isActive ? 'rgba(88, 144, 166, 0.1)' : 'transparent',
               }}
               aria-label={label}
               aria-current={isActive ? 'page' : undefined}
