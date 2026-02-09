@@ -32,7 +32,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
       name: 'New Tier',
       minSpend: 0,
       perks: [],
-      color: '#111827',
+      color: '#0B3559',
     };
     updateMembershipConfig(prev => ({
       ...prev,
@@ -81,10 +81,10 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
               onCheckedChange={handleMembershipToggle}
             />
           </div>
-          <p className="text-xs font-bold text-gray-500 mt-4">Membership pricing is based on the monthly average of the client’s projected yearly spend.</p>
+          <p className="text-xs font-bold mt-4" style={{ color: '#42708C' }}>{"Membership pricing is based on the monthly average of the client\u2019s projected yearly spend."}</p>
         </div>
 
-        <div className="bg-white p-6 rounded-[32px] border-4 border-gray-100 shadow-sm">
+        <div className="bg-white p-6 rounded-[32px] border-4 shadow-sm" style={{ borderColor: '#E2EAF0' }}>
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#42708C' }}>Membership tiers</p>
@@ -95,12 +95,12 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
 
           <div className="space-y-4">
             {membershipConfig.tiers.length === 0 && (
-              <div className="p-4 rounded-[247px] border-2 border-dashed border-gray-200 text-xs font-bold text-gray-400 text-center overflow-hidden">
+              <div className="p-4 rounded-[247px] border-2 border-dashed text-xs font-bold text-center overflow-hidden" style={{ borderColor: '#C5D5DE', color: '#8EB1BF' }}>
                 No membership tiers yet. Add your first tier to get started.
               </div>
             )}
             {membershipConfig.tiers.map((tier) => (
-              <div key={tier.id} className="rounded-2xl border-2 border-gray-100 p-4 space-y-4">
+              <div key={tier.id} className="rounded-2xl border-2 p-4 space-y-4" style={{ borderColor: '#E2EAF0' }}>
                 <div className="grid gap-4 md:grid-cols-3">
                   <div>
                     <label className="block text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: '#42708C' }}>Tier name</label>
@@ -109,7 +109,8 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
                       type="text"
                       value={tier.name}
                       onChange={(event) => handleMembershipTierUpdate(tier.id, { name: event.target.value })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl font-bold text-sm focus:outline-none focus:border-gray-950"
+                      className="w-full px-4 py-3 border-2 rounded-2xl font-bold text-sm focus:outline-none"
+                      style={{ borderColor: '#C5D5DE', color: '#0B3559' }}
                     />
                   </div>
                   <div>
@@ -120,7 +121,8 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
                       min={0}
                       value={tier.minSpend}
                       onChange={(event) => handleMembershipTierUpdate(tier.id, { minSpend: Number(event.target.value) })}
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl font-bold text-sm focus:outline-none focus:border-gray-950"
+                      className="w-full px-4 py-3 border-2 rounded-2xl font-bold text-sm focus:outline-none"
+                      style={{ borderColor: '#C5D5DE', color: '#0B3559' }}
                     />
                   </div>
                   <div>
@@ -137,17 +139,18 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
 
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-gray-500">Perks & benefits</p>
+                    <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: '#42708C' }}>{"Perks & benefits"}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {tier.perks.map((perk, index) => (
-                      <div key={`${tier.id}-perk-${index}`} className="flex items-center gap-2 bg-gray-100 rounded-full px-3 py-1 text-xs font-bold text-gray-700">
+                      <div key={`${tier.id}-perk-${index}`} className="flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold" style={{ backgroundColor: '#E2EAF0', color: '#42708C' }}>
                         <span>{perk}</span>
                         <button
                           data-ui="button"
                           type="button"
                           onClick={() => handleRemoveTierPerk(tier.id, index)}
-                          className="text-gray-400 hover:text-gray-900"
+                          className="hover:opacity-70"
+                          style={{ color: '#8EB1BF' }}
                         >
                           Remove
                         </button>
@@ -161,13 +164,15 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
                       value={perkDrafts[tier.id] || ''}
                       onChange={(event) => setPerkDrafts(prev => ({ ...prev, [tier.id]: event.target.value }))}
                       placeholder="Add a perk"
-                      className="flex-1 min-w-[200px] px-4 py-3 border-2 border-gray-200 rounded-2xl font-bold text-sm focus:outline-none focus:border-gray-950"
+                      className="flex-1 min-w-[200px] px-4 py-3 border-2 rounded-2xl font-bold text-sm focus:outline-none"
+                      style={{ borderColor: '#C5D5DE', color: '#0B3559' }}
                     />
                     <button
                       data-ui="button"
                       type="button"
                       onClick={() => handleAddTierPerk(tier.id)}
-                      className="px-4 py-3 bg-gray-950 text-white font-black rounded-2xl text-xs uppercase tracking-widest"
+                      className="px-4 py-3 font-black rounded-2xl text-xs uppercase tracking-widest"
+                      style={{ backgroundColor: '#0B3559', color: '#F0F4F8' }}
                     >
                       Add perk
                     </button>
@@ -178,7 +183,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
           </div>
         </div>
 
-        <button data-ui="button" onClick={saveAll} className="w-full py-4 bg-gray-950 text-white font-black rounded-2xl">SAVE MEMBERSHIP SETTINGS</button>
+        <button data-ui="button" onClick={saveAll} className="w-full py-4 font-black rounded-2xl" style={{ backgroundColor: '#0B3559', color: '#F0F4F8' }}>SAVE MEMBERSHIP SETTINGS</button>
       </div>
     </div>
   );

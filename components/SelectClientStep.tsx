@@ -28,16 +28,15 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
 
   const isAdmin = user?.role === 'admin';
 
-  // ✅ NORMALIZE DB ROWS → UI SHAPE
   const clients: Client[] = useMemo(() => {
     return (propClients || []).map((c: any) => ({
       id: c.id,
       name: c.name,
       email: c.email,
       phone: c.phone,
-      avatarUrl: c.avatar_url, // FIX
-      source: 'square',        // FIX
-      historicalData: [],      // Ensure required field from Client type is present
+      avatarUrl: c.avatar_url,
+      source: 'square',
+      historicalData: [],
     }));
   }, [propClients]);
 
@@ -79,16 +78,16 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
     return (
       <div className="flex flex-col h-full p-4 pb-12 bg-white">
         <div className="text-center p-4">
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">
+          <h1 className="text-2xl font-bold mb-1" style={{ color: '#0B3559' }}>
             Create New Client
           </h1>
-          <p className="text-sm" style={{ color: '#374151' }}>
+          <p className="text-sm" style={{ color: '#42708C' }}>
             This client will be saved to your database.
           </p>
         </div>
         <form onSubmit={handleCreateClient} className="p-4 space-y-4">
           <div>
-            <label className="block text-xs font-bold mb-1" style={{ color: '#374151' }}>
+            <label className="block text-xs font-bold mb-1" style={{ color: '#42708C' }}>
               Full Name
             </label>
             <input
@@ -96,11 +95,12 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
               value={newName}
               onChange={e => setNewName(e.target.value)}
               required
-              className="w-full p-3 border border-gray-300 rounded-lg outline-none focus:border-brand-accent"
+              className="w-full p-3 border rounded-lg outline-none focus:border-[#5890A6]"
+              style={{ borderColor: '#C5D5DE', color: '#0B3559' }}
             />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1" style={{ color: '#374151' }}>
+            <label className="block text-xs font-bold mb-1" style={{ color: '#42708C' }}>
               Email Address
             </label>
             <input
@@ -108,7 +108,8 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
               value={newEmail}
               onChange={e => setNewEmail(e.target.value)}
               required
-              className="w-full p-3 border border-gray-300 rounded-lg outline-none focus:border-brand-accent"
+              className="w-full p-3 border rounded-lg outline-none focus:border-[#5890A6]"
+              style={{ borderColor: '#C5D5DE', color: '#0B3559' }}
             />
           </div>
           {createError && (
@@ -124,7 +125,7 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
                 color: ensureAccessibleColor(
                   '#FFFFFF',
                   branding.secondaryColor,
-                  '#1F2937'
+                  '#F0F4F8'
                 ),
               }}
             >
@@ -138,7 +139,7 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
               type="button"
               onClick={() => setIsCreating(false)}
               className="w-full font-bold py-2"
-              style={{ color: '#374151' }}
+              style={{ color: '#42708C' }}
             >
               Cancel
             </button>
@@ -150,8 +151,8 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
 
   return (
     <div className="flex flex-col h-full pb-12">
-      <div className="p-4 bg-white border-b border-gray-100">
-        <h1 className="text-2xl font-bold text-center mb-2 tracking-tighter text-gray-900">
+      <div className="p-4 bg-white border-b" style={{ borderColor: '#E2EAF0' }}>
+        <h1 className="text-2xl font-bold text-center mb-2 tracking-tighter" style={{ color: '#0B3559' }}>
           Select Client
         </h1>
         <div className="relative">
@@ -160,9 +161,10 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
             placeholder="Search clients..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="w-full p-3 pl-10 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:bg-white focus:border-brand-accent transition-all"
+            className="w-full p-3 pl-10 border rounded-xl outline-none focus:bg-white focus:border-[#5890A6] transition-all"
+            style={{ backgroundColor: '#F0F4F8', borderColor: '#C5D5DE', color: '#0B3559' }}
           />
-          <div className="absolute left-3 top-3.5" style={{ color: '#374151' }}>
+          <div className="absolute left-3 top-3.5" style={{ color: '#42708C' }}>
             <UsersIcon className="w-5 h-5" />
           </div>
         </div>
@@ -178,7 +180,7 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
               color: ensureAccessibleColor(
                 '#FFFFFF',
                 branding.accentColor,
-                '#1F2937'
+                '#F0F4F8'
               ),
             }}
           >
@@ -189,27 +191,29 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
 
         {filteredClients.length === 0 ? (
           <div className="text-center py-10">
-            <p className="font-bold" style={{ color: '#374151' }}>No clients found.</p>
+            <p className="font-bold" style={{ color: '#42708C' }}>No clients found.</p>
           </div>
         ) : (
           filteredClients.map(client => (
             <button
               key={client.id}
               onClick={() => onSelect(client)}
-              className="w-full bg-white p-3 rounded-xl shadow-sm border border-gray-100 flex items-center hover:border-gray-300 transition-all active:scale-[0.98]"
+              className="w-full bg-white p-3 rounded-xl shadow-sm border flex items-center transition-all active:scale-[0.98] elevated-card"
+              style={{ borderColor: '#E2EAF0' }}
             >
               <img
                 src={client.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.name)}&background=random`}
                 alt={client.name}
-                className="w-12 h-12 rounded-full mr-4 border border-gray-100"
+                className="w-12 h-12 rounded-full mr-4 border"
+                style={{ borderColor: '#E2EAF0' }}
               />
               <div className="flex-grow text-left">
-                <h3 className="font-bold text-gray-900 leading-tight">{client.name}</h3>
-                <p className="text-[10px] font-black uppercase tracking-widest mt-0.5" style={{ color: '#6B7280' }}>
+                <h3 className="font-bold leading-tight" style={{ color: '#0B3559' }}>{client.name}</h3>
+                <p className="text-[10px] font-black uppercase tracking-widest mt-0.5" style={{ color: '#8EB1BF' }}>
                   Source: {client.source}
                 </p>
               </div>
-              <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-gray-100" style={{ color: '#374151' }}>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F0F4F8', color: '#42708C' }}>
                   <PlusIcon className="w-4 h-4" />
               </div>
             </button>
@@ -217,11 +221,11 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
         )}
       </div>
 
-      <div className="p-4 bg-white border-t border-gray-100">
+      <div className="p-4 bg-white border-t" style={{ borderColor: '#E2EAF0' }}>
         <button
           onClick={onBack}
-          className="w-full bg-gray-100 font-bold py-3 rounded-full hover:bg-gray-200 transition-colors"
-          style={{ color: '#374151' }}
+          className="w-full font-bold py-3 rounded-full transition-colors"
+          style={{ backgroundColor: '#E2EAF0', color: '#42708C' }}
         >
           Cancel
         </button>

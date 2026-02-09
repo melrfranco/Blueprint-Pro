@@ -62,7 +62,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
     const nextLevel: StylistLevel = {
       id: `lvl_${Date.now()}`,
       name: 'New Tier',
-      color: '#111827',
+      color: '#0B3559',
       order: levels.length + 1,
       defaultPermissions: fallbackPermissions,
     };
@@ -165,21 +165,21 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
   const renderStylists = () => (
     <div className="space-y-4 pb-8">
       {stylists.length === 0 ? (
-        <div className="p-4 text-center text-gray-500 text-sm font-bold bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+        <div className="p-4 text-center text-sm font-bold rounded-2xl border-2 border-dashed" style={{ color: '#42708C', backgroundColor: '#F0F4F8', borderColor: '#C5D5DE' }}>
           No stylists on your team yet. Invite one to get started.
         </div>
       ) : (
         stylists.map((stylist) => {
           const isEditing = editingStylist?.id === stylist.id;
-          const levelColor = levels.find(l => l.id === stylist.levelId)?.color || '#111827';
+          const levelColor = levels.find(l => l.id === stylist.levelId)?.color || '#0B3559';
 
           return (
-            <div key={stylist.id} className="rounded-2xl border-2 border-gray-100 p-4 bg-white">
+            <div key={stylist.id} className="rounded-2xl border-2 p-4 bg-white" style={{ borderColor: '#E2EAF0' }}>
               {isEditing ? (
                 <>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Level</label>
+                      <label className="block text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: '#42708C' }}>Level</label>
                       <select
                         data-ui="field"
                         value={stylist.levelId || ''}
@@ -187,7 +187,8 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
                           const newStylist = { ...stylist, levelId: e.target.value };
                           setEditingStylist(newStylist);
                         }}
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl font-bold text-sm focus:outline-none focus:border-gray-950"
+                        className="w-full px-4 py-3 border-2 rounded-2xl font-bold text-sm focus:outline-none"
+                        style={{ borderColor: '#C5D5DE', color: '#0B3559' }}
                       >
                         {levels.map((level) => (
                           <option key={level.id} value={level.id}>
@@ -198,7 +199,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
                     </div>
 
                     <div className="space-y-3">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-gray-500">Custom permissions</p>
+                      <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: '#42708C' }}>Custom permissions</p>
                       <div className="space-y-2">
                         {levelPermissionKeys.map((permKey) => {
                           const levelPerms = resolveLevelDefaults(stylist.levelId || '');
@@ -208,7 +209,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
 
                           return (
                             <div key={permKey} className="flex items-center justify-between">
-                              <label className="text-xs font-bold text-gray-700 capitalize">
+                              <label className="text-xs font-bold capitalize" style={{ color: '#42708C' }}>
                                 {permKey.replace(/([A-Z])/g, ' $1').trim()}
                               </label>
                               <Toggle
@@ -239,14 +240,16 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
                         data-ui="button"
                         onClick={() => persistStylistUpdates(editingStylist!)}
                         disabled={stylistSaveLoading}
-                        className="flex-1 px-4 py-3 bg-gray-950 text-white font-black rounded-2xl text-xs uppercase tracking-widest disabled:opacity-50"
+                        className="flex-1 px-4 py-3 font-black rounded-2xl text-xs uppercase tracking-widest disabled:opacity-50"
+                        style={{ backgroundColor: '#0B3559', color: '#F0F4F8' }}
                       >
                         {stylistSaveLoading ? 'Saving...' : 'Save'}
                       </button>
                       <button
                         data-ui="button"
                         onClick={() => setEditingStylist(null)}
-                        className="flex-1 px-4 py-3 bg-gray-100 text-gray-950 font-black rounded-2xl text-xs uppercase tracking-widest"
+                        className="flex-1 px-4 py-3 font-black rounded-2xl text-xs uppercase tracking-widest"
+                        style={{ backgroundColor: '#E2EAF0', color: '#0B3559' }}
                       >
                         Cancel
                       </button>
@@ -257,8 +260,8 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
                 <>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex-1">
-                      <p className="font-black text-gray-950 text-sm">{stylist.name}</p>
-                      <p className="text-xs text-gray-500 font-bold">{stylist.email}</p>
+                      <p className="font-black text-sm" style={{ color: '#0B3559' }}>{stylist.name}</p>
+                      <p className="text-xs font-bold" style={{ color: '#42708C' }}>{stylist.email}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="px-3 py-1.5 rounded-full text-xs font-black" style={{ backgroundColor: levelColor, color: '#fff' }}>
@@ -267,14 +270,15 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
                       <button
                         data-ui="button"
                         onClick={() => setEditingStylist(stylist)}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="p-2 rounded-lg transition-colors hover:opacity-70"
+                        style={{ color: '#42708C' }}
                       >
-                        <ChevronRightIcon className="w-4 h-4 text-gray-500" />
+                        <ChevronRightIcon className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
                   {stylist.permissionOverrides && Object.keys(stylist.permissionOverrides).length > 0 && (
-                    <p className="text-[9px] text-gray-400 font-bold">
+                    <p className="text-[9px] font-bold" style={{ color: '#8EB1BF' }}>
                       {Object.keys(stylist.permissionOverrides).length} custom permission(s)
                     </p>
                   )}
@@ -290,25 +294,26 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
   const renderLevels = () => (
     <div className="space-y-4 pb-8">
       {levels.length === 0 ? (
-        <div className="p-4 text-center text-gray-500 text-sm font-bold bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+        <div className="p-4 text-center text-sm font-bold rounded-2xl border-2 border-dashed" style={{ color: '#42708C', backgroundColor: '#F0F4F8', borderColor: '#C5D5DE' }}>
           No access levels yet. Create one to set up team permissions.
         </div>
       ) : (
         levels.map((level) => (
-          <div key={level.id} className="rounded-2xl border-2 border-gray-100 p-4 bg-white space-y-4">
+          <div key={level.id} className="rounded-2xl border-2 p-4 bg-white space-y-4" style={{ borderColor: '#E2EAF0' }}>
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Level name</label>
+                <label className="block text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: '#42708C' }}>Level name</label>
                 <input
                   data-ui="field"
                   type="text"
                   value={level.name}
                   onChange={(e) => handleLevelUpdate(level.id, { name: e.target.value })}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl font-bold text-sm focus:outline-none focus:border-gray-950"
+                  className="w-full px-4 py-3 border-2 rounded-2xl font-bold text-sm focus:outline-none"
+                  style={{ borderColor: '#C5D5DE', color: '#0B3559' }}
                 />
               </div>
               <div>
-                <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Color</label>
+                <label className="block text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: '#42708C' }}>Color</label>
                 <input
                   data-ui="field"
                   type="color"
@@ -320,11 +325,11 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
             </div>
 
             <div className="space-y-3">
-              <p className="text-[9px] font-black uppercase tracking-widest text-gray-500">Default permissions</p>
+              <p className="text-[9px] font-black uppercase tracking-widest" style={{ color: '#42708C' }}>Default permissions</p>
               <div className="space-y-2">
                 {levelPermissionKeys.map((permKey) => (
                   <div key={permKey} className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-gray-700 capitalize">
+                    <label className="text-xs font-bold capitalize" style={{ color: '#42708C' }}>
                       {permKey.replace(/([A-Z])/g, ' $1').trim()}
                     </label>
                     <Toggle
@@ -342,22 +347,22 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
   );
 
   return (
-    <div className="p-6 bg-gradient-to-b from-gray-50 to-white min-h-screen">
-      <button data-ui="button" onClick={onBack} className="mb-6 flex items-center text-xs font-black uppercase text-gray-500 hover:text-gray-900 transition-colors">
+    <div className="p-6 min-h-screen" style={{ background: 'linear-gradient(180deg, #F0F4F8 0%, #FFFFFF 100%)' }}>
+      <button data-ui="button" onClick={onBack} className="mb-6 flex items-center text-xs font-black uppercase hover:opacity-80 transition-colors" style={{ color: '#42708C' }}>
         <ChevronLeftIcon className="w-4 h-4 mr-1" />
         Back
       </button>
 
-      <h2 className="text-4xl font-black mb-8 text-brand-accent">Team Access</h2>
+      <h2 className="text-4xl font-black mb-8" style={{ color: '#0B3559' }}>Team Access</h2>
 
       <div className="space-y-8">
         <div>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Access Levels</p>
-              <p className="text-sm font-black text-gray-900">Define permission tiers for team members.</p>
+              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#42708C' }}>Access Levels</p>
+              <p className="text-sm font-black" style={{ color: '#0B3559' }}>Define permission tiers for team members.</p>
             </div>
-            <button data-ui="button" onClick={handleAddLevel} className="px-4 py-2 bg-gray-950 text-white font-black rounded-2xl text-xs uppercase tracking-widest">
+            <button data-ui="button" onClick={handleAddLevel} className="px-4 py-2 font-black rounded-2xl text-xs uppercase tracking-widest" style={{ backgroundColor: '#0B3559', color: '#F0F4F8' }}>
               Add level
             </button>
           </div>
@@ -367,45 +372,48 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
         <div>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">Team Members</p>
-              <p className="text-sm font-black text-gray-900">Invite and manage your team.</p>
+              <p className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#42708C' }}>Team Members</p>
+              <p className="text-sm font-black" style={{ color: '#0B3559' }}>Invite and manage your team.</p>
             </div>
-            <button data-ui="button" onClick={() => setShowInviteForm(!showInviteForm)} className="px-4 py-2 bg-gray-950 text-white font-black rounded-2xl text-xs uppercase tracking-widest">
+            <button data-ui="button" onClick={() => setShowInviteForm(!showInviteForm)} className="px-4 py-2 font-black rounded-2xl text-xs uppercase tracking-widest" style={{ backgroundColor: '#0B3559', color: '#F0F4F8' }}>
               {showInviteForm ? 'Cancel' : 'Invite'}
             </button>
           </div>
 
           {showInviteForm && (
-            <form onSubmit={handleInviteStylist} className="mb-4 p-4 bg-white border-2 border-gray-100 rounded-2xl space-y-4">
+            <form onSubmit={handleInviteStylist} className="mb-4 p-4 bg-white border-2 rounded-2xl space-y-4" style={{ borderColor: '#E2EAF0' }}>
               <div>
-                <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Name</label>
+                <label className="block text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: '#42708C' }}>Name</label>
                 <input
                   data-ui="field"
                   type="text"
                   value={inviteName}
                   onChange={(e) => setInviteName(e.target.value)}
                   placeholder="Full name"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl font-bold text-sm focus:outline-none focus:border-gray-950"
+                  className="w-full px-4 py-3 border-2 rounded-2xl font-bold text-sm focus:outline-none"
+                  style={{ borderColor: '#C5D5DE', color: '#0B3559' }}
                 />
               </div>
               <div>
-                <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Email</label>
+                <label className="block text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: '#42708C' }}>Email</label>
                 <input
                   data-ui="field"
                   type="email"
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="email@example.com"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl font-bold text-sm focus:outline-none focus:border-gray-950"
+                  className="w-full px-4 py-3 border-2 rounded-2xl font-bold text-sm focus:outline-none"
+                  style={{ borderColor: '#C5D5DE', color: '#0B3559' }}
                 />
               </div>
               <div>
-                <label className="block text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Access Level</label>
+                <label className="block text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: '#42708C' }}>Access Level</label>
                 <select
                   data-ui="field"
                   value={inviteLevelId}
                   onChange={(e) => setInviteLevelId(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-2xl font-bold text-sm focus:outline-none focus:border-gray-950"
+                  className="w-full px-4 py-3 border-2 rounded-2xl font-bold text-sm focus:outline-none"
+                  style={{ borderColor: '#C5D5DE', color: '#0B3559' }}
                 >
                   {levels.map((level) => (
                     <option key={level.id} value={level.id}>
@@ -418,7 +426,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
               {inviteError && <p className="text-xs text-red-600 font-bold">{inviteError}</p>}
               {inviteStatus && <p className="text-xs text-green-600 font-bold">{inviteStatus}</p>}
 
-              <button data-ui="button" type="submit" disabled={inviteLoading} className="w-full px-4 py-3 bg-gray-950 text-white font-black rounded-2xl text-xs uppercase tracking-widest disabled:opacity-50">
+              <button data-ui="button" type="submit" disabled={inviteLoading} className="w-full px-4 py-3 font-black rounded-2xl text-xs uppercase tracking-widest disabled:opacity-50" style={{ backgroundColor: '#0B3559', color: '#F0F4F8' }}>
                 {inviteLoading ? 'Sending...' : 'Send invite'}
               </button>
             </form>
@@ -427,7 +435,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
           {renderStylists()}
         </div>
 
-        <button data-ui="button" onClick={saveAll} className="w-full py-4 bg-gray-950 text-white font-black rounded-2xl">
+        <button data-ui="button" onClick={saveAll} className="w-full py-4 font-black rounded-2xl" style={{ backgroundColor: '#0B3559', color: '#F0F4F8' }}>
           SAVE ALL SETTINGS
         </button>
       </div>
