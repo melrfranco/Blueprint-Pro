@@ -48,28 +48,28 @@ const SetDatesStep: React.FC<SetDatesStepProps> = ({ selectedServices, planDetai
 
   const getButtonClass = (isSelected: boolean, isDisabled: boolean) => {
       let base = "p-3 rounded-lg transition-all ";
-      if (isDisabled) return base + "cursor-not-allowed";
+      if (isDisabled) return base + "cursor-not-allowed bg-surface-muted text-frost border border-surface-border";
       if (isSelected) return base + "shadow-md";
-      return base + "bg-white shadow-sm";
+      return base + "bg-surface shadow-sm text-steel border border-surface-border";
   };
 
   const getButtonStyle = (isSelected: boolean, isDisabled: boolean) => {
-      if (isDisabled) return { backgroundColor: '#E2EAF0', color: '#8EB1BF', border: '1px solid #C5D5DE' };
+      if (isDisabled) return {};
       if (isSelected) return { backgroundColor: branding.secondaryColor, color: ensureAccessibleColor('#FFFFFF', branding.secondaryColor, '#F0F4F8'), borderColor: branding.secondaryColor };
-      return { color: '#42708C', border: '1px solid #C5D5DE' };
+      return {};
   };
 
   return (
     <div className="flex flex-col h-full p-4 pb-12">
       <div className="text-center p-4">
-        <div className="relative w-full h-2 mb-4 rounded-full" style={{ backgroundColor: '#E2EAF0' }}><div className="absolute top-0 left-0 h-2 bg-brand-secondary rounded-full" style={{width: '33%'}}></div></div>
-        <h1 className="text-2xl font-bold" style={{ color: '#0B3559' }}>First Service Date</h1>
+        <div className="relative w-full h-2 mb-4 rounded-full bg-surface-muted"><div className="absolute top-0 left-0 h-2 bg-brand-secondary rounded-full" style={{width: '33%'}}></div></div>
+        <h1 className="text-2xl font-bold text-navy">First Service Date</h1>
       </div>
       
       <div className="flex-grow overflow-y-auto p-4 space-y-6">
         {selectedServices.map(service => (
-          <div key={service.id} className="p-4 rounded-xl border shadow-sm" style={{ backgroundColor: '#F0F4F8', borderColor: '#C5D5DE' }}>
-            <h3 className="font-bold text-lg mb-3" style={{ color: '#0B3559' }}>{service.name}</h3>
+          <div key={service.id} className="p-4 rounded-xl border border-surface-border shadow-sm bg-surface-subtle">
+            <h3 className="font-bold text-lg mb-3 text-navy">{service.name}</h3>
             
             <div className="grid grid-cols-2 gap-3 text-sm font-bold">
                 <button 
@@ -99,8 +99,8 @@ const SetDatesStep: React.FC<SetDatesStepProps> = ({ selectedServices, planDetai
 
              <div className="mt-3 flex items-center space-x-2 text-sm">
                 <div 
-                  className={`p-2 rounded-lg flex-grow flex items-center justify-center border transition-all ${selections[service.id] === 'offset' ? 'shadow-md' : 'bg-white shadow-sm'}`}
-                  style={selections[service.id] === 'offset' ? { backgroundColor: branding.secondaryColor, color: ensureAccessibleColor('#FFFFFF', branding.secondaryColor, '#F0F4F8'), borderColor: branding.secondaryColor } : { borderColor: '#C5D5DE', color: '#42708C' }}
+                  className={`p-2 rounded-lg flex-grow flex items-center justify-center border transition-all ${selections[service.id] === 'offset' ? 'shadow-md' : 'bg-surface shadow-sm border-surface-border text-steel'}`}
+                  style={selections[service.id] === 'offset' ? { backgroundColor: branding.secondaryColor, color: ensureAccessibleColor('#FFFFFF', branding.secondaryColor, '#F0F4F8'), borderColor: branding.secondaryColor } : {}}
                 >
                     <label htmlFor={`offset-${service.id}`} className="font-bold mr-2">In</label>
                     <input 
@@ -108,8 +108,7 @@ const SetDatesStep: React.FC<SetDatesStepProps> = ({ selectedServices, planDetai
                         id={`offset-${service.id}`} 
                         value={offsets[service.id] || ''} 
                         onChange={e => handleOffsetChange(service.id, parseInt(e.target.value, 10) || 0)} 
-                        className="w-16 p-2 border rounded text-center font-bold"
-                        style={{ borderColor: '#C5D5DE', color: '#0B3559' }}
+                        className="w-16 p-2 border border-surface-border rounded text-center font-bold text-navy"
                         placeholder="0"
                     />
                     <span className="ml-2 font-bold">weeks</span>
@@ -117,22 +116,22 @@ const SetDatesStep: React.FC<SetDatesStepProps> = ({ selectedServices, planDetai
             </div>
 
             <div className="mt-3">
-                <label htmlFor={`date-${service.id}`} className="block font-bold mb-1 text-xs uppercase" style={{ color: '#42708C' }}>Or Select Date:</label>
+                <label htmlFor={`date-${service.id}`} className="block font-bold mb-1 text-xs uppercase text-steel">Or Select Date:</label>
                 <input 
                     type="date" 
                     id={`date-${service.id}`} 
                     onChange={e => handleDateChange(service.id, new Date(e.target.value), 'custom')} 
-                    className={`w-full p-3 border rounded-lg font-medium shadow-sm`}
-                    style={selections[service.id] === 'custom' ? { borderColor: branding.secondaryColor, color: '#0B3559' } : { borderColor: '#C5D5DE', color: '#0B3559' }}
+                    className="w-full p-3 border rounded-lg font-medium shadow-sm text-navy"
+                    style={selections[service.id] === 'custom' ? { borderColor: branding.secondaryColor } : {}}
                 />
             </div>
           </div>
         ))}
       </div>
 
-      <div className="p-4 mt-auto space-y-3 bg-white border-t" style={{ borderColor: '#E2EAF0' }}>
+      <div className="p-4 mt-auto space-y-3 bg-surface border-t border-surface-muted">
         <button onClick={() => onNext(localDetails)} disabled={isNextDisabled} className="w-full font-bold py-4 px-4 rounded-full shadow-lg transition-transform transform hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed" style={{ backgroundColor: branding.primaryColor, color: ensureAccessibleColor('#FFFFFF', branding.primaryColor, '#F0F4F8') }}>Next Step</button>
-        <button onClick={onBack} className="w-full bg-transparent font-bold py-2 px-4" style={{ color: '#42708C' }}>Back</button>
+        <button onClick={onBack} className="w-full bg-transparent font-bold py-2 px-4 text-steel">Back</button>
       </div>
     </div>
   );

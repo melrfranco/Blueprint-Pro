@@ -157,14 +157,11 @@ const MissingCredentialsScreen = () => {
       style={{ backgroundColor: branding.primaryColor }}
     >
       {/* Blueprint grid background */}
-      <div className="absolute inset-0 opacity-10" style={{
-        backgroundImage: 'linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)',
-        backgroundSize: '20px 20px',
-      }} />
+      <div className="absolute inset-0 opacity-10 bp-grid-bg" />
 
-      <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-md overflow-hidden relative border-4 depth-3" style={{ borderColor: branding.primaryColor }}>
+      <div className="bg-surface rounded-[40px] shadow-2xl w-full max-w-md overflow-hidden relative border-4 depth-3" style={{ borderColor: branding.primaryColor }}>
         {/* Header Section with Branding */}
-        <div className="p-10 text-center border-b-4" style={{ borderColor: branding.primaryColor, background: 'linear-gradient(135deg, #F0F4F8 0%, #E2EAF0 100%)' }}>
+        <div className="p-10 text-center border-b-4 bp-page-header" style={{ borderColor: branding.primaryColor }}>
           {branding.logoUrl ? (
             <img
               src={branding.logoUrl}
@@ -179,17 +176,17 @@ const MissingCredentialsScreen = () => {
               <SettingsIcon className="w-10 h-10 text-white" />
             </div>
           )}
-          <h1 className="text-3xl font-black tracking-tighter" style={{ color: branding.primaryColor }}>
+          <h1 className="text-3xl font-black tracking-tighter bp-title" style={{ color: branding.primaryColor }}>
             Connect Square
           </h1>
-          <p className="text-xs font-black uppercase tracking-widest mt-2" style={{ color: branding.secondaryColor }}>
+          <p className="text-xs font-black uppercase tracking-widest mt-2 bp-subtitle">
             Pro Access Required
           </p>
         </div>
 
         {/* Content Section */}
-        <div className="p-10" style={{ backgroundColor: 'rgba(11, 53, 89, 0.05)' }}>
-          <p className="text-center text-sm font-bold mb-8" style={{ color: '#42708C' }}>
+        <div className="p-10 bg-navy/5">
+          <p className="text-center text-sm font-bold mb-8 bp-text-secondary">
             Connect your Square account to access the Pro/Admin dashboard.
           </p>
 
@@ -205,31 +202,39 @@ const MissingCredentialsScreen = () => {
           )}
 
           {(oauthDebug || oauthDebugError) && (
-            <div className="mb-6 rounded-2xl border-2 border-gray-200 bg-white/70 p-4 text-xs font-semibold text-gray-700">
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">OAuth Debug Info</p>
+            <div className="mb-6 rounded-2xl border-2 border-surface-border bg-white/70 p-4 text-xs font-semibold text-steel">
+              <p className="text-[10px] font-black uppercase tracking-widest bp-label">OAuth Debug Info</p>
               {oauthDebugError ? (
                 <p className="mt-2 text-red-600">{oauthDebugError}</p>
               ) : (
                 <div className="mt-2 space-y-2">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Request Origin</p>
-                    <p className="break-all font-mono text-[11px] text-gray-800">{oauthDebug?.requestOrigin || 'Not resolved'}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest bp-label">Request Origin</p>
+                    <p className="break-all font-mono text-[11px] bp-text">
+                      {oauthDebug?.requestOrigin || 'Not resolved'}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Resolved Redirect</p>
-                    <p className="break-all font-mono text-[11px] text-gray-800">{oauthDebug?.resolvedRedirectUri || 'Not resolved'}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest bp-label">Resolved Redirect</p>
+                    <p className="break-all font-mono text-[11px] bp-text">
+                      {oauthDebug?.resolvedRedirectUri || 'Not resolved'}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Env Redirect</p>
-                    <p className="break-all font-mono text-[11px] text-gray-800">{squareRedirectUri || 'Not set'}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest bp-label">Env Redirect</p>
+                    <p className="break-all font-mono text-[11px] bp-text">
+                      {squareRedirectUri || 'Not set'}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Square Environment</p>
-                    <p className="font-mono text-[11px] text-gray-800">{oauthDebug?.squareEnv || 'Unknown'}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-widest bp-label">Square Environment</p>
+                    <p className="font-mono text-[11px] bp-text">
+                      {oauthDebug?.squareEnv || 'Unknown'}
+                    </p>
                   </div>
                   {oauthDebug?.ok === false && (
                     <p className="text-[11px] font-bold text-red-600">
-                      Missing config: App ID {oauthDebug?.hasAppId ? 'OK' : 'Missing'}, Redirect URI {oauthDebug?.hasRedirectUri ? 'OK' : 'Missing'}
+                      {"Missing config: App ID "}{oauthDebug?.hasAppId ? 'OK' : 'Missing'}{", Redirect URI "}{oauthDebug?.hasRedirectUri ? 'OK' : 'Missing'}
                     </p>
                   )}
                 </div>
@@ -238,14 +243,14 @@ const MissingCredentialsScreen = () => {
           )}
 
           <div className="flex items-center gap-3 mb-6">
-            <div className="flex-1" style={{ height: '2px', backgroundColor: branding.primaryColor }}></div>
-            <span className="text-xs font-semibold" style={{ color: '#374151' }}>or</span>
-            <div className="flex-1" style={{ height: '2px', backgroundColor: branding.primaryColor }}></div>
+            <div className="flex-1 h-0.5" style={{ backgroundColor: branding.primaryColor }} />
+            <span className="text-xs font-semibold bp-text-secondary">or</span>
+            <div className="flex-1 h-0.5" style={{ backgroundColor: branding.primaryColor }} />
           </div>
 
           <form onSubmit={handleTokenSubmit} className="space-y-4">
             <div>
-              <label className="block text-[9px] font-black uppercase tracking-widest mb-2" style={{ color: '#42708C' }}>
+              <label className="block text-[9px] font-black uppercase tracking-widest mb-2 bp-label">
                 Square Access Token
               </label>
               <input
@@ -253,8 +258,7 @@ const MissingCredentialsScreen = () => {
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
                 placeholder="Paste your Square access token"
-                className="w-full px-4 py-3 border-2 rounded-xl font-bold text-sm focus:outline-none"
-                style={{ borderColor: '#C5D5DE', color: '#0B3559' }}
+                className="w-full px-4 py-3 rounded-xl font-bold text-sm bp-input"
                 disabled={loading}
               />
             </div>
@@ -264,8 +268,8 @@ const MissingCredentialsScreen = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full font-black py-4 rounded-2xl border-4 uppercase tracking-widest text-sm shadow-lg active:scale-95 transition-all flex items-center justify-center"
-              style={{ backgroundColor: branding.primaryColor, borderColor: branding.primaryColor, color: '#F0F4F8' }}
+              className="w-full font-black py-4 rounded-2xl border-4 uppercase tracking-widest text-sm shadow-lg active:scale-95 transition-all flex items-center justify-center bp-btn-primary"
+              style={{ backgroundColor: branding.primaryColor, borderColor: branding.primaryColor }}
             >
               {loading ? 'Syncing...' : 'Sync with Token'}
             </button>

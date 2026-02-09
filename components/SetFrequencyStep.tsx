@@ -36,31 +36,30 @@ const SetFrequencyStep: React.FC<SetFrequencyStepProps> = ({ selectedServices, p
   return (
     <div className="flex flex-col h-full p-4 pb-12">
       <div className="text-center p-4">
-        <div className="relative w-full h-2 mb-4 rounded-full" style={{ backgroundColor: '#E2EAF0' }}>
+        <div className="relative w-full h-2 mb-4 rounded-full bg-surface-muted">
             <div className="absolute top-0 left-0 h-2 bg-brand-primary rounded-full" style={{width: '66%'}}></div>
         </div>
-        <h1 className="text-2xl font-bold" style={{ color: '#0B3559' }}>Service Frequency</h1>
-        <p className="text-sm" style={{ color: '#42708C' }}>How often should these repeat?</p>
+        <h1 className="text-2xl font-bold text-navy">Service Frequency</h1>
+        <p className="text-sm text-steel">How often should these repeat?</p>
       </div>
       
       <div className="flex-grow overflow-y-auto p-4 space-y-4">
         {selectedServices.map(service => (
-          <div key={service.id} className="p-4 rounded-lg border" style={{ backgroundColor: '#F0F4F8', borderColor: '#C5D5DE' }}>
+          <div key={service.id} className="p-4 rounded-lg border border-surface-border bg-surface-subtle">
             <div className="flex justify-between items-baseline">
-                <h3 className="font-bold text-lg mb-3" style={{ color: '#0B3559' }}>{service.name}</h3>
-                <span className="text-xs" style={{ color: '#8EB1BF' }}>Starts: {formatDate(localDetails[service.id]?.firstDate)}</span>
+                <h3 className="font-bold text-lg mb-3 text-navy">{service.name}</h3>
+                <span className="text-xs text-frost">Starts: {formatDate(localDetails[service.id]?.firstDate)}</span>
             </div>
             <div className="flex items-center space-x-2">
-                <span className="font-medium" style={{ color: '#42708C' }}>Every</span>
+                <span className="font-medium text-steel">Every</span>
                  <input 
                     type="number" 
                     value={localDetails[service.id]?.frequency || ''} 
                     onChange={(e) => handleFrequencyChange(service.id, parseInt(e.target.value, 10))}
-                    className="w-20 p-2 border rounded text-center font-bold text-lg bg-white"
-                    style={{ borderColor: '#C5D5DE', color: '#0B3559' }}
+                    className="w-20 p-2 border border-surface-border rounded text-center font-bold text-lg bg-surface text-navy"
                     placeholder="Wks"
                 />
-                <span className="font-medium" style={{ color: '#42708C' }}>weeks</span>
+                <span className="font-medium text-steel">weeks</span>
             </div>
           </div>
         ))}
@@ -77,8 +76,7 @@ const SetFrequencyStep: React.FC<SetFrequencyStepProps> = ({ selectedServices, p
         </button>
         <button
           onClick={onBack}
-          className="w-full bg-transparent font-semibold py-2 px-4"
-          style={{ color: '#42708C' }}
+          className="w-full bg-transparent font-semibold py-2 px-4 text-steel"
         >
           Back
         </button>
