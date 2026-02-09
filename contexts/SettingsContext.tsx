@@ -22,13 +22,13 @@ import { ALL_SERVICES, STYLIST_LEVELS } from '../data/mockData';
 import { supabase } from '../lib/supabase';
 import { canCustomizeBranding } from '../utils/isEnterpriseAccount';
 
-// Blueprint default branding - used for all non-enterprise accounts
+// Blueprint default branding - uses Blueprint Design System v1.0.0 palette
 export const BLUEPRINT_DEFAULT_BRANDING: BrandingSettings = {
   salonName: 'Blueprint',
-  primaryColor: '#0F4C81', /* Classic Blue */
-  secondaryColor: '#5D96BC', /* Heritage Blue */
-  accentColor: '#8ABAD3', /* Sky Blue */
-  font: 'Inter',
+  primaryColor: '#0B3559', /* Blueprint Navy */
+  secondaryColor: '#42708C', /* Blueprint Steel */
+  accentColor: '#5890A6', /* Blueprint Sky */
+  font: 'Comfortaa',
   logoUrl: 'https://cdn.builder.io/api/v1/image/assets%2F8d6a989189ff4d9e8633804d5d0dbd86%2Fa72b6d70b1bc42b2991e3c072f2b3588?format=webp&width=800&height=1200',
 };
 

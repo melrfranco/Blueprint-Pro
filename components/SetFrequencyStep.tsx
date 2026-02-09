@@ -19,7 +19,7 @@ const SetFrequencyStep: React.FC<SetFrequencyStepProps> = ({ selectedServices, p
   }, [planDetails]);
 
   const handleFrequencyChange = (serviceId: string, freq: number) => {
-    const frequency = Math.max(1, freq); // Ensure frequency is at least 1
+    const frequency = Math.max(1, freq);
     setLocalDetails(prev => ({
       ...prev,
       [serviceId]: { ...prev[serviceId], frequency },
@@ -36,30 +36,30 @@ const SetFrequencyStep: React.FC<SetFrequencyStepProps> = ({ selectedServices, p
   return (
     <div className="flex flex-col h-full p-4 pb-12">
       <div className="text-center p-4">
-        <div className="relative w-full h-2 bg-gray-200 mb-4 rounded-full">
+        <div className="relative w-full h-2 mb-4 rounded-full bg-surface-muted">
             <div className="absolute top-0 left-0 h-2 bg-brand-primary rounded-full" style={{width: '66%'}}></div>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Service Frequency</h1>
-        <p className="text-sm" style={{ color: '#374151' }}>How often should these repeat?</p>
+        <h1 className="text-2xl font-bold text-navy">Service Frequency</h1>
+        <p className="text-sm text-steel">How often should these repeat?</p>
       </div>
       
       <div className="flex-grow overflow-y-auto p-4 space-y-4">
         {selectedServices.map(service => (
-          <div key={service.id} className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+          <div key={service.id} className="p-4 rounded-lg border border-surface-border bg-surface-subtle">
             <div className="flex justify-between items-baseline">
-                <h3 className="font-bold text-lg text-gray-900 mb-3">{service.name}</h3>
-                <span className="text-xs" style={{ color: '#6B7280' }}>Starts: {formatDate(localDetails[service.id]?.firstDate)}</span>
+                <h3 className="font-bold text-lg mb-3 text-navy">{service.name}</h3>
+                <span className="text-xs text-frost">Starts: {formatDate(localDetails[service.id]?.firstDate)}</span>
             </div>
             <div className="flex items-center space-x-2">
-                <span className="font-medium text-gray-700">Every</span>
+                <span className="font-medium text-steel">Every</span>
                  <input 
                     type="number" 
                     value={localDetails[service.id]?.frequency || ''} 
                     onChange={(e) => handleFrequencyChange(service.id, parseInt(e.target.value, 10))}
-                    className="w-20 p-2 border border-gray-300 rounded text-center font-bold text-lg bg-white text-gray-900"
+                    className="w-20 p-2 border border-surface-border rounded text-center font-bold text-lg bg-surface text-navy"
                     placeholder="Wks"
                 />
-                <span className="font-medium text-gray-700">weeks</span>
+                <span className="font-medium text-steel">weeks</span>
             </div>
           </div>
         ))}
@@ -69,15 +69,14 @@ const SetFrequencyStep: React.FC<SetFrequencyStepProps> = ({ selectedServices, p
         <button
           onClick={() => onNext(localDetails)}
           disabled={isNextDisabled}
-          className="w-full font-bold py-3 px-4 rounded-full shadow-lg transition-transform transform hover:scale-105 disabled:bg-gray-300 disabled:cursor-not-allowed"
-          style={{ backgroundColor: branding.secondaryColor, color: ensureAccessibleColor('#FFFFFF', branding.secondaryColor, '#1F2937') }}
+          className="w-full font-bold py-3 px-4 rounded-full shadow-lg transition-transform transform hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{ backgroundColor: branding.secondaryColor, color: ensureAccessibleColor('#FFFFFF', branding.secondaryColor, '#F0F4F8') }}
         >
           Create Maintenance Roadmap
         </button>
         <button
           onClick={onBack}
-          className="w-full bg-transparent font-semibold py-2 px-4"
-          style={{ color: '#374151' }}
+          className="w-full bg-transparent font-semibold py-2 px-4 text-steel"
         >
           Back
         </button>
