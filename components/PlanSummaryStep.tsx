@@ -113,7 +113,6 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
     setIsPublishing(true);
     try {
         const updated = await savePlan({ ...plan, status: 'active' });
-        // Go back to plans list so the updated plan shows as published
         if (onEditPlan) {
           onEditPlan();
         }
@@ -190,10 +189,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
         const loc = await SquareIntegrationService.fetchLocation();
 
-        // Resolve stylist ID: prefer Square Team Member ID (starts with TM), fall back to allStylists
         let stylistId = isClient ? plan.stylistId : (user?.stylistData?.id || allStylists[0]?.id);
 
-        // If stylistId doesn't start with 'TM', it's an old Supabase UUID - resolve it to the first stylist with a valid Square ID
         if (stylistId && !String(stylistId).startsWith('TM')) {
             console.log('[BOOKING CALENDAR] Stylist ID is not a Square Team Member ID, finding valid one:', stylistId);
             const validStylist = allStylists.find(s => String(s.id).startsWith('TM'));
@@ -226,23 +223,19 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
         console.log('[BOOKING] Service from plan:', { name: serviceToBook.name, id: serviceToBook.id });
 
-        // Fetch Square catalog and validate service ID
         const squareCatalog = await SquareIntegrationService.fetchCatalog();
         console.log('[BOOKING] Catalog has', squareCatalog.length, 'services');
         console.log('[BOOKING] Catalog service IDs:', squareCatalog.map(s => s.id));
 
         let serviceVariationId = serviceToBook.id;
 
-        // Check if service ID exists in current Square catalog
         const existingService = squareCatalog.find(s => s.id === serviceVariationId);
         console.log('[BOOKING] Looking for service ID', serviceVariationId, '- found:', !!existingService);
 
         if (!existingService) {
-            // Service ID not found - try exact name match first, then case-insensitive
             console.log('[BOOKING] Trying to find by name:', serviceToBook.name);
             let squareService = squareCatalog.find(s => s.name === serviceToBook.name);
 
-            // If exact match fails, try case-insensitive match
             if (!squareService) {
                 const searchName = serviceToBook.name.toLowerCase();
                 squareService = squareCatalog.find(s => s.name.toLowerCase() === searchName);
@@ -304,10 +297,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
         const loc = await SquareIntegrationService.fetchLocation();
 
-        // Resolve stylist ID: prefer Square Team Member ID (starts with TM), fall back to allStylists
         let stylistId = isClient ? plan.stylistId : (user?.stylistData?.id || allStylists[0]?.id);
 
-        // If stylistId doesn't start with 'TM', it's an old Supabase UUID - resolve it to the first stylist with a valid Square ID
         if (stylistId && !String(stylistId).startsWith('TM')) {
             console.log('[BOOKING PERIOD] Stylist ID is not a Square Team Member ID, finding valid one:', stylistId);
             const validStylist = allStylists.find(s => String(s.id).startsWith('TM'));
@@ -331,18 +322,14 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             throw new Error(`No service selected for this visit.`);
         }
 
-        // Fetch Square catalog and validate service ID
         const squareCatalog = await SquareIntegrationService.fetchCatalog();
         let serviceVariationId = serviceToBook.id;
 
-        // Check if service ID exists in current Square catalog
         const existingService = squareCatalog.find(s => s.id === serviceVariationId);
 
         if (!existingService) {
-            // Service ID not found - try exact name match first, then case-insensitive
             let squareService = squareCatalog.find(s => s.name === serviceToBook.name);
 
-            // If exact match fails, try case-insensitive match
             if (!squareService) {
                 const searchName = serviceToBook.name.toLowerCase();
                 squareService = squareCatalog.find(s => s.name.toLowerCase() === searchName);
@@ -404,19 +391,15 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
               throw new Error("No services were selected for this visit.");
           }
 
-          // Map service IDs to real Square IDs if needed
           const squareCatalog = await SquareIntegrationService.fetchCatalog();
 
           const squareServices = mockServices.map(ms => {
-              // Check if this service ID exists in current Square catalog
               const existing = squareCatalog.find(s => s.id === ms.id);
               if (existing) {
-                  return existing; // Already has valid Square ID
+                  return existing;
               }
-              // Service ID not found - try exact name match first, then case-insensitive
               let found = squareCatalog.find(s => s.name === ms.name);
 
-              // If exact match fails, try case-insensitive match
               if (!found) {
                   const searchName = ms.name.toLowerCase();
                   found = squareCatalog.find(s => s.name.toLowerCase() === searchName);
@@ -428,10 +411,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
               return found;
           });
 
-          // Resolve stylist ID: prefer Square Team Member ID (starts with TM), fall back to allStylists
           let stylistIdToBookFor = isClient ? plan.stylistId : (user?.stylistData?.id || allStylists[0]?.id);
 
-          // If stylistId doesn't start with 'TM', it's an old Supabase UUID - resolve it to the first stylist with a valid Square ID
           if (stylistIdToBookFor && !String(stylistIdToBookFor).startsWith('TM')) {
               const validStylist = allStylists.find(s => String(s.id).startsWith('TM'));
               if (validStylist) {
@@ -455,36 +436,15 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
           const squareBooking = squareResponse.booking;
           if (squareBooking) {
               await saveBooking({
-                  id: squareBooking.id,
-                  client_id: plan.client.id,
-                  stylist_id: stylistIdToBookFor,
-                  start_time: slotTime,
-                  status: squareBooking.status,
-                  services: squareServices.map(s => ({ variation_id: s.id, name: s.name })),
-                  source: 'square'
+                  planId: plan.id!,
+                  squareBookingId: squareBooking.id,
+                  startAt: squareBooking.startAt,
+                  status: squareBooking.status || 'ACCEPTED',
+                  services: selectedVisit!.services.map(s => s.name),
               });
-          }
-          
-          const bookedDate = new Date(slotTime);
-          const recommendedDate = new Date(selectedVisit!.date);
-          bookedDate.setHours(0, 0, 0, 0);
-          recommendedDate.setHours(0, 0, 0, 0);
-          const offset = bookedDate.getTime() - recommendedDate.getTime();
-          
-          if (offset !== 0) {
-              const updatedAppointments = plan.appointments.map(appt => {
-                  const apptDate = new Date(appt.date);
-                  if (apptDate.getTime() >= recommendedDate.getTime()) {
-                      return { ...appt, date: new Date(apptDate.getTime() + offset) };
-                  }
-                  return appt;
-              });
-              const updatedPlan = { ...plan, appointments: updatedAppointments };
-              await savePlan(updatedPlan);
           }
 
           setBookingSuccess(true);
-          setTimeout(() => setBookingModalOpen(false), 2000);
       } catch (e: any) {
           setFetchError(e.message);
       } finally {
@@ -492,20 +452,15 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
       }
   };
 
-  const isMissingContact = useMemo(() => {
-    if (!canViewClientContact) return false;
-    if (deliveryMethod === 'sms') return !plan.client.phone;
-    if (deliveryMethod === 'email') return !plan.client.email;
-    return false;
-  }, [canViewClientContact, deliveryMethod, plan.client]);
-  
-  const buttonStyle = {
-      backgroundColor: branding.primaryColor,
-      color: ensureAccessibleColor('#FFFFFF', branding.primaryColor, '#1F2937')
+  const isMissingContact = (deliveryMethod === 'sms' && !plan.client.phone) || (deliveryMethod === 'email' && !plan.client.email);
+
+  const buttonStyle: React.CSSProperties = {
+    backgroundColor: branding.primaryColor,
+    color: ensureAccessibleColor('#FFFFFF', branding.primaryColor, '#FFFFFF'),
   };
 
-  const year = calendarMonth.getFullYear();
   const month = calendarMonth.getMonth();
+  const year = calendarMonth.getFullYear();
   const firstDayOfMonth = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const calendarBlanks = Array(firstDayOfMonth).fill(null);
@@ -513,21 +468,21 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
   return (
     <div className="flex flex-col h-full bg-brand-bg relative">
-      <div className="flex-grow p-4 overflow-y-auto" className="text-navy">
-        <div className="mb-6 flex justify-between items-end border-b-2 pb-4" className="border-surface-muted">
+      <div className="flex-grow p-4 overflow-y-auto text-navy">
+        <div className="mb-6 flex justify-between items-end border-b-2 pb-4 border-surface-muted">
             <div>
-                <h1 className="text-2xl font-black tracking-tighter leading-none mb-1" className="text-navy">Blueprint Summary</h1>
-                <p className="text-base font-black uppercase tracking-widest" className="text-navy">{plan.client.name}</p>
+                <h1 className="text-2xl font-black tracking-tighter leading-none mb-1 text-navy">Blueprint Summary</h1>
+                <p className="text-base font-black uppercase tracking-widest text-navy">{plan.client.name}</p>
             </div>
-            <span className={`text-xs font-black px-4 py-1.5 rounded-full border-2 shadow-sm ${isPlanActive ? 'bg-green-50 text-green-900 border-green-400' : ''}`} style={!isPlanActive ? { backgroundColor: '#E2EAF0', color: '#0B3559', borderColor: '#8EB1BF' } : {}}>
+            <span className={`text-xs font-black px-4 py-1.5 rounded-full border-2 shadow-sm ${isPlanActive ? 'bg-green-50 text-green-900 border-green-400' : 'bg-surface-muted text-navy border-frost'}`}>
                 {isPlanActive ? 'PUBLISHED' : 'DRAFT'}
             </span>
         </div>
 
         {membershipConfig.enabled && isClient && isMemberOffered && (
-            <div className="mb-6 p-6 rounded-[32px] shadow-xl animate-fade-in border-4" style={{ borderColor: branding.primaryColor, backgroundColor: '#FFF' }}>
+            <div className="mb-6 p-6 rounded-[32px] shadow-xl animate-fade-in border-4 bg-white" style={{ borderColor: branding.primaryColor }}>
                 <h2 className="text-xl font-black tracking-tighter mb-4" style={{color: branding.primaryColor}}>Membership Invitation</h2>
-                <p className="text-sm font-bold mb-4 leading-relaxed" className="text-steel">
+                <p className="text-sm font-bold mb-4 leading-relaxed text-steel">
                     Your blueprint qualifies for a membership! Review the details to enjoy a more predictable and streamlined salon experience.
                 </p>
                 <button
@@ -543,28 +498,28 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
         {membershipConfig.enabled && isClient && isMemberActive && (
              <div className="mb-6 p-6 rounded-[32px] shadow-lg animate-fade-in border-4 border-green-500 bg-green-50 text-center">
                 <CheckCircleIcon className="w-10 h-10 text-green-600 mx-auto mb-3" />
-                <h2 className="text-lg font-black tracking-tighter text-green-900">You’re enrolled! This blueprint is now your active membership.</h2>
+                <h2 className="text-lg font-black tracking-tighter text-green-900">{"You're enrolled! This blueprint is now your active membership."}</h2>
             </div>
         )}
 
         <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="col-span-2 p-6 rounded-[32px] text-white shadow-2xl flex justify-between items-center border-4" className="bg-navy border-navy">
+            <div className="col-span-2 p-6 rounded-[32px] text-white shadow-2xl flex justify-between items-center border-4 bg-navy border-navy">
                 <div>
-                    <p className="text-sm font-black uppercase mb-1 tracking-widest" className="text-frost">Yearly Investment</p>
-                    <p className="text-5xl font-black" className="text-sky">{formatCurrency(plan.totalCost)}</p>
+                    <p className="text-sm font-black uppercase mb-1 tracking-widest text-frost">Yearly Investment</p>
+                    <p className="text-5xl font-black text-sky">{formatCurrency(plan.totalCost)}</p>
                 </div>
                 <div className="text-right">
-                    <p className="text-xs font-black uppercase mb-1 tracking-widest" className="text-frost">Membership Tier</p>
+                    <p className="text-xs font-black uppercase mb-1 tracking-widest text-frost">Membership Tier</p>
                     <p className="text-xl font-black" style={{color: qualifyingTier?.color || '#5890A6'}}>{qualifyingTier?.name || 'Standard'}</p>
                 </div>
             </div>
-            <div className="bg-white p-5 rounded-3xl border-4 shadow-lg" className="border-surface-muted">
-                <p className="text-sm font-black uppercase mb-1 tracking-widest" className="text-navy">Avg. Visit</p>
-                <p className="text-3xl font-black" className="text-navy">{formatCurrency(plan.averageAppointmentCost)}</p>
+            <div className="bg-white p-5 rounded-3xl border-4 shadow-lg border-surface-muted">
+                <p className="text-sm font-black uppercase mb-1 tracking-widest text-navy">Avg. Visit</p>
+                <p className="text-3xl font-black text-navy">{formatCurrency(plan.averageAppointmentCost)}</p>
             </div>
-            <div className="bg-white p-5 rounded-3xl border-4 shadow-lg" className="border-surface-muted">
-                <p className="text-sm font-black uppercase mb-1 tracking-widest" className="text-navy">Avg. Monthly</p>
-                <p className="text-3xl font-black" className="text-navy">{formatCurrency(plan.averageMonthlySpend)}</p>
+            <div className="bg-white p-5 rounded-3xl border-4 shadow-lg border-surface-muted">
+                <p className="text-sm font-black uppercase mb-1 tracking-widest text-navy">Avg. Monthly</p>
+                <p className="text-3xl font-black text-navy">{formatCurrency(plan.averageMonthlySpend)}</p>
             </div>
             <div className="col-span-2 bg-brand-accent p-5 rounded-3xl shadow-xl flex justify-between items-center">
                 <span className="text-sm font-black text-white uppercase tracking-widest">Planned Visits</span>
@@ -572,32 +527,32 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             </div>
         </div>
 
-        <div className="bg-white p-6 rounded-[32px] border-4 mb-8 shadow-sm overflow-hidden" className="border-surface-muted">
+        <div className="bg-white p-6 rounded-[32px] border-4 mb-8 shadow-sm overflow-hidden border-surface-muted">
             <div className="flex justify-between items-center mb-6">
-                <h3 className="text-sm font-black uppercase tracking-widest" className="text-navy">Visit Value Forecast</h3>
-                <span className="text-[10px] font-black uppercase" className="text-frost">Cost Per Appointment</span>
+                <h3 className="text-sm font-black uppercase tracking-widest text-navy">Visit Value Forecast</h3>
+                <span className="text-[10px] font-black uppercase text-frost">Cost Per Appointment</span>
             </div>
             <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={visitChartData} margin={{ top: 10, right: 10, left: -20, bottom: 20 }}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2EAF0" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-surface-muted)" />
                         <XAxis 
                             dataKey="name" 
-                            tick={{fontSize: 10, fontWeight: 900, fill: '#42708C'}} 
-                            axisLine={{stroke:'#E2EAF0', strokeWidth:2}} 
+                            tick={{fontSize: 10, fontWeight: 900, fill: 'var(--color-steel)'}} 
+                            axisLine={{stroke:'var(--color-surface-muted)', strokeWidth:2}} 
                             tickLine={false}
                             interval={0}
                             angle={-45}
                             textAnchor="end"
                         />
                         <YAxis 
-                            tick={{fontSize: 10, fontWeight: 900, fill: '#42708C'}} 
-                            axisLine={{stroke:'#E2EAF0', strokeWidth:2}} 
+                            tick={{fontSize: 10, fontWeight: 900, fill: 'var(--color-steel)'}} 
+                            axisLine={{stroke:'var(--color-surface-muted)', strokeWidth:2}} 
                             tickLine={false} 
                         />
                         <Tooltip 
-                            cursor={{fill: '#F0F4F8'}}
-                            contentStyle={{backgroundColor: '#0B3559', color: '#F0F4F8', borderRadius: '16px', border: 'none', fontWeight: 900}} 
+                            cursor={{fill: 'var(--color-surface-subtle)'}}
+                            contentStyle={{backgroundColor: 'var(--color-navy)', color: 'var(--color-surface-subtle)', borderRadius: '16px', border: 'none', fontWeight: 900}} 
                         />
                         {serviceLegend.map((name: string) => (
                             <Bar 
@@ -615,15 +570,15 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 {serviceLegend.map((name: string) => (
                     <div key={name} className="flex items-center space-x-2">
                         <div className="w-3 h-3 rounded-full" style={{backgroundColor: SERVICE_COLORS[name] || '#cbd5e1'}}></div>
-                        <span className="text-[10px] font-black uppercase" className="text-steel">{name}</span>
+                        <span className="text-[10px] font-black uppercase text-steel">{name}</span>
                     </div>
                 ))}
             </div>
         </div>
         
-        <div className="mt-8 pt-8 border-t-4 flex flex-col space-y-4" className="border-surface-muted">
+        <div className="mt-8 pt-8 border-t-4 flex flex-col space-y-4 border-surface-muted">
             {!isClient && !isPlanActive && (
-                <button onClick={handlePublish} disabled={isPublishing} className="w-full py-5 rounded-2xl font-black text-lg shadow-xl flex items-center justify-center space-x-3 active:scale-95 transition-all border-b-4" className="bg-navy text-surface-subtle border-navy-dark">
+                <button onClick={handlePublish} disabled={isPublishing} className="w-full py-5 rounded-2xl font-black text-lg shadow-xl flex items-center justify-center space-x-3 active:scale-95 transition-all border-b-4 bg-navy text-surface-subtle border-navy-dark">
                     {isPublishing ? <RefreshIcon className="w-6 h-6 animate-spin" /> : <GlobeIcon className="w-6 h-6" />}
                     <span>PUBLISH TO CLIENT</span>
                 </button>
@@ -643,10 +598,9 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             <button 
                 onClick={handleOpenBooking} 
                 disabled={!canBook}
-                className={`w-full py-5 rounded-2xl font-black text-lg shadow-md active:scale-95 transition-all flex items-center justify-center space-x-3 border-b-8 ${canBook ? 'bg-white' : 'cursor-not-allowed'}`}
-                style={canBook ? { color: '#0B3559', borderColor: '#0B3559' } : { backgroundColor: '#E2EAF0', color: '#8EB1BF', borderColor: '#C5D5DE' }}
+                className={`w-full py-5 rounded-2xl font-black text-lg shadow-md active:scale-95 transition-all flex items-center justify-center space-x-3 border-b-8 ${canBook ? 'bg-white text-navy border-navy' : 'cursor-not-allowed bg-surface-muted text-frost border-surface-border'}`}
             >
-                <CalendarIcon className="w-6 h-6" style={canBook ? { color: branding.secondaryColor } : { color: '#C5D5DE' }}/>
+                <CalendarIcon className="w-6 h-6" style={canBook ? { color: branding.secondaryColor } : undefined} />
                 <span>{isClient ? 'BOOK APPOINTMENT' : canBook ? 'Book an Upcoming Appointment' : 'SYNC DISABLED'}</span>
             </button>
         </div>
@@ -654,7 +608,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
       {isMembershipModalOpen && (
           <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
-              <div className="bg-white w-full max-w-sm rounded-[40px] shadow-2xl relative overflow-hidden border-4 flex flex-col" className="border-navy">
+              <div className="bg-white w-full max-w-sm rounded-[40px] shadow-2xl relative overflow-hidden border-4 flex flex-col border-navy">
                   <div className="p-7 text-center" style={{ backgroundColor: branding.primaryColor }}>
                       <h2 className="text-2xl font-black tracking-tight" style={{ color: ensureAccessibleColor('#FFFFFF', branding.primaryColor, '#FFFFFF') }}>Membership Invitation</h2>
                       <p className="text-[10px] font-black uppercase tracking-widest mt-1" style={{ color: ensureAccessibleColor('#FFFFFF', branding.primaryColor, '#FFFFFF'), opacity: 0.8 }}>{"Upgrade "}{plan.client.name.split(' ')[0]}{"'s Experience"}</p>
@@ -664,17 +618,17 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                       {inviteSent ? (
                         <div className="py-12 text-center animate-bounce-in">
                             <CheckCircleIcon className="w-20 h-20 text-green-500 mx-auto mb-4" />
-                            <p className="text-2xl font-black" className="text-navy">INVITE SENT!</p>
-                            <p className="text-sm font-bold mt-2" className="text-steel">{"Client marked as 'Offered'"}</p>
+                            <p className="text-2xl font-black text-navy">INVITE SENT!</p>
+                            <p className="text-sm font-bold mt-2 text-steel">{"Client marked as 'Offered'"}</p>
                         </div>
                       ) : (
-                        <div className="space-y-6" className="text-navy">
+                        <div className="space-y-6 text-navy">
                             <div>
-                                <label className="block text-[10px] font-black uppercase tracking-widest mb-3" className="text-frost">Delivery Method</label>
+                                <label className="block text-[10px] font-black uppercase tracking-widest mb-3 text-frost">Delivery Method</label>
                                 <div className="grid grid-cols-3 gap-2">
-                                    <button onClick={() => setDeliveryMethod('sms')} className={`p-3 rounded-2xl border-4 font-black text-xs transition-all ${deliveryMethod === 'sms' ? 'bg-brand-primary/10 border-brand-primary text-brand-primary' : ''}`} style={deliveryMethod !== 'sms' ? { borderColor: '#F0F4F8', backgroundColor: '#F0F4F8', color: '#8EB1BF' } : {}}>SMS</button>
-                                    <button onClick={() => setDeliveryMethod('email')} className={`p-3 rounded-2xl border-4 font-black text-xs transition-all ${deliveryMethod === 'email' ? 'bg-brand-primary/10 border-brand-primary text-brand-primary' : ''}`} style={deliveryMethod !== 'email' ? { borderColor: '#F0F4F8', backgroundColor: '#F0F4F8', color: '#8EB1BF' } : {}}>EMAIL</button>
-                                    <button onClick={() => setDeliveryMethod('link')} className={`p-3 rounded-2xl border-4 font-black text-xs transition-all ${deliveryMethod === 'link' ? 'bg-brand-primary/10 border-brand-primary text-brand-primary' : ''}`} style={deliveryMethod !== 'link' ? { borderColor: '#F0F4F8', backgroundColor: '#F0F4F8', color: '#8EB1BF' } : {}}>LINK</button>
+                                    <button onClick={() => setDeliveryMethod('sms')} className={`p-3 rounded-2xl border-4 font-black text-xs transition-all ${deliveryMethod === 'sms' ? 'bg-brand-primary/10 border-brand-primary text-brand-primary' : 'border-surface-subtle bg-surface-subtle text-frost'}`}>SMS</button>
+                                    <button onClick={() => setDeliveryMethod('email')} className={`p-3 rounded-2xl border-4 font-black text-xs transition-all ${deliveryMethod === 'email' ? 'bg-brand-primary/10 border-brand-primary text-brand-primary' : 'border-surface-subtle bg-surface-subtle text-frost'}`}>EMAIL</button>
+                                    <button onClick={() => setDeliveryMethod('link')} className={`p-3 rounded-2xl border-4 font-black text-xs transition-all ${deliveryMethod === 'link' ? 'bg-brand-primary/10 border-brand-primary text-brand-primary' : 'border-surface-subtle bg-surface-subtle text-frost'}`}>LINK</button>
                                 </div>
                             </div>
 
@@ -692,29 +646,29 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                     <div className="bg-red-500 text-white rounded-full p-1 mt-0.5">!</div>
                                     <div>
                                         <p className="text-[10px] font-black text-red-600 uppercase tracking-widest">Contact Missing</p>
-                                        <p className="text-[11px] font-bold text-red-800 leading-tight">No {deliveryMethod === 'sms' ? 'phone' : 'email'} found for this client. You can still open the app, but you'll need to manually enter the recipient.</p>
+                                        <p className="text-[11px] font-bold text-red-800 leading-tight">No {deliveryMethod === 'sms' ? 'phone' : 'email'} found for this client. You can still open the app, but you{"'"}ll need to manually enter the recipient.</p>
                                     </div>
                                 </div>
                             )}
 
-                            <div className="p-4 rounded-3xl border-2" className="bg-surface-subtle border-surface-muted">
-                                <p className="text-[10px] font-black uppercase mb-2 tracking-widest" className="text-frost">Projected membership pricing</p>
-                                <div className="flex flex-col gap-3" className="text-navy">
+                            <div className="p-4 rounded-3xl border-2 bg-surface-subtle border-surface-muted">
+                                <p className="text-[10px] font-black uppercase mb-2 tracking-widest text-frost">Projected membership pricing</p>
+                                <div className="flex flex-col gap-3 text-navy">
                                     <div>
-                                        <p className="text-[9px] font-black uppercase tracking-widest" className="text-frost">Projected yearly total</p>
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-frost">Projected yearly total</p>
                                         <p className="text-lg font-black">{formatCurrency(plan.totalCost)}</p>
                                     </div>
                                     <div>
-                                        <p className="text-[9px] font-black uppercase tracking-widest" className="text-frost">Estimated monthly membership</p>
+                                        <p className="text-[9px] font-black uppercase tracking-widest text-frost">Estimated monthly membership</p>
                                         <p className="text-lg font-black">{formatCurrency(projectedMonthlySpend)}</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="p-4 rounded-3xl border-2" className="bg-surface-subtle border-surface-muted">
-                                <p className="text-[10px] font-black uppercase mb-2 tracking-widest" className="text-frost">Message Preview</p>
-                                <div className="bg-white p-4 rounded-2xl border-2 text-xs font-bold leading-relaxed italic shadow-inner" style={{ borderColor: '#C5D5DE', color: '#42708C' }}>
-                                    "{invitationMessage}"
+                            <div className="p-4 rounded-3xl border-2 bg-surface-subtle border-surface-muted">
+                                <p className="text-[10px] font-black uppercase mb-2 tracking-widest text-frost">Message Preview</p>
+                                <div className="bg-white p-4 rounded-2xl border-2 text-xs font-bold leading-relaxed italic shadow-inner border-surface-border text-steel">
+                                    {'"'}{invitationMessage}{'"'}
                                 </div>
                             </div>
 
@@ -728,7 +682,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                 <span>{isSendingInvite ? 'OPENING...' : isContactRestricted ? 'CONTACT ACCESS REQUIRED' : `OPEN ${deliveryMethod.toUpperCase()}`}</span>
                             </button>
                             
-                            <button onClick={() => setMembershipModalOpen(false)} className="w-full text-center text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-colors" className="text-frost">Cancel</button>
+                            <button onClick={() => setMembershipModalOpen(false)} className="w-full text-center text-[10px] font-black uppercase tracking-widest hover:opacity-70 transition-colors text-frost">Cancel</button>
                         </div>
                       )}
                   </div>
@@ -738,52 +692,52 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
       {isViewingMembershipDetails && (
         <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
-            <div className="bg-white w-full max-w-sm rounded-[40px] shadow-2xl relative overflow-hidden border-4 flex flex-col max-h-[90vh]" className="border-navy">
+            <div className="bg-white w-full max-w-sm rounded-[40px] shadow-2xl relative overflow-hidden border-4 flex flex-col max-h-[90vh] border-navy">
                 <div className="p-7 text-center" style={{ backgroundColor: branding.primaryColor }}>
                     <h2 className="text-2xl font-black tracking-tight" style={{ color: ensureAccessibleColor('#FFFFFF', branding.primaryColor, '#FFFFFF') }}>Membership Details</h2>
                     <p className="text-[10px] font-black uppercase tracking-widest mt-1" style={{ color: ensureAccessibleColor('#FFFFFF', branding.primaryColor, '#FFFFFF'), opacity: 0.8 }}>Based on Your Blueprint</p>
                 </div>
                 <div className="p-6 overflow-y-auto flex-grow">
-                    <div className="mb-6 p-5 rounded-3xl border-2 text-center" className="bg-surface-subtle border-surface-muted">
-                        <p className="text-[10px] font-black uppercase tracking-widest mb-1" className="text-frost">Your Membership Level</p>
+                    <div className="mb-6 p-5 rounded-3xl border-2 text-center bg-surface-subtle border-surface-muted">
+                        <p className="text-[10px] font-black uppercase tracking-widest mb-1 text-frost">Your Membership Level</p>
                         <p className="text-2xl font-black" style={{ color: qualifyingTier?.color || '#000' }}>{qualifyingTier?.name || 'Standard'}</p>
                     </div>
 
-                    <div className="mb-6 p-5 rounded-3xl border-2 text-center" className="bg-surface-subtle border-surface-muted">
-                        <p className="text-[10px] font-black uppercase tracking-widest mb-2" className="text-frost">Projected membership pricing</p>
+                    <div className="mb-6 p-5 rounded-3xl border-2 text-center bg-surface-subtle border-surface-muted">
+                        <p className="text-[10px] font-black uppercase tracking-widest mb-2 text-frost">Projected membership pricing</p>
                         <div className="space-y-3">
                           <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest" className="text-frost">Projected yearly total</p>
-                            <p className="text-xl font-black" className="text-navy">{formatCurrency(plan.totalCost)}</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-frost">Projected yearly total</p>
+                            <p className="text-xl font-black text-navy">{formatCurrency(plan.totalCost)}</p>
                           </div>
                           <div>
-                            <p className="text-[9px] font-black uppercase tracking-widest" className="text-frost">Estimated monthly membership</p>
-                            <p className="text-xl font-black" className="text-navy">{formatCurrency(projectedMonthlySpend)}</p>
+                            <p className="text-[9px] font-black uppercase tracking-widest text-frost">Estimated monthly membership</p>
+                            <p className="text-xl font-black text-navy">{formatCurrency(projectedMonthlySpend)}</p>
                           </div>
                         </div>
                     </div>
 
                     <div className="mb-6">
-                        <h3 className="text-sm font-black uppercase tracking-widest mb-3 text-center" className="text-navy">Included Perks</h3>
+                        <h3 className="text-sm font-black uppercase tracking-widest mb-4 text-navy">Membership Perks</h3>
                         {qualifyingTier?.perks && qualifyingTier.perks.length > 0 ? (
                             <ul className="space-y-3">
                                 {qualifyingTier.perks.map((perk, index) => (
-                                    <li key={index} className="flex items-start text-sm font-bold" className="text-steel">
+                                    <li key={index} className="flex items-start text-sm font-bold text-steel">
                                         <CheckCircleIcon className="w-5 h-5 text-green-500 mr-3 flex-shrink-0 mt-0.5" />
                                         <span>{perk}</span>
                                     </li>
                                 ))}
                             </ul>
                         ) : (
-                            <div className="p-4 rounded-2xl border-2 text-center text-xs font-bold" className="bg-surface-subtle border-surface-muted text-steel">
+                            <div className="p-4 rounded-2xl border-2 text-center text-xs font-bold bg-surface-subtle border-surface-muted text-steel">
                                 <p>This membership includes benefits defined by your salon. Your stylist can walk you through the details.</p>
                             </div>
                         )}
                     </div>
                     
-                    <div className="p-4 rounded-2xl border-2 text-center text-xs font-bold mb-6" className="bg-surface-subtle border-surface-muted text-steel">
+                    <div className="p-4 rounded-2xl border-2 text-center text-xs font-bold mb-6 bg-surface-subtle border-surface-muted text-steel">
                         <p>Your membership is custom-tailored to you and is based on the services you and your stylist agreed on when creating your maintenance blueprint.</p>
-                        <p className="mt-2 text-[10px] italic" className="text-frost">*Additional services not included in your blueprint may be an additional cost, unless explicitly listed as a membership perk.</p>
+                        <p className="mt-2 text-[10px] italic text-frost">*Additional services not included in your blueprint may be an additional cost, unless explicitly listed as a membership perk.</p>
                     </div>
 
                     <button 
@@ -796,7 +750,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                     </button>
                 </div>
                 
-                <button onClick={() => setIsViewingMembershipDetails(false)} className="w-full p-6 font-black uppercase tracking-widest text-[10px] border-t-4 transition-colors hover:opacity-70" style={{ color: '#0B3559', borderColor: '#F0F4F8' }}>
+                <button onClick={() => setIsViewingMembershipDetails(false)} className="w-full p-6 font-black uppercase tracking-widest text-[10px] border-t-4 transition-colors hover:opacity-70 text-navy border-surface-subtle">
                     Maybe Later
                 </button>
             </div>
@@ -805,9 +759,9 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
       {isBookingModalOpen && (
           <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
-              <div className="bg-white w-full max-w-sm rounded-[40px] shadow-2xl relative overflow-hidden border-4 flex flex-col max-h-[90vh]" className="border-navy">
+              <div className="bg-white w-full max-w-sm rounded-[40px] shadow-2xl relative overflow-hidden border-4 flex flex-col max-h-[90vh] border-navy">
                   
-                  <div className="text-white p-6 relative" style={{ backgroundColor: '#0B3559' }}>
+                  <div className="text-white p-6 relative bg-navy">
                     {bookingStep !== 'select-visit' && !bookingSuccess && (
                         <button onClick={() => {
                            if (bookingStep === 'select-slot') setBookingStep('select-period');
@@ -818,7 +772,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                         </button>
                     )}
                     <h2 className="text-xl font-black text-center">Square Booking</h2>
-                    <p className="text-[10px] text-center font-black uppercase tracking-widest mt-1" className="text-frost">
+                    <p className="text-[10px] text-center font-black uppercase tracking-widest mt-1 text-frost">
                         {bookingStep === 'select-visit' ? 'Which visit are you booking?' : 
                          bookingStep === 'select-date' ? 'Confirm your appointment date' :
                          bookingStep === 'select-period' ? 'What time of day do you prefer?' : 'Choose your perfect opening'}
@@ -829,8 +783,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                       {bookingSuccess ? (
                           <div className="py-12 text-center animate-bounce-in">
                               <CheckCircleIcon className="w-20 h-20 text-green-500 mx-auto mb-4" />
-                              <p className="text-3xl font-black" className="text-navy">BOOKED!</p>
-                              <p className="text-lg font-black mt-2" className="text-navy">Added to Square calendar.</p>
+                              <p className="text-3xl font-black text-navy">BOOKED!</p>
+                              <p className="text-lg font-black mt-2 text-navy">Added to Square calendar.</p>
                           </div>
                       ) : fetchError ? (
                           <div className="p-6 bg-red-50 text-red-950 rounded-3xl border-4 border-red-500 text-center">
@@ -841,8 +795,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                       ) : (
                           <>
                               {bookingStep === 'select-visit' && (
-                                  <div className="space-y-3" className="text-navy">
-                                      <p className="text-center text-xs pb-2" className="text-steel">{"Select a planned visit below. You'll confirm the exact date in the next step."}</p>
+                                  <div className="space-y-3 text-navy">
+                                      <p className="text-center text-xs pb-2 text-steel">{"Select a planned visit below. You'll confirm the exact date in the next step."}</p>
                                       {futureVisits.length > 0 ? futureVisits.map((visit, i) => {
                                           const totalCost = visit.services.reduce((sum, s) => sum + s.cost, 0);
                                           const totalDuration = visit.services.reduce((sum, s) => sum + s.duration, 0);
@@ -852,35 +806,35 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                               return `${h > 0 ? `${h}h ` : ''}${m > 0 ? `${m}m` : ''}`.trim() || '0m';
                                           };
                                           return (
-                                              <button key={i} onClick={() => handleVisitSelected(visit)} className="w-full p-5 border-4 rounded-3xl text-left flex flex-col group active:scale-95 transition-all hover:border-brand-accent elevated-card" className="border-surface-muted">
+                                              <button key={i} onClick={() => handleVisitSelected(visit)} className="w-full p-5 border-4 rounded-3xl text-left flex flex-col group active:scale-95 transition-all hover:border-brand-accent elevated-card border-surface-muted">
                                                   <div className="flex justify-between items-center w-full">
                                                       <div className="text-navy">
-                                                          <p className="text-xs font-black uppercase tracking-widest mb-1" className="text-frost">Upcoming Visit</p>
+                                                          <p className="text-xs font-black uppercase tracking-widest mb-1 text-frost">Upcoming Visit</p>
                                                           <p className="text-xl font-black group-hover:text-brand-accent">{visit.date.toLocaleDateString([], {month:'long', day:'numeric'})}</p>
                                                       </div>
-                                                      <ChevronRightIcon className="w-6 h-6" style={{ color: '#C5D5DE' }} />
+                                                      <ChevronRightIcon className="w-6 h-6 text-surface-border" />
                                                   </div>
                                                   
-                                                  <div className="border-t-2 mt-4 pt-4 space-y-2" className="border-surface-muted">
-                                                      <p className="text-[10px] font-black uppercase tracking-widest mb-1" className="text-frost">Visit Details:</p>
+                                                  <div className="border-t-2 mt-4 pt-4 space-y-2 border-surface-muted">
+                                                      <p className="text-[10px] font-black uppercase tracking-widest mb-1 text-frost">Visit Details:</p>
                                                       <div className="flex justify-between items-center text-sm">
-                                                          <span className="font-bold" className="text-steel">Services:</span>
-                                                          <span className="font-black truncate max-w-[150px]" className="text-navy">{visit.services.map(s => s.name).join(' + ')}</span>
+                                                          <span className="font-bold text-steel">Services:</span>
+                                                          <span className="font-black truncate max-w-[150px] text-navy">{visit.services.map(s => s.name).join(' + ')}</span>
                                                       </div>
                                                       <div className="flex justify-between items-center text-sm">
-                                                          <span className="font-bold" className="text-steel">Est. Cost:</span>
-                                                          <span className="font-black" className="text-navy">${totalCost.toFixed(0)}</span>
+                                                          <span className="font-bold text-steel">Est. Cost:</span>
+                                                          <span className="font-black text-navy">${totalCost.toFixed(0)}</span>
                                                       </div>
                                                       <div className="flex justify-between items-center text-sm">
-                                                          <span className="font-bold" className="text-steel">Est. Time:</span>
-                                                          <span className="font-black" className="text-navy">{formatDuration(totalDuration)}</span>
+                                                          <span className="font-bold text-steel">Est. Time:</span>
+                                                          <span className="font-black text-navy">{formatDuration(totalDuration)}</span>
                                                       </div>
                                                   </div>
                                               </button>
                                           )
                                       }) : (
                                           <div className="text-center py-10">
-                                              <p className="font-black text-lg leading-tight" className="text-navy">No future blueprint visits<br/>available to sync.</p>
+                                              <p className="font-black text-lg leading-tight text-navy">{"No future blueprint visits"}<br/>{"available to sync."}</p>
                                           </div>
                                       )}
                                   </div>
@@ -890,22 +844,22 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                 isFetchingSlots ? (
                                     <div className="py-16 text-center">
                                         <RefreshIcon className="w-16 h-16 text-brand-accent animate-spin mx-auto mb-6" />
-                                        <p className="font-black uppercase tracking-widest" className="text-navy">Finding Openings...</p>
+                                        <p className="font-black uppercase tracking-widest text-navy">Finding Openings...</p>
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
-                                        <div className="text-center p-3 rounded-2xl border-2 mb-4" className="bg-surface-subtle border-surface-muted">
-                                            <p className="text-[10px] font-black uppercase tracking-widest" className="text-frost">Recommended Date</p>
-                                            <p className="font-black text-base" className="text-steel">{selectedVisit?.date.toLocaleDateString([], {weekday: 'long', month: 'long', day: 'numeric'})}</p>
+                                        <div className="text-center p-3 rounded-2xl border-2 mb-4 bg-surface-subtle border-surface-muted">
+                                            <p className="text-[10px] font-black uppercase tracking-widest text-frost">Recommended Date</p>
+                                            <p className="font-black text-base text-steel">{selectedVisit?.date.toLocaleDateString([], {weekday: 'long', month: 'long', day: 'numeric'})}</p>
                                         </div>
 
-                                        <div className="bg-white p-3 rounded-2xl border-2" className="border-surface-muted">
+                                        <div className="bg-white p-3 rounded-2xl border-2 border-surface-muted">
                                             <div className="flex justify-between items-center mb-3 px-2">
-                                                <button onClick={() => setCalendarMonth(new Date(year, month - 1, 1))} className="p-2 rounded-full hover:opacity-70" className="text-steel">&lt;</button>
-                                                <h3 className="font-black" className="text-steel">{calendarMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
-                                                <button onClick={() => setCalendarMonth(new Date(year, month + 1, 1))} className="p-2 rounded-full hover:opacity-70" className="text-steel">&gt;</button>
+                                                <button onClick={() => setCalendarMonth(new Date(year, month - 1, 1))} className="p-2 rounded-full hover:opacity-70 text-steel">{'<'}</button>
+                                                <h3 className="font-black text-steel">{calendarMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
+                                                <button onClick={() => setCalendarMonth(new Date(year, month + 1, 1))} className="p-2 rounded-full hover:opacity-70 text-steel">{'>'}</button>
                                             </div>
-                                            <div className="grid grid-cols-7 text-center text-xs font-bold mb-2" className="text-frost">
+                                            <div className="grid grid-cols-7 text-center text-xs font-bold mb-2 text-frost">
                                                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => <div key={i}>{d}</div>)}
                                             </div>
                                             <div className="grid grid-cols-7 gap-1">
@@ -927,9 +881,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                                             }}
                                                             className={`p-2 rounded-full font-black text-sm aspect-square transition-all ${
                                                                 isSelected ? 'bg-brand-primary text-white scale-110 shadow-lg' : 
-                                                                isAvailable ? 'bg-white hover:opacity-70' : 'cursor-not-allowed opacity-50'
+                                                                isAvailable ? 'bg-white text-steel hover:opacity-70' : 'cursor-not-allowed opacity-50 bg-surface-muted text-frost'
                                                             }`}
-                                                            style={isSelected ? {} : isAvailable ? { color: '#42708C' } : { backgroundColor: '#E2EAF0', color: '#8EB1BF' }}
                                                         >
                                                             {day}
                                                         </button>
@@ -953,23 +906,23 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                               {bookingStep === 'select-period' && (
                                   <div className="space-y-4">
                                       <button onClick={() => confirmPeriodAndFetch('morning')} className="w-full p-6 bg-blue-50 border-4 border-blue-200 rounded-3xl text-left flex items-center space-x-4 active:scale-95 transition-all">
-                                          <div className="bg-blue-500 text-white p-3 rounded-2xl text-xl">🌅</div>
+                                          <div className="bg-blue-500 text-white p-3 rounded-2xl text-xl">{'🌅'}</div>
                                           <div>
-                                              <p className="text-xl font-black leading-none" className="text-navy">Morning</p>
+                                              <p className="text-xl font-black leading-none text-navy">Morning</p>
                                               <p className="text-xs font-black uppercase tracking-widest text-blue-900 mt-2">Before 12:00 PM</p>
                                           </div>
                                       </button>
                                       <button onClick={() => confirmPeriodAndFetch('afternoon')} className="w-full p-6 bg-orange-50 border-4 border-orange-200 rounded-3xl text-left flex items-center space-x-4 active:scale-95 transition-all">
-                                          <div className="bg-orange-500 text-white p-3 rounded-2xl text-xl">☀️</div>
+                                          <div className="bg-orange-500 text-white p-3 rounded-2xl text-xl">{'☀️'}</div>
                                           <div>
-                                              <p className="text-xl font-black leading-none" className="text-navy">Afternoon</p>
+                                              <p className="text-xl font-black leading-none text-navy">Afternoon</p>
                                               <p className="text-xs font-black uppercase tracking-widest text-orange-900 mt-2">12:00 PM - 5:00 PM</p>
                                           </div>
                                       </button>
                                       <button onClick={() => confirmPeriodAndFetch('evening')} className="w-full p-6 bg-indigo-50 border-4 border-indigo-200 rounded-3xl text-left flex items-center space-x-4 active:scale-95 transition-all">
-                                          <div className="bg-indigo-500 text-white p-3 rounded-2xl text-xl">🌙</div>
+                                          <div className="bg-indigo-500 text-white p-3 rounded-2xl text-xl">{'🌙'}</div>
                                           <div>
-                                              <p className="text-xl font-black leading-none" className="text-navy">Evening</p>
+                                              <p className="text-xl font-black leading-none text-navy">Evening</p>
                                               <p className="text-xs font-black uppercase tracking-widest text-indigo-900 mt-2">After 5:00 PM</p>
                                           </div>
                                       </button>
@@ -980,19 +933,25 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                   <div className="space-y-6">
                                       {Object.keys(groupedSlots).length > 0 ? Object.entries(groupedSlots).map(([day, slots]) => (
                                           <div key={day}>
-                                              <h3 className="text-[10px] font-black uppercase mb-3 tracking-widest border-b-2 pb-2" style={{ color: '#8EB1BF', borderColor: '#E2EAF0' }}>{day}</h3>
+                                              <h3 className="text-[10px] font-black uppercase mb-3 tracking-widest border-b-2 pb-2 text-frost border-surface-muted">{day}</h3>
                                               <div className="grid grid-cols-2 gap-2">
                                                   {(slots as string[]).map((s, i) => (
-                                                      <button key={i} onClick={() => executeBooking(s)} disabled={isBooking} className="p-4 border-4 rounded-2xl text-center hover:border-brand-accent active:scale-95 transition-all elevated-card" style={{ borderColor: '#E2EAF0', color: '#0B3559' }}>
+                                                      <button key={i} onClick={() => executeBooking(s)} disabled={isBooking} className="p-4 border-4 rounded-2xl text-center hover:border-brand-accent active:scale-95 transition-all elevated-card border-surface-muted text-navy">
                                                           <span className="font-black text-base">{new Date(s).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
                                                       </button>
                                                   ))}
                                               </div>
                                           </div>
                                       )) : (
-                                          <div className="text-center py-10" className="text-navy">
+                                          <div className="text-center py-10 text-navy">
                                               <p className="font-black text-lg leading-tight">No {timePeriod !== 'all' ? timePeriod : ''} openings<br/>found this week.</p>
                                               <button onClick={() => setBookingStep('select-period')} className="mt-4 text-brand-accent font-black underline">Change preference</button>
+                                          </div>
+                                      )}
+
+                                      {isFetchingSlots && (
+                                          <div className="text-center py-8">
+                                              <RefreshIcon className="w-12 h-12 text-brand-accent animate-spin mx-auto" />
                                           </div>
                                       )}
                                   </div>
@@ -1002,7 +961,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                   </div>
 
                   {!bookingSuccess && (
-                      <button onClick={() => setBookingModalOpen(false)} className="w-full p-6 font-black uppercase tracking-widest text-[10px] border-t-4 hover:opacity-70 transition-colors" style={{ color: '#0B3559', borderColor: '#F0F4F8' }}>Cancel Booking</button>
+                      <button onClick={() => setBookingModalOpen(false)} className="w-full p-6 font-black uppercase tracking-widest text-[10px] border-t-4 hover:opacity-70 transition-colors text-navy border-surface-subtle">Cancel Booking</button>
                   )}
               </div>
           </div>
