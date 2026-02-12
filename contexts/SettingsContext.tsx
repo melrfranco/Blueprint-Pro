@@ -245,9 +245,6 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
                 source: 'square',
               }));
               setClients(mapped);
-              // Skip the Supabase mapping below
-              setLoadingTeam(true);
-              setTeamError(null);
             }
           } catch (clientApiErr) {
             console.warn('[Settings] Square clients API fallback failed:', clientApiErr);

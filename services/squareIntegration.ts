@@ -186,7 +186,8 @@ export const SquareIntegrationService = {
       const allCustomers: any[] = [];
 
       do {
-          const path = `/v2/customers/list${cursor ? `?cursor=${cursor}` : ''}`;
+          const path = `/v2/customers${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''}`;
+          console.log('[CUSTOMERS] Fetching:', path);
           const data: any = await squareApiFetch(path);
           
           if (data.customers) {
