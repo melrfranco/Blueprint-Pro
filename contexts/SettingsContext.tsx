@@ -149,8 +149,20 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     if (!supabase) return;
 
     let cancelled = false;
+    let isLoading = false;
+    let lastLoadedUserId: string | null = null;
 
     const loadForUser = async (passedUser?: any) => {
+      // Prevent duplicate runs for the same user
+      if (passedUser?.id && passedUser.id === lastLoadedUserId) {
+        console.log('[Settings] loadForUser skipped (already loaded for user:', passedUser.id, ')');
+        return;
+      }
+      if (isLoading) {
+        console.log('[Settings] loadForUser skipped (already loading)');
+        return;
+      }
+      isLoading = true;
       console.log('[Settings] loadForUser called, passedUser:', passedUser?.id || 'none');
 
       let user = passedUser;
@@ -314,6 +326,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         }
       } finally {
         if (!cancelled) setLoadingTeam(false);
+        isLoading = false;
+        if (user?.id) lastLoadedUserId = user.id;
+        console.log('[Settings] loadForUser completed for user:', user?.id);
       }
     };
 

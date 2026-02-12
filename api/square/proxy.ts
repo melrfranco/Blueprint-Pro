@@ -23,43 +23,48 @@ export default async function handler(req: any, res: any) {
         | undefined);
 
     // 🔑 FIX: Load access token from merchant_settings (authoritative schema)
-    if (!squareAccessToken) {
+    if (!squareAccessToken && process.env.VITE_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      const supabaseAdmin = createClient(
+        process.env.VITE_SUPABASE_URL,
+        process.env.SUPABASE_SERVICE_ROLE_KEY
+      );
+
+      // Try X-User-Id header first (lightweight, avoids Vercel 494 header size limit)
+      const userIdHeader = req.headers['x-user-id'] as string | undefined;
+
+      // Fall back to Bearer JWT if no X-User-Id
       const authHeader = req.headers['authorization'] as string | undefined;
       const bearer = authHeader?.startsWith('Bearer ')
         ? authHeader.slice(7)
         : undefined;
 
-      if (
-        bearer &&
-        process.env.VITE_SUPABASE_URL &&
-        process.env.SUPABASE_SERVICE_ROLE_KEY
-      ) {
-        const supabaseAdmin = createClient(
-          process.env.VITE_SUPABASE_URL,
-          process.env.SUPABASE_SERVICE_ROLE_KEY
-        );
+      let userId = userIdHeader;
 
-        // FIX: Cast to 'any' to bypass Supabase auth method type errors, likely from an environment configuration issue.
+      // If we have a bearer token but no user ID header, resolve user from JWT
+      if (!userId && bearer) {
         const { data: userData, error: userErr } =
           await (supabaseAdmin.auth as any).getUser(bearer);
-
-        const userId = userData?.user?.id;
-
-        if (!userErr && userId) {
-          const { data: ms } = await supabaseAdmin
-            .from('merchant_settings')
-            .select('square_access_token')
-            .eq('supabase_user_id', userId)
-            .maybeSingle();
-
-          console.log(`[SQUARE PROXY] Supabase lookup for user ${userId}:`, { found: !!ms, hasToken: !!ms?.square_access_token });
-          if (ms?.square_access_token) {
-            squareAccessToken = ms.square_access_token;
-            console.log(`[SQUARE PROXY] Using token from Supabase merchant_settings`);
-          }
+        if (!userErr && userData?.user?.id) {
+          userId = userData.user.id;
         } else {
-          console.log(`[SQUARE PROXY] Auth lookup failed:`, { userErr, userId });
+          console.log(`[SQUARE PROXY] Auth lookup failed:`, { userErr });
         }
+      }
+
+      if (userId) {
+        const { data: ms } = await supabaseAdmin
+          .from('merchant_settings')
+          .select('square_access_token')
+          .eq('supabase_user_id', userId)
+          .maybeSingle();
+
+        console.log(`[SQUARE PROXY] Supabase lookup for user ${userId}:`, { found: !!ms, hasToken: !!ms?.square_access_token });
+        if (ms?.square_access_token) {
+          squareAccessToken = ms.square_access_token;
+          console.log(`[SQUARE PROXY] Using token from merchant_settings`);
+        }
+      } else {
+        console.log(`[SQUARE PROXY] No user ID available from headers`);
       }
     }
 

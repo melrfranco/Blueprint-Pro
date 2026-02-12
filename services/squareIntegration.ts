@@ -16,19 +16,19 @@ export const isSquareTokenMissing = false;
 async function squareApiFetch<T>(path: string, options: { method?: string, body?: any } = {}): Promise<T> {
     const { method = 'GET', body } = options;
 
-    // Get the current Supabase session to pass auth to the proxy
+    // Get the current session to identify the user
     const { data: { session } } = await supabase.auth.getSession();
 
     // Route all Square API calls through the server proxy to avoid CORS issues
     const headers: any = {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'Square-Version': '2025-10-16',
     };
 
-    // If we have a Supabase session, use it; otherwise the proxy will fall back to stored token
-    if (session?.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
+    // Send user ID in a small custom header instead of the full JWT
+    // (Supabase JWTs are too large and cause Vercel 494 "header too large" errors)
+    if (session?.user?.id) {
+        headers['X-User-Id'] = session.user.id;
     }
 
     const response = await fetch(`/api/square/proxy?path=${encodeURIComponent(path)}`, {
