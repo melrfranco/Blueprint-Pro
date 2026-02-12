@@ -170,19 +170,34 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         .eq('supabase_user_id', user.id)
         .maybeSingle();
 
-      console.log('[Settings] Merchant settings lookup for user', user.id, ':', { found: !!merchantSettings, error: msError });
+      console.log('[Settings] Merchant settings lookup for user', user.id, ':', {
+        found: !!merchantSettings,
+        hasToken: !!merchantSettings?.square_access_token,
+        error: msError?.message || null,
+      });
 
       if (cancelled) return;
 
+      // Determine if user has Square connected:
+      // - If we can read merchant_settings and it has a token, yes
+      // - If RLS blocks the read (msError or null), check user metadata as fallback
+      const hasSquareFromDb = !!merchantSettings?.square_access_token;
+      const hasSquareFromMeta = !!user.user_metadata?.merchant_id;
+      const hasSquareConnection = hasSquareFromDb || hasSquareFromMeta;
+
+      console.log('[Settings] Square connection:', { hasSquareFromDb, hasSquareFromMeta, hasSquareConnection });
+
       if (msError) {
         console.error('[Settings] Failed to load merchant settings:', msError);
-        setNeedsSquareConnect(true); // Fail-safe
+        // If user has merchant_id in metadata, they connected via OAuth - don't block them
+        setNeedsSquareConnect(!hasSquareFromMeta);
       } else {
         setNeedsSquareConnect(!merchantSettings?.square_access_token);
       }
 
       // ---- Services: fetch from Square catalog (replaces mock data)
-      if (merchantSettings?.square_access_token) {
+      // The proxy resolves the Square token server-side, so we don't need it client-side
+      if (hasSquareConnection) {
         try {
           console.log('[Settings] Fetching services from Square catalog...');
           const squareServices = await SquareIntegrationService.fetchCatalog();
@@ -227,7 +242,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         }
 
         // If still no data from Supabase, fetch directly from Square API
-        if ((data?.length ?? 0) === 0 && merchantSettings?.square_access_token) {
+        if ((data?.length ?? 0) === 0 && hasSquareConnection) {
           console.log('[Settings] No clients in Supabase, fetching directly from Square API...');
           try {
             const squareClients = await SquareIntegrationService.fetchCustomers();
@@ -305,7 +320,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         }
 
         // If still no data from Supabase, fetch directly from Square API
-        if ((data?.length ?? 0) === 0 && merchantSettings?.square_access_token) {
+        if ((data?.length ?? 0) === 0 && hasSquareConnection) {
           console.log('[Settings] No team in Supabase, fetching directly from Square API...');
           try {
             const squareTeam = await SquareIntegrationService.fetchTeam();
