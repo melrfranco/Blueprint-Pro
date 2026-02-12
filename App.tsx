@@ -146,7 +146,7 @@ const AppContent: React.FC = () => {
     return <LoginScreen />;
   }
 
-  if (needsSquareConnect) {
+  if (needsSquareConnect && user.role !== 'stylist') {
     return <MissingCredentialsScreen />;
   }
 
