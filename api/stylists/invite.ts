@@ -81,44 +81,42 @@ export default async function handler(req: any, res: any) {
     const requestOrigin = resolvedHost ? `${protocol}://${resolvedHost}` : null;
     const redirectTo = process.env.VITE_STYLIST_APP_URL || (requestOrigin ? `${requestOrigin}/` : undefined);
 
-    let linkData: any = null;
-    let linkError: any = null;
+    const userData = {
+      role: 'stylist',
+      stylist_id: stylistId,
+      stylist_name: name,
+      level_id: levelId,
+      permissions: DEFAULT_PERMISSIONS,
+    };
 
-    // Try invite first (creates user + generates link)
-    const inviteResult = await (supabaseAdmin.auth as any).admin.generateLink({
-      type: 'invite',
-      email,
-      options: {
-        data: {
-          role: 'stylist',
-          stylist_id: stylistId,
-          stylist_name: name,
-          level_id: levelId,
-          permissions: DEFAULT_PERMISSIONS,
-        },
-        redirectTo,
-      },
+    // First: try inviteUserByEmail (sends the actual email)
+    const { error: inviteError } = await (supabaseAdmin.auth as any).admin.inviteUserByEmail(email, {
+      data: userData,
+      redirectTo,
     });
 
-    if (inviteResult.error) {
-      // User may already exist — fall back to magic link for re-invites
+    let actionLink: string | null = null;
+
+    if (inviteError) {
+      // User may already exist — try generateLink with magiclink as fallback
       const magicResult = await (supabaseAdmin.auth as any).admin.generateLink({
         type: 'magiclink',
         email,
         options: { redirectTo },
       });
-      linkData = magicResult.data;
-      linkError = magicResult.error;
+      if (magicResult.error) {
+        return res.status(400).json({ message: inviteError.message });
+      }
+      actionLink = magicResult.data?.properties?.action_link || null;
     } else {
-      linkData = inviteResult.data;
+      // Also generate a link as backup (in case email is slow/missing)
+      const linkResult = await (supabaseAdmin.auth as any).admin.generateLink({
+        type: 'invite',
+        email,
+        options: { data: userData, redirectTo },
+      });
+      actionLink = linkResult.data?.properties?.action_link || null;
     }
-
-    if (linkError) {
-      return res.status(400).json({ message: linkError.message });
-    }
-
-    // Build the invite link from the token hash returned by generateLink
-    const actionLink = linkData?.properties?.action_link || null;
 
     const { data: merchantSettings } = await supabaseAdmin
       .from('merchant_settings')
