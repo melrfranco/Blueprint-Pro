@@ -155,59 +155,49 @@ export default function SquareCallback() {
 
   if (needsEmail) {
     return (
-      <div style={{ padding: 24, maxWidth: 400 }}>
-        <h2>Complete Authentication</h2>
-        <p>We couldn't find an email associated with your Square account. Please provide one to continue:</p>
-        <form onSubmit={handleEmailSubmit}>
-          <input
-            type="email"
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            style={{
-              width: '100%',
-              padding: 8,
-              marginBottom: 12,
-              border: '1px solid #ccc',
-              borderRadius: 4,
-              boxSizing: 'border-box',
-            }}
-            disabled={isSubmitting}
-          />
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            style={{
-              width: '100%',
-              padding: 8,
-              backgroundColor: '#007AFF',
-              color: 'white',
-              border: 'none',
-              borderRadius: 4,
-              cursor: isSubmitting ? 'default' : 'pointer',
-              opacity: isSubmitting ? 0.6 : 1,
-            }}
-          >
-            {isSubmitting ? 'Authenticating...' : 'Continue'}
-          </button>
-        </form>
-        {error && (
-          <p style={{ color: 'red', marginTop: 16 }}>
-            {error}
+      <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-background">
+        <div className="w-full max-w-sm bp-container-tall bg-card p-6">
+          <h2 className="bp-section-title mb-2 text-center">Complete Authentication</h2>
+          <p className="bp-body-sm text-muted-foreground mb-4 text-center">
+            We couldn't find an email associated with your Square account. Please provide one to continue:
           </p>
-        )}
+          <form onSubmit={handleEmailSubmit}>
+            <input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              data-ui="field"
+              className="w-full px-4 py-2 mb-3 bg-muted text-foreground border border-border"
+              disabled={isSubmitting}
+            />
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              data-ui="button"
+              className="w-full py-2 bg-primary text-primary-foreground font-bold disabled:opacity-50"
+            >
+              {isSubmitting ? 'Authenticating...' : 'Continue'}
+            </button>
+          </form>
+          {error && (
+            <p className="text-red-500 mt-4 bp-body-sm text-center">{error}</p>
+          )}
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: 24 }}>
-      <h2>Connecting Square…</h2>
-      <p>Please wait. This may take a moment.</p>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-background">
+      <div className="relative w-full max-w-xs h-2 bg-muted mb-4 bp-container-compact overflow-hidden">
+        <div className="absolute top-0 left-0 h-2 bg-secondary bp-container-compact animate-pulse w-full"></div>
+      </div>
+      <div className="w-24 h-24 border-4 border-secondary border-t-transparent rounded-full animate-spin mb-8"></div>
+      <h2 className="bp-section-title mb-2">Connecting Square</h2>
+      <p className="bp-body text-muted-foreground">Setting up your account...</p>
       {error && (
-        <p style={{ color: 'red', marginTop: 16 }}>
-          {error}
-        </p>
+        <p className="text-red-500 mt-4 bp-body-sm text-center">{error}</p>
       )}
     </div>
   );
