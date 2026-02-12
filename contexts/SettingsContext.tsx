@@ -150,17 +150,20 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
     let cancelled = false;
 
-    const loadForUser = async () => {
-      console.log('[Settings] loadForUser called');
+    const loadForUser = async (passedUser?: any) => {
+      console.log('[Settings] loadForUser called, passedUser:', passedUser?.id || 'none');
 
-      // Use getSession() instead of getUser() — getSession reads from local cache
-      // and doesn't require a network call to /auth/v1/user (which fails with ERR_CONNECTION_RESET)
-      const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
-      if (cancelled) return;
+      let user = passedUser;
 
-      const user = sessionData?.session?.user;
-      if (sessionErr || !user) {
-        console.log('[Settings] No authenticated session, skipping data load', { error: sessionErr?.message });
+      // If no user passed directly, try to get from session
+      if (!user) {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (cancelled) return;
+        user = sessionData?.session?.user;
+      }
+
+      if (!user) {
+        console.log('[Settings] No authenticated user, skipping data load');
         setNeedsSquareConnect(false);
         return;
       }
@@ -319,9 +322,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
     // Subscribe once to auth changes
     // FIX: Cast to 'any' to bypass Supabase auth method type errors, likely from an environment configuration issue.
-    const { data } = (supabase.auth as any).onAuthStateChange((event: string) => {
+    const { data } = (supabase.auth as any).onAuthStateChange((event: string, session: any) => {
+      console.log('[Settings] onAuthStateChange:', event, 'user:', session?.user?.id || 'none');
       if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-        void loadForUser();
+        // Pass the user directly from the session — avoids needing getSession()/getUser() network calls
+        void loadForUser(session?.user);
       }
       if (event === 'SIGNED_OUT') {
         // Clear user-scoped data

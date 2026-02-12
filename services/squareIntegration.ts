@@ -186,15 +186,26 @@ export const SquareIntegrationService = {
       const allCustomers: any[] = [];
 
       do {
-          const path = `/v2/customers${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ''}`;
-          console.log('[CUSTOMERS] Fetching:', path);
-          const data: any = await squareApiFetch(path);
+          console.log('[CUSTOMERS] Fetching page, cursor:', cursor ? cursor.substring(0, 20) + '...' : 'none');
+          const body: any = {
+              query: { sort: { field: 'CREATED_AT', order: 'DESC' } },
+              limit: 100,
+          };
+          if (cursor) body.cursor = cursor;
+
+          const data: any = await squareApiFetch('/v2/customers/search', {
+              method: 'POST',
+              body,
+          });
           
           if (data.customers) {
+              console.log('[CUSTOMERS] Got', data.customers.length, 'customers');
               allCustomers.push(...data.customers);
           }
           cursor = data.cursor;
       } while(cursor);
+
+      console.log('[CUSTOMERS] Total customers fetched:', allCustomers.length);
       
       return allCustomers.map((c: any) => ({
         id: c.id,
