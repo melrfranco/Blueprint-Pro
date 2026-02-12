@@ -733,6 +733,12 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                             <CheckCircleIcon className="w-20 h-20 text-accent mx-auto mb-4" />
                             <p className="text-2xl font-bold text-foreground">INVITE SENT!</p>
                             <p className="bp-body-sm mt-2 text-muted-foreground">{"Client marked as 'Offered'"}</p>
+                            <button
+                                onClick={() => { setMembershipModalOpen(false); setInviteSent(false); }}
+                                className="mt-6 px-8 py-3 font-bold bp-container-compact bg-primary text-primary-foreground active:scale-95 transition-all"
+                            >
+                                DONE
+                            </button>
                         </div>
                       ) : (
                         <div className="space-y-6 text-foreground">
@@ -896,6 +902,12 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                               <CheckCircleIcon className="w-20 h-20 text-accent mx-auto mb-4" />
                               <p className="text-3xl font-bold text-foreground">BOOKED!</p>
                               <p className="text-lg font-bold mt-2 text-foreground">Added to Square calendar.</p>
+                              <button
+                                  onClick={() => { setBookingModalOpen(false); setBookingSuccess(false); }}
+                                  className="mt-6 px-8 py-3 font-bold bp-container-compact bg-primary text-primary-foreground active:scale-95 transition-all"
+                              >
+                                  DONE
+                              </button>
                           </div>
                       ) : fetchError ? (
                           <div className="p-6 bg-red-50 text-red-950 bp-container-list border-4 border-red-500 text-center">
