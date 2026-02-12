@@ -102,7 +102,7 @@ const JoinScreen: React.FC<JoinScreenProps> = ({ onComplete }) => {
     <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden bg-primary">
       <div className="absolute inset-0 opacity-10 bp-grid-bg" />
 
-      <div className="bg-white bp-container-tall shadow-2xl w-full max-w-md relative border border-border depth-3 overflow-hidden">
+      <div className="bg-white bp-container-tall shadow-2xl w-full max-w-md relative border border-border depth-3 overflow-hidden text-[#0B3559]">
         <div className="p-10 text-center">
           <img
             src="https://cdn.builder.io/api/v1/image/assets%2F8d6a989189ff4d9e8633804d5d0dbd86%2F7093acbcb2ca4ac783c4b84bc621e52f"
@@ -114,14 +114,14 @@ const JoinScreen: React.FC<JoinScreenProps> = ({ onComplete }) => {
         <div className="px-10 pb-10 pt-2">
           {step === 'pin' ? (
             <>
-              <h2 className="bp-section-title text-center mb-2">Join Your Team</h2>
-              <p className="bp-body-sm text-center text-muted-foreground mb-6">
+              <h2 className="bp-section-title text-center mb-2 text-[#0B3559]">Join Your Team</h2>
+              <p className="bp-body-sm text-center text-[#2B5470] mb-6">
                 Enter the 4-digit PIN your admin gave you.
               </p>
 
               <form onSubmit={handlePinSubmit} className="space-y-4">
                 <div>
-                  <label className="block bp-overline mb-2">Team PIN</label>
+                  <label className="block bp-overline mb-2 text-[#2B5470]">Team PIN</label>
                   <input
                     type="text"
                     inputMode="numeric"
@@ -129,7 +129,7 @@ const JoinScreen: React.FC<JoinScreenProps> = ({ onComplete }) => {
                     value={pin}
                     onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                     placeholder="0000"
-                    className="w-full p-4 border-2 bp-container-compact font-bold text-2xl text-center tracking-[0.5em] outline-none bg-muted text-foreground focus:border-accent transition-all"
+                    className="w-full p-4 border-2 bp-container-compact font-bold text-2xl text-center tracking-[0.5em] outline-none bg-[#0B3559] text-white placeholder-white/40 focus:border-accent transition-all"
                     autoFocus
                   />
                 </div>
@@ -141,7 +141,7 @@ const JoinScreen: React.FC<JoinScreenProps> = ({ onComplete }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-4 bp-btn-primary text-center disabled:opacity-50"
+                  className="w-full py-4 bg-[#0B3559] text-white font-bold text-center disabled:opacity-50"
                   data-ui="button"
                 >
                   {loading ? 'Verifying...' : 'Continue'}
@@ -150,43 +150,43 @@ const JoinScreen: React.FC<JoinScreenProps> = ({ onComplete }) => {
             </>
           ) : (
             <>
-              <h2 className="bp-section-title text-center mb-2">
+              <h2 className="bp-section-title text-center mb-2 text-[#0B3559]">
                 {stylistName ? `Welcome, ${stylistName.split(' ')[0]}!` : 'Set Up Your Account'}
               </h2>
-              <p className="bp-body-sm text-center text-muted-foreground mb-6">
+              <p className="bp-body-sm text-center text-[#2B5470] mb-6">
                 Confirm your email and set a password.
               </p>
 
               <form onSubmit={handleSetup} className="space-y-4">
                 <div>
-                  <label className="block bp-overline mb-2">Email</label>
+                  <label className="block bp-overline mb-2 text-[#2B5470]">Email</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="your@email.com"
-                    className="w-full p-4 border-2 bp-container-compact font-medium outline-none bg-muted text-foreground focus:border-accent transition-all"
+                    className="w-full p-4 border-2 bp-container-compact font-medium outline-none bg-[#EDF2F7] text-[#0B3559] focus:border-accent transition-all"
                     autoFocus
                   />
                 </div>
                 <div>
-                  <label className="block bp-overline mb-2">Password</label>
+                  <label className="block bp-overline mb-2 text-[#2B5470]">Password</label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="At least 8 characters"
-                    className="w-full p-4 border-2 bp-container-compact font-medium outline-none bg-muted text-foreground focus:border-accent transition-all"
+                    className="w-full p-4 border-2 bp-container-compact font-medium outline-none bg-[#EDF2F7] text-[#0B3559] focus:border-accent transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block bp-overline mb-2">Confirm Password</label>
+                  <label className="block bp-overline mb-2 text-[#2B5470]">Confirm Password</label>
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Re-enter your password"
-                    className="w-full p-4 border-2 bp-container-compact font-medium outline-none bg-muted text-foreground focus:border-accent transition-all"
+                    className="w-full p-4 border-2 bp-container-compact font-medium outline-none bg-[#EDF2F7] text-[#0B3559] focus:border-accent transition-all"
                   />
                 </div>
 
@@ -197,7 +197,7 @@ const JoinScreen: React.FC<JoinScreenProps> = ({ onComplete }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-4 bp-btn-primary text-center disabled:opacity-50"
+                  className="w-full py-4 bg-[#0B3559] text-white font-bold text-center disabled:opacity-50"
                   data-ui="button"
                 >
                   {loading ? 'Setting up...' : 'Create Account'}
@@ -206,7 +206,7 @@ const JoinScreen: React.FC<JoinScreenProps> = ({ onComplete }) => {
                 <button
                   type="button"
                   onClick={() => { setStep('pin'); setError(null); }}
-                  className="w-full py-2 text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                  className="w-full py-2 text-xs uppercase tracking-widest text-[#2B5470] hover:text-[#0B3559] transition-colors"
                 >
                   Back
                 </button>

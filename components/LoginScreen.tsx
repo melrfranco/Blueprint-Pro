@@ -40,7 +40,7 @@ const LoginScreen: React.FC = () => {
       {/* Blueprint grid background */}
       <div className="absolute inset-0 opacity-10 bp-grid-bg" />
 
-      <div className="bg-white bp-container-tall shadow-2xl w-full max-w-md relative border border-border depth-3 overflow-hidden">
+      <div className="bg-white bp-container-tall shadow-2xl w-full max-w-md relative border border-border depth-3 overflow-hidden text-[#0B3559]">
         <div className="p-10 text-center">
           <img
             src="https://cdn.builder.io/api/v1/image/assets%2F8d6a989189ff4d9e8633804d5d0dbd86%2F7093acbcb2ca4ac783c4b84bc621e52f"
@@ -51,23 +51,23 @@ const LoginScreen: React.FC = () => {
 
         <div className="px-10 pb-10 pt-2">
           <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-0.5 bg-foreground/30" />
-            <span className="bp-overline text-foreground">Admin access</span>
-            <div className="flex-1 h-0.5 bg-foreground/30" />
+            <div className="flex-1 h-0.5 bg-[#0B3559]/30" />
+            <span className="bp-overline text-[#2B5470]">Admin access</span>
+            <div className="flex-1 h-0.5 bg-[#0B3559]/30" />
           </div>
 
           <button
             data-ui="button"
             onClick={startSquareOAuth}
-            className="w-full py-4 bp-btn-primary text-center"
+            className="w-full py-4 bg-[#0B3559] text-white font-bold text-center"
           >
             Login with Square
           </button>
 
           <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-0.5 bg-foreground/30" />
-            <span className="bp-overline text-foreground">Team access</span>
-            <div className="flex-1 h-0.5 bg-foreground/30" />
+            <div className="flex-1 h-0.5 bg-[#0B3559]/30" />
+            <span className="bp-overline text-[#2B5470]">Team access</span>
+            <div className="flex-1 h-0.5 bg-[#0B3559]/30" />
           </div>
 
           {!showStylistLogin ? (
@@ -75,14 +75,14 @@ const LoginScreen: React.FC = () => {
               <button
                 data-ui="button"
                 onClick={() => setShowStylistLogin(true)}
-                className="w-full py-4 bp-btn-secondary text-center"
+                className="w-full py-4 bg-[#2B5470] text-white font-bold text-center"
               >
                 Stylist Login
               </button>
               <button
                 data-ui="button"
                 onClick={() => { window.location.href = '/join'; }}
-                className="w-full py-3 text-xs uppercase tracking-widest font-bold text-muted-foreground hover:text-foreground transition-colors"
+                className="w-full py-3 text-xs uppercase tracking-widest font-bold text-[#2B5470] hover:text-[#0B3559] transition-colors"
               >
                 New here? Join with PIN
               </button>
@@ -94,7 +94,7 @@ const LoginScreen: React.FC = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email"
-                className="w-full p-3 border-2 bp-container-compact font-medium outline-none bg-muted text-foreground focus:border-accent transition-all text-sm"
+                className="w-full p-3 border-2 bp-container-compact font-medium outline-none bg-[#EDF2F7] text-[#0B3559] focus:border-accent transition-all text-sm"
                 required
               />
               <input
@@ -102,7 +102,7 @@ const LoginScreen: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
-                className="w-full p-3 border-2 bp-container-compact font-medium outline-none bg-muted text-foreground focus:border-accent transition-all text-sm"
+                className="w-full p-3 border-2 bp-container-compact font-medium outline-none bg-[#EDF2F7] text-[#0B3559] focus:border-accent transition-all text-sm"
                 required
               />
               {error && (
@@ -112,14 +112,14 @@ const LoginScreen: React.FC = () => {
                 type="submit"
                 disabled={loading}
                 data-ui="button"
-                className="w-full py-4 bp-btn-secondary text-center disabled:opacity-50"
+                className="w-full py-4 bg-[#2B5470] text-white font-bold text-center disabled:opacity-50"
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
               <button
                 type="button"
                 onClick={() => { setShowStylistLogin(false); setError(null); }}
-                className="w-full py-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors"
+                className="w-full py-2 text-xs font-semibold text-[#2B5470] hover:text-[#0B3559] transition-colors"
               >
                 Cancel
               </button>
