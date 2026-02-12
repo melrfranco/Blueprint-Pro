@@ -153,15 +153,14 @@ const MissingCredentialsScreen = () => {
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center justify-center p-6 transition-colors duration-500 relative overflow-hidden"
-      style={{ backgroundColor: branding.primaryColor }}
+      className="min-h-screen flex flex-col items-center justify-center p-6 transition-colors duration-500 relative overflow-hidden bg-primary"
     >
       {/* Blueprint grid background */}
       <div className="absolute inset-0 opacity-10 bp-grid-bg" />
 
-      <div className="bg-surface rounded-[40px] shadow-2xl w-full max-w-md overflow-hidden relative border-4 depth-3" style={{ borderColor: branding.primaryColor }}>
+      <div className="bg-card bp-container-tall shadow-2xl w-full max-w-md relative border-4 border-primary depth-3">
         {/* Header Section with Branding */}
-        <div className="p-10 text-center border-b-4 bp-page-header" style={{ borderColor: branding.primaryColor }}>
+        <div className="p-10 text-center border-b-4 border-primary bp-page-header">
           {branding.logoUrl ? (
             <img
               src={branding.logoUrl}
@@ -170,22 +169,21 @@ const MissingCredentialsScreen = () => {
             />
           ) : (
             <div
-              className="w-20 h-20 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-xl transform -rotate-3"
-              style={{ backgroundColor: branding.accentColor }}
+              className="w-20 h-20 bp-container-tall mx-auto flex items-center justify-center mb-4 shadow-xl transform -rotate-3 bg-accent"
             >
               <SettingsIcon className="w-10 h-10 text-white" />
             </div>
           )}
-          <h1 className="text-3xl font-black tracking-tighter bp-title" style={{ color: branding.primaryColor }}>
+          <h1 className="text-3xl font-bold tracking-tighter bp-title text-primary">
             Connect Square
           </h1>
-          <p className="text-xs font-black uppercase tracking-widest mt-2 bp-subtitle">
+          <p className="bp-overline mt-2">
             Pro Access Required
           </p>
         </div>
 
         {/* Content Section */}
-        <div className="p-10 bg-navy/5">
+        <div className="p-10 bg-primary/5">
           <p className="text-center text-sm font-bold mb-8 bp-text-secondary">
             Connect your Square account to access the Pro/Admin dashboard.
           </p>
@@ -194,7 +192,7 @@ const MissingCredentialsScreen = () => {
             <div className="mb-6">
               <button
                 onClick={startOAuth}
-                className="blueprint-button font-black"
+                className="blueprint-button"
               >
                 Continue with Square OAuth
               </button>
@@ -202,8 +200,8 @@ const MissingCredentialsScreen = () => {
           )}
 
           {(oauthDebug || oauthDebugError) && (
-            <div className="mb-6 rounded-2xl border-2 border-surface-border bg-white/70 p-4 text-xs font-semibold text-steel">
-              <p className="text-[10px] font-black uppercase tracking-widest bp-label">OAuth Debug Info</p>
+            <div className="mb-6 bp-container-tall border-2 border bg-card/70 p-4 text-xs font-semibold text-muted-foreground">
+              <p className="bp-overline">OAuth Debug Info</p>
               {oauthDebugError ? (
                 <p className="mt-2 text-red-600">{oauthDebugError}</p>
               ) : (
@@ -243,14 +241,14 @@ const MissingCredentialsScreen = () => {
           )}
 
           <div className="flex items-center gap-3 mb-6">
-            <div className="flex-1 h-0.5" style={{ backgroundColor: branding.primaryColor }} />
-            <span className="text-xs font-semibold bp-text-secondary">or</span>
-            <div className="flex-1 h-0.5" style={{ backgroundColor: branding.primaryColor }} />
+            <div className="flex-1 h-0.5 bg-primary" />
+            <span className="text-xs font-semibold text-muted-foreground">or</span>
+            <div className="flex-1 h-0.5 bg-primary" />
           </div>
 
           <form onSubmit={handleTokenSubmit} className="space-y-4">
             <div>
-              <label className="block text-[9px] font-black uppercase tracking-widest mb-2 bp-label">
+              <label className="block bp-overline mb-2">
                 Square Access Token
               </label>
               <input
@@ -258,18 +256,17 @@ const MissingCredentialsScreen = () => {
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
                 placeholder="Paste your Square access token"
-                className="w-full px-4 py-3 rounded-xl font-bold text-sm bp-input"
+                className="w-full px-4 py-3 bp-container-compact font-bold text-sm bp-input"
                 disabled={loading}
               />
             </div>
             {error && (
-              <p className="text-red-600 text-xs font-bold text-center bg-red-50 p-3 rounded-lg">{error}</p>
+              <p className="text-red-600 text-xs font-bold text-center bg-red-50 p-3 bp-container-list">{error}</p>
             )}
             <button
               type="submit"
               disabled={loading}
-              className="w-full font-black py-4 rounded-2xl border-4 uppercase tracking-widest text-sm shadow-lg active:scale-95 transition-all flex items-center justify-center bp-btn-primary"
-              style={{ backgroundColor: branding.primaryColor, borderColor: branding.primaryColor }}
+              className="w-full py-4 bp-container-compact border-4 border-primary uppercase tracking-widest text-sm shadow-lg active:scale-95 transition-all flex items-center justify-center bg-primary text-primary-foreground"
             >
               {loading ? 'Syncing...' : 'Sync with Token'}
             </button>

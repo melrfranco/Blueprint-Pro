@@ -10,6 +10,7 @@ import { supabase } from '../lib/supabase';
 
 interface AuthContextType {
   user: User | null;
+  updateUser: (updates: Partial<User>) => void;
   login: (role: UserRole, specificId?: string) => Promise<void>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
@@ -64,6 +65,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         name: resolvedName,
         role,
         email: authUser.email,
+        avatarUrl: authUser.user_metadata?.avatar_url || undefined,
         isMock: false,
       });
 
@@ -222,10 +224,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setAuthInitialized(true);
   };
 
+  const updateUser = async (updates: Partial<User>) => {
+    setUser(prev => prev ? { ...prev, ...updates } : prev);
+    
+    // Persist avatar to Supabase auth metadata if it changed
+    if (updates.avatarUrl && supabase) {
+      try {
+        await supabase.auth.updateUser({
+          data: { avatar_url: updates.avatarUrl }
+        });
+      } catch (e) {
+        console.warn('[AuthContext] Failed to persist avatar to Supabase:', e);
+      }
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
+        updateUser,
         login,
         logout,
         isAuthenticated: !!user,

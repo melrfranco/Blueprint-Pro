@@ -1,7 +1,5 @@
 import React from 'react';
 import { HomeIcon, DocumentTextIcon, SettingsIcon } from './icons';
-import { useSettings } from '../contexts/SettingsContext';
-import { ensureAccessibleColor } from '../utils/ensureAccessibleColor';
 
 export type Tab = 'dashboard' | 'plans' | 'settings';
 
@@ -17,8 +15,6 @@ const NAV_ITEMS: { key: Tab; label: string; icon: any }[] = [
 ];
 
 export default function BottomNav({ activeTab, onChange }: BottomNavProps) {
-  const { branding } = useSettings();
-  const safePrimaryColor = ensureAccessibleColor(branding.primaryColor, '#111827', '#0B3559');
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-50 bp-bottomnav">
@@ -30,13 +26,12 @@ export default function BottomNav({ activeTab, onChange }: BottomNavProps) {
             <button
               key={key}
               onClick={() => onChange(key)}
-              className={`flex flex-col items-center justify-center w-full p-1 rounded-lg transition-all ${isActive ? 'bp-nav-active' : 'bp-nav-inactive'}`}
-              style={isActive ? { color: safePrimaryColor } : undefined}
+              className={`flex flex-col items-center justify-center w-full p-1 rounded-lg transition-all ${isActive ? 'text-white font-bold' : 'text-white/60 font-medium'}`}
               aria-label={label}
               aria-current={isActive ? 'page' : undefined}
             >
               <Icon className={`h-7 w-7 mb-1 ${isActive ? 'stroke-[3]' : 'stroke-[2.5]'}`} />
-              <span className="text-[10px] font-black uppercase tracking-tight">
+              <span className="text-[10px] font-bold uppercase tracking-tight">
                 {label}
               </span>
             </button>

@@ -7,50 +7,7 @@
     <title>Salon Service Planner - Client</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <script>
-      // IMMEDIATE BRANDING & PREFERENCE RESTORATION
-      // This runs before React loads to ensure settings are correct instantly.
-      (function() {
-        try {
-          const primary = localStorage.getItem('admin_brand_primary');
-          const secondary = localStorage.getItem('admin_brand_secondary');
-          const accent = localStorage.getItem('admin_brand_accent');
-          const font = localStorage.getItem('admin_brand_font');
-          const textSize = localStorage.getItem('admin_text_size');
-
-          if (primary) document.documentElement.style.setProperty('--color-brand-primary', primary);
-          if (secondary) document.documentElement.style.setProperty('--color-brand-secondary', secondary);
-          if (accent) document.documentElement.style.setProperty('--color-brand-accent', accent);
-
-          const applyBodyPreferences = () => {
-            // This function is guaranteed to run only after document.body is available.
-            if (!document.body) return;
-
-            if (font && !['font-sans', 'font-serif', 'font-mono'].includes(font)) {
-              const link = document.createElement('link');
-              link.href = `https://fonts.googleapis.com/css2?family=${font.replace(/ /g, '+')}:wght@400;700;900&display=swap`;
-              link.rel = 'stylesheet';
-              document.head.appendChild(link);
-              document.body.style.fontFamily = `'${font}', sans-serif`;
-            } else if (font) {
-              document.body.classList.add(font);
-            }
-
-            if (textSize) {
-              document.body.classList.add(`text-size-${textSize.toLowerCase()}`);
-            }
-          };
-
-          // Using 'DOMContentLoaded' ensures this script only runs after the DOM is fully
-          // parsed, preventing any race conditions where `document.body` might be null.
-          // This is the correct and safe way to apply initial styles.
-          document.addEventListener('DOMContentLoaded', applyBodyPreferences, { once: true });
-
-        } catch (e) {
-          console.log('Error loading preferences', e);
-        }
-      })();
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Raleway:wght@100..900&display=swap" rel="stylesheet">
 
 <script type="importmap">
 {

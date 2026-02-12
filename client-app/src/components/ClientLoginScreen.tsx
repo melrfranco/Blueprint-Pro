@@ -37,8 +37,8 @@ const ClientLoginScreen: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white flex items-center justify-center px-6">
       <div className="bg-white border-4 border-gray-100 rounded-3xl shadow-lg p-8 w-full max-w-md">
         <div className="space-y-2 mb-6">
-          <p className="text-xs font-black uppercase tracking-[0.3em] text-gray-400">Client access</p>
-          <h1 className="text-3xl font-black text-gray-950">Welcome back</h1>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-gray-400">Client access</p>
+          <h1 className="text-3xl font-bold text-gray-950">Welcome back</h1>
           <p className="text-sm text-gray-600 font-semibold">
             Sign in to view your plan and appointments from {branding.salonName}.
           </p>
@@ -46,7 +46,7 @@ const ClientLoginScreen: React.FC = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.2em] text-gray-400 font-black">Email</label>
+            <label className="text-xs uppercase tracking-[0.2em] text-gray-400 font-semibold">Email</label>
             <input
               type="email"
               value={email}
@@ -58,7 +58,7 @@ const ClientLoginScreen: React.FC = () => {
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs uppercase tracking-[0.2em] text-gray-400 font-black">Password</label>
+            <label className="text-xs uppercase tracking-[0.2em] text-gray-400 font-semibold">Password</label>
             <input
               type="password"
               value={password}
@@ -78,7 +78,7 @@ const ClientLoginScreen: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-2xl bg-gray-950 text-white py-3 text-sm font-black uppercase tracking-[0.2em] shadow-lg hover:shadow-xl transition-shadow disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full rounded-2xl bg-gray-950 text-white py-3 text-sm font-bold uppercase tracking-[0.2em] shadow-lg hover:shadow-xl transition-shadow disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>

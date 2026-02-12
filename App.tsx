@@ -5,23 +5,28 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import AdminDashboard from './components/AdminDashboardV2';
 import LoginScreen from './components/LoginScreen';
 import MissingCredentialsScreen from './components/MissingCredentialsScreen';
+import DesignSystemShowcase from './components/DesignSystemShowcase';
 
 import { SettingsProvider } from './contexts/SettingsContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { PlanProvider } from './contexts/PlanContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 import { useSettings } from './contexts/SettingsContext';
-
-import './styles/accessibility.css';
 
 /* ----------------------------- */
 /* App Content (Auth-aware UI)   */
 /* ----------------------------- */
 const AppContent: React.FC = () => {
-  const { user, login, logout, authInitialized } = useAuth();
+  const { user, authInitialized } = useAuth();
   const { needsSquareConnect } = useSettings();
-  const bypassLogin = (import.meta as any).env.VITE_BYPASS_LOGIN === '1';
   const [forceAdmin, setForceAdmin] = useState(false);
+
+  // Show design system showcase for styling review
+  const showDesignSystem = window.location.search.includes('design-system');
+  if (showDesignSystem) {
+    return <DesignSystemShowcase />;
+  }
 
   // DEBUG: Log user role when it changes
   useEffect(() => {
@@ -34,14 +39,6 @@ const AppContent: React.FC = () => {
       });
     }
   }, [user]);
-
-  useEffect(() => {
-    if (!bypassLogin || !authInitialized || user) {
-      return;
-    }
-
-    login('admin');
-  }, [authInitialized, bypassLogin, login, user]);
 
   useEffect(() => {
     let active = true;
@@ -92,18 +89,6 @@ const AppContent: React.FC = () => {
     );
   }
 
-  if (bypassLogin) {
-    if (!user) {
-      return (
-        <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin h-10 w-10 border-4 border-gray-300 border-t-transparent rounded-full" />
-        </div>
-      );
-    }
-
-    return <AdminDashboard role="admin" />;
-  }
-
   if (!user) {
     return <LoginScreen />;
   }
@@ -138,14 +123,16 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <SettingsProvider>
-      <AuthProvider>
-        <PlanProvider>
-          <AppContent />
-          <SpeedInsights />
-        </PlanProvider>
-      </AuthProvider>
-    </SettingsProvider>
+    <ThemeProvider>
+      <SettingsProvider>
+        <AuthProvider>
+          <PlanProvider>
+            <AppContent />
+            <SpeedInsights />
+          </PlanProvider>
+        </AuthProvider>
+      </SettingsProvider>
+    </ThemeProvider>
   );
 };
 

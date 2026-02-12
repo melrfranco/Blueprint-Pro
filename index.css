@@ -1,275 +1,324 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;900&family=Comfortaa:wght@400;500;600;700&display=swap');
 
-/* =========================================================
-   TAILWIND v4 THEME — Blueprint Design System v1.0.0
-   Registers Blueprint colors as first-class Tailwind utilities.
-   Use: text-navy, bg-steel, border-frost, etc.
-========================================================= */
-@theme inline {
-  /* Core palette */
-  --color-navy: #0B3559;
-  --color-navy-dark: #093050;
-  --color-steel: #42708C;
-  --color-sky: #5890A6;
-  --color-frost: #8EB1BF;
+@custom-variant dark (&:is(.dark *));
 
-  /* Surfaces */
-  --color-surface: #FFFFFF;
-  --color-surface-muted: #E2EAF0;
-  --color-surface-subtle: #F0F4F8;
-  --color-surface-border: #C5D5DE;
-
-  /* Fonts */
-  --font-sans: "Comfortaa", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  --font-heading: "Raleway", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
-}
-
-/* =========================================================
-   DESIGN TOKENS — SOURCE OF TRUTH
-   Blueprint Design System v1.0.0
-   Core: Navy #0B3559, Steel #42708C, Sky #5890A6, Frost #8EB1BF
-   Fonts: Raleway (headings/UI), Comfortaa (body)
-========================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Raleway:wght@100..900&display=swap');
 
 :root {
-  /* Core Blueprint Palette */
+  --font-size: 16px;
+  
+  /* Blueprint Color Palette - Light Mode */
   --blueprint-navy: #0B3559;
   --blueprint-steel: #42708C;
   --blueprint-sky: #5890A6;
   --blueprint-frost: #8EB1BF;
-
-  /* Typography */
-  --font-sans: "Comfortaa", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-  --font-heading: "Raleway", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Helvetica, Arial, sans-serif;
-  --fw-regular: 400;
-  --fw-medium: 500;
-  --fw-semibold: 600;
-  --fw-bold: 700;
-  --fw-black: 900;
-
-  /* LIGHT MODE — Semantic tokens */
-  --background: #F0F4F8;
+  
+  /* Light Mode Theme */
+  --background: #B5D0DA;
   --foreground: #0B3559;
-
-  --card: #FFFFFF;
+  --card: #F8FAFB;
   --card-foreground: #0B3559;
-
-  --popover: #FFFFFF;
+  --popover: #F8FAFB;
   --popover-foreground: #0B3559;
-
   --primary: #0B3559;
-  --primary-foreground: #F0F4F8;
+  --primary-foreground: #FFFFFF;
+  --secondary: #7BA3B3;
+  --secondary-foreground: #0B3559;
+  --muted: #DDE6ED;
+  --muted-foreground: #2B5470;
+  --accent: #3D7A94;
+  --accent-foreground: #FFFFFF;
+  --destructive: #C73E3A;
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(11, 53, 89, 0.22);
+  --input: rgba(11, 53, 89, 0.22);
+  --input-background: #FFFFFF;
+  --switch-background: #8EB1BF;
+  --bottomnav: #42708C;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: #5890A6;
+  
+  /* Chart colors using the palette */
+  --chart-1: #0B3559;
+  --chart-2: #42708C;
+  --chart-3: #5890A6;
+  --chart-4: #8EB1BF;
+  --chart-5: #6FA3B8;
 
-  --secondary: #42708C;
-  --secondary-foreground: #F0F4F8;
+  /* Service chart colors - light mode */
+  --svc-color-1: #0B3559;
+  --svc-color-2: #5890A6;
+  --svc-color-3: #8EB1BF;
+  --svc-color-4: #42708C;
+  --svc-color-5: #3D7A94;
+  --svc-color-6: #174A6F;
+  --svc-color-7: #7BA3B3;
+  --svc-color-8: #A8C8D4;
+  --svc-color-9: #2C5F7F;
+  --svc-color-10: #B5D4DE;
+  
+  --radius: 0.25rem;
+  
+  /* Sidebar */
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #0B3559;
+  --sidebar-primary: #0B3559;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E8EEF2;
+  --sidebar-accent-foreground: #0B3559;
+  --sidebar-border: rgba(11, 53, 89, 0.22);
+  --sidebar-ring: #5890A6;
+  
+  /* Blueprint-specific design tokens */
+  --grid-color: rgba(11, 53, 89, 0.12);
+  --grid-line-weight: 1px;
+  --technical-border: rgba(11, 53, 89, 0.25);
+  --blueprint-overlay: rgba(88, 144, 166, 0.05);
+}
 
+.dark {
+  /* Dark Mode Theme - Blueprint inspired with WCAG AA compliant contrast */
+  --background: #060D12;
+  --foreground: #F5F9FC;
+  --card: #112D3E;
+  --card-foreground: #FFFFFF;
+  --popover: #112D3E;
+  --popover-foreground: #FFFFFF;
+  --primary: #5890A6;
+  --primary-foreground: #FFFFFF;
+  --secondary: #5890A6;
+  --secondary-foreground: #FFFFFF;
+  --muted: #0E2230;
+  --muted-foreground: #C5E0EB;
   --accent: #5890A6;
   --accent-foreground: #FFFFFF;
-
-  --muted: #E2EAF0;
-  --muted-foreground: #42708C;
-
-  --destructive: #DC2626;
+  --destructive: #FF6B6B;
   --destructive-foreground: #FFFFFF;
-
-  --border: #C5D5DE;
-  --input: #C5D5DE;
-  --input-background: #FFFFFF;
+  --border: rgba(88, 144, 166, 0.25);
+  --input: rgba(88, 144, 166, 0.3);
+  --input-background: #174A6F;
+  --switch-background: #42708C;
+  --bottomnav: #42708C;
   --ring: #5890A6;
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  
+  /* Chart colors for dark mode */
+  --chart-1: #8EB1BF;
+  --chart-2: #5890A6;
+  --chart-3: #42708C;
+  --chart-4: #0B3559;
+  --chart-5: #6FA3B8;
 
-  /* Sidebar tokens */
-  --sidebar: #0B3559;
-  --sidebar-foreground: #F0F4F8;
-  --sidebar-border: #1A4A73;
+  /* Service chart colors - dark mode (lighter for contrast) */
+  --svc-color-1: #8EB1BF;
+  --svc-color-2: #A8D4E6;
+  --svc-color-3: #C8E2EC;
+  --svc-color-4: #6FA3B8;
+  --svc-color-5: #7DBDD4;
+  --svc-color-6: #5A9AB5;
+  --svc-color-7: #B5D4DE;
+  --svc-color-8: #D4E8F0;
+  --svc-color-9: #4A8DA8;
+  --svc-color-10: #E0F0F5;
+  
+  --sidebar: #174A6F;
+  --sidebar-foreground: #FFFFFF;
   --sidebar-primary: #5890A6;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1A4A73;
-  --sidebar-accent-foreground: #F0F4F8;
-
-  /* Legacy aliases */
-  --bg: var(--background);
-  --surface: var(--card);
-  --surface-2: var(--muted);
-  --text: var(--foreground);
-  --text-muted: var(--muted-foreground);
-  --border-strong: var(--blueprint-steel);
-  --brand: var(--primary);
-  --brand-hover: #093050;
-
-  --interactive-bg: var(--primary);
-  --interactive-text: var(--primary-foreground);
-  --interactive-border: var(--blueprint-steel);
-
-  /* Spacing */
-  --s-1: 4px;
-  --s-2: 8px;
-  --s-3: 12px;
-  --s-4: 16px;
-  --s-5: 20px;
-  --s-6: 24px;
-
-  /* Radius */
-  --r-sm: 10px;
-  --r-md: 14px;
-  --r-lg: 18px;
-  --r-pill: 9999px;
-  --radius: 0.75rem;
-
-  /* Elevation */
-  --shadow-1: 0 2px 8px rgba(11, 53, 89, 0.10);
-  --shadow-2: 0 10px 30px rgba(11, 53, 89, 0.16);
-
-  /* Motion */
-  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --dur-fast: 120ms;
-  --dur-med: 180ms;
-  --press-y: 1px;
-
-  /* ---------------------------------------------------------
-     Back-compat aliases (IMPORTANT)
-     Tailwind v4 CSS variables for bg-brand-primary etc.
-  --------------------------------------------------------- */
-  --color-brand-primary: var(--primary);
-  --color-brand-secondary: var(--secondary);
-  --color-brand-accent: var(--blueprint-frost);
-  --color-brand-accent-dark: var(--blueprint-navy);
-  --color-brand-bg: var(--background);
-
-  /* Accessible text colors */
-  --text-on-primary: #F0F4F8;
-  --text-on-secondary: #F0F4F8;
-  --text-on-accent: #FFFFFF;
-  --text-on-light: var(--foreground);
+  --sidebar-accent: #1A3A52;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: rgba(88, 144, 166, 0.3);
+  --sidebar-ring: #5890A6;
+  
+  /* Blueprint-specific design tokens for dark mode */
+  --grid-color: rgba(88, 144, 166, 0.2);
+  --grid-line-weight: 1px;
+  --technical-border: rgba(142, 177, 191, 0.4);
+  --blueprint-overlay: rgba(88, 144, 166, 0.1);
 }
 
-/* Dark Mode */
-.dark {
-  --background: #0A1628;
-  --foreground: #E8EEF4;
-
-  --card: #0F2035;
-  --card-foreground: #E8EEF4;
-
-  --popover: #0F2035;
-  --popover-foreground: #E8EEF4;
-
-  --primary: #5890A6;
-  --primary-foreground: #0A1628;
-
-  --secondary: #8EB1BF;
-  --secondary-foreground: #0A1628;
-
-  --accent: #42708C;
-  --accent-foreground: #E8EEF4;
-
-  --muted: #1A3350;
-  --muted-foreground: #8EB1BF;
-
-  --destructive: #EF4444;
-  --destructive-foreground: #FFFFFF;
-
-  --border: #1A3350;
-  --input: #1A3350;
-  --input-background: #0F2035;
-  --ring: #5890A6;
-
-  --sidebar: #0A1628;
-  --sidebar-foreground: #E8EEF4;
-  --sidebar-border: #1A3350;
-  --sidebar-primary: #5890A6;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1A3350;
-  --sidebar-accent-foreground: #E8EEF4;
-
-  --bg: var(--background);
-  --surface: var(--card);
-  --surface-2: var(--muted);
-  --text: var(--foreground);
-  --text-muted: var(--muted-foreground);
-  --border-strong: var(--blueprint-sky);
-  --brand: var(--primary);
-  --brand-hover: #6FA8BE;
-
-  --interactive-bg: var(--primary-foreground);
-  --interactive-text: var(--primary);
-  --interactive-border: var(--blueprint-sky);
-
-  --color-brand-primary: var(--primary);
-  --color-brand-secondary: var(--secondary);
-  --color-brand-accent: var(--blueprint-sky);
-  --color-brand-accent-dark: var(--foreground);
-  --color-brand-bg: var(--background);
-
-  --text-on-primary: #0A1628;
-  --text-on-secondary: #0A1628;
-  --text-on-accent: #E8EEF4;
-  --text-on-light: var(--foreground);
+/* Card containers: subtle glass effect */
+.bp-container-list,
+.bp-container-tall {
+  backdrop-filter: blur(8px);
 }
 
-/* =========================================================
-   GLOBAL BASELINE
-========================================================= */
-
-html, body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans);
+/* Dark mode: add visible outlines to card containers only */
+.dark .bp-container-list,
+.dark .bp-container-tall {
+  outline: 1.5px solid rgba(88, 144, 166, 0.5);
 }
 
-h1, h2, h3, h4, h5, h6, label, button, [data-ui="button"] {
-  font-family: var(--font-heading);
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* Blueprint-specific Tailwind tokens */
+  --color-blueprint-navy: var(--blueprint-navy);
+  --color-blueprint-steel: var(--blueprint-steel);
+  --color-blueprint-sky: var(--blueprint-sky);
+  --color-blueprint-frost: var(--blueprint-frost);
+  --color-grid: var(--grid-color);
+  --color-technical-border: var(--technical-border);
+  --color-blueprint-overlay: var(--blueprint-overlay);
 }
 
-/* =========================================================
-   BLUEPRINT DESIGN SYSTEM — Utility Classes
-   Glassmorphism, Depth, Grid patterns, Glow effects
-========================================================= */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
 
-/* Glass card effect */
-.glass-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Comfortaa', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
 }
 
-.dark .glass-card {
-  background: rgba(15, 32, 53, 0.7);
+/**
+ * Base typography. This is not applied to elements which have an ancestor with a Tailwind text class.
+ */
+@layer base {
+  :where(:not(:has([class*=' text-']), :not(:has([class^='text-'])))) {
+    h1 {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+      letter-spacing: -0.02em;
+      font-family: 'Raleway', sans-serif;
+    }
+
+    h2 {
+      font-size: var(--text-xl);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+      font-family: 'Raleway', sans-serif;
+    }
+
+    h3 {
+      font-size: var(--text-lg);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+      font-family: 'Raleway', sans-serif;
+    }
+
+    h4 {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+      font-family: 'Raleway', sans-serif;
+    }
+
+    label {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+      letter-spacing: 0.01em;
+      font-family: 'Raleway', sans-serif;
+    }
+
+    button {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: 1.5;
+      letter-spacing: 0.01em;
+      font-family: 'Raleway', sans-serif;
+    }
+
+    input {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: 1.5;
+      font-family: 'Comfortaa', sans-serif;
+    }
+    
+    textarea {
+      font-family: 'Comfortaa', sans-serif;
+    }
+    
+    p {
+      font-family: 'Comfortaa', sans-serif;
+    }
+  }
 }
 
-/* Depth / elevation */
-.depth-1 { box-shadow: 0 2px 8px rgba(11, 53, 89, 0.08); }
-.depth-2 { box-shadow: 0 4px 16px rgba(11, 53, 89, 0.12); }
-.depth-3 { box-shadow: 0 8px 32px rgba(11, 53, 89, 0.16); }
-
-/* Elevated card hover effect */
-.elevated-card {
-  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
-}
-.elevated-card:hover {
-  transform: translateY(-2px);
+html {
+  font-size: var(--font-size);
 }
 
-/* Blueprint grid patterns */
+/* Blueprint Grid Pattern */
 .blueprint-grid {
-  background-image:
-    linear-gradient(var(--blueprint-frost) 1px, transparent 1px),
-    linear-gradient(90deg, var(--blueprint-frost) 1px, transparent 1px);
+  background-image: 
+    linear-gradient(var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight)),
+    linear-gradient(90deg, var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight));
   background-size: 20px 20px;
-  background-position: center center;
 }
 
 .blueprint-grid-large {
-  background-image:
-    linear-gradient(var(--blueprint-frost) 1px, transparent 1px),
-    linear-gradient(90deg, var(--blueprint-frost) 1px, transparent 1px);
-  background-size: 40px 40px;
-  background-position: center center;
+  background-image: 
+    linear-gradient(var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight)),
+    linear-gradient(90deg, var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight)),
+    linear-gradient(var(--technical-border) 2px, transparent 2px),
+    linear-gradient(90deg, var(--technical-border) 2px, transparent 2px);
+  background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+}
+
+/* Technical border utility */
+.technical-border {
+  border: 1px solid var(--technical-border);
+  position: relative;
+}
+
+.technical-border::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: var(--blueprint-overlay);
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Blueprint corner decorations */
@@ -277,848 +326,524 @@ h1, h2, h3, h4, h5, h6, label, button, [data-ui="button"] {
 .blueprint-corners::after {
   content: '';
   position: absolute;
-  width: 24px;
-  height: 24px;
-  border-color: var(--blueprint-sky);
-  border-style: solid;
+  width: 12px;
+  height: 12px;
+  border-color: var(--technical-border);
 }
+
 .blueprint-corners::before {
-  top: 8px;
-  left: 8px;
-  border-width: 2px 0 0 2px;
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid;
+  border-left: 2px solid;
 }
+
 .blueprint-corners::after {
-  bottom: 8px;
-  right: 8px;
-  border-width: 0 2px 2px 0;
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid;
+  border-right: 2px solid;
 }
 
-/* Glow effects */
-.glow-primary {
-  filter: drop-shadow(0 0 8px rgba(88, 144, 166, 0.4));
+/* Modern depth and texture utilities */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(11, 53, 89, 0.1);
 }
 
-/* Shine effect for buttons */
+.dark .glass-card {
+  background: rgba(11, 53, 89, 0.3);
+  border: 1px solid rgba(88, 144, 166, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.depth-1 {
+  box-shadow: 0 1px 3px rgba(11, 53, 89, 0.12), 0 1px 2px rgba(11, 53, 89, 0.08);
+}
+
+.depth-2 {
+  box-shadow: 0 4px 6px rgba(11, 53, 89, 0.12), 0 2px 4px rgba(11, 53, 89, 0.08);
+}
+
+.depth-3 {
+  box-shadow: 0 10px 15px rgba(11, 53, 89, 0.15), 0 4px 6px rgba(11, 53, 89, 0.1);
+}
+
+.depth-4 {
+  box-shadow: 0 20px 25px rgba(11, 53, 89, 0.15), 0 10px 10px rgba(11, 53, 89, 0.08);
+}
+
+.dark .depth-1 {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.dark .depth-2 {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dark .depth-3 {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.dark .depth-4 {
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.5), 0 10px 10px rgba(0, 0, 0, 0.3);
+}
+
+.gradient-overlay {
+  position: relative;
+}
+
+.gradient-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dark .gradient-overlay::before {
+  opacity: 0.1;
+}
+
+.texture-dots {
+  background-image: radial-gradient(circle, var(--grid-color) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
 .shine-effect {
   position: relative;
   overflow: hidden;
 }
-.shine-effect::before {
+
+.shine-effect::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
-  transition: left 0.5s ease;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s;
 }
-.shine-effect:hover::before {
-  left: 100%;
-}
-
-/* Texture dot pattern */
-.texture-dots {
-  background-image: radial-gradient(circle, var(--blueprint-frost) 1px, transparent 1px);
-  background-size: 8px 8px;
-}
-
-/* Gradient overlay */
-.gradient-overlay {
-  background: linear-gradient(135deg, rgba(11, 53, 89, 0.03) 0%, rgba(88, 144, 166, 0.06) 100%);
-}
-
-/* =========================================================
-   SEMANTIC COMPONENT CLASSES
-   Single source of truth for ALL repeated UI patterns.
-   Colors + sizing + padding + radius + depth + effects.
-   Matches the design system showcase specs exactly.
-   To restyle any element across the entire app,
-   edit ONLY THIS FILE — no component changes needed.
-========================================================= */
-
-/* --- Page layouts --- */
-.bp-page {
-  padding: 1.5rem;
-  min-height: 100vh;
-  background: linear-gradient(180deg, var(--background) 0%, #FFFFFF 100%);
-}
-
-.bp-page-header {
-  background: linear-gradient(135deg, var(--background) 0%, var(--muted) 100%);
-}
-
-.bp-grid-bg {
-  background-image:
-    linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px);
-  background-size: 20px 20px;
-}
-
-/* --- Headings & Text --- */
-.bp-title {
-  color: var(--blueprint-navy);
-  font-family: var(--font-heading);
-  font-weight: var(--fw-medium);
-}
-
-.bp-subtitle {
-  color: var(--blueprint-steel);
-  font-family: var(--font-heading);
-  font-weight: var(--fw-medium);
-}
-
-.bp-text           { color: var(--blueprint-navy); }
-.bp-text-secondary { color: var(--blueprint-steel); }
-.bp-text-light     { color: var(--primary-foreground); }
-
-/* --- Labels & micro-copy --- */
-.bp-label {
-  color: var(--blueprint-steel);
-  font-family: var(--font-heading);
-  font-size: 0.875rem;
-  font-weight: var(--fw-medium);
-}
-
-.bp-label-muted {
-  color: var(--blueprint-frost);
-  font-family: var(--font-heading);
-  font-size: 0.75rem;
-}
-
-/* --- Cards & containers (DS: glass-card rounded-lg p-6 depth-1) --- */
-.bp-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(11, 53, 89, 0.08);
-  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
-}
-
-.bp-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(11, 53, 89, 0.12);
-}
-
-.bp-card-hero {
-  background-color: var(--blueprint-navy);
-  border: 4px solid var(--blueprint-navy);
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-  color: var(--primary-foreground);
-  box-shadow: 0 4px 16px rgba(11, 53, 89, 0.12);
-}
-
-.bp-card-stat {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(11, 53, 89, 0.08);
-}
-
-.bp-panel {
-  background-color: var(--background);
-  border: 2px solid var(--muted);
-  border-radius: 1.5rem;
-  padding: 1.5rem;
-}
-
-.bp-modal {
-  background-color: #FFFFFF;
-  border: 4px solid var(--blueprint-navy);
-  border-radius: 2.5rem;
-  padding: 2rem;
-  box-shadow: 0 8px 32px rgba(11, 53, 89, 0.16);
-}
-
-/* --- Input / form fields (DS: rounded-full px-4 py-2.5 depth-1) --- */
-.bp-input {
-  width: 100%;
-  padding: 0.625rem 1rem;
-  background-color: var(--input-background);
-  border: 1px solid var(--input);
-  border-radius: var(--r-pill);
-  color: var(--blueprint-navy);
-  font-weight: var(--fw-bold);
-  font-family: var(--font-sans);
-  box-shadow: 0 2px 8px rgba(11, 53, 89, 0.08);
-  transition: color 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
-}
-.bp-input:focus {
-  border-color: var(--ring);
-  box-shadow: 0 0 0 3px rgba(88, 144, 166, 0.25);
-  outline: none;
-}
-.bp-input::placeholder {
-  color: var(--muted-foreground);
-}
-
-.bp-input-readonly {
-  width: 100%;
-  padding: 0.625rem 1rem;
-  background-color: var(--muted);
-  border: 1px solid var(--input);
-  border-radius: var(--r-pill);
-  color: var(--blueprint-navy);
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.bp-textarea {
-  width: 100%;
-  padding: 0.625rem 1rem;
-  background-color: var(--input-background);
-  border: 1px solid var(--input);
-  border-radius: 0.75rem;
-  color: var(--blueprint-navy);
-  font-family: var(--font-sans);
-  box-shadow: 0 2px 8px rgba(11, 53, 89, 0.08);
-  resize: none;
-  transition: color 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
-}
-.bp-textarea:focus {
-  border-color: var(--ring);
-  box-shadow: 0 0 0 3px rgba(88, 144, 166, 0.25);
-  outline: none;
-}
-
-.bp-select {
-  width: 100%;
-  padding: 0.625rem 1rem;
-  padding-right: 2.5rem;
-  background-color: var(--input-background);
-  border: 1px solid var(--input);
-  border-radius: var(--r-pill);
-  color: var(--blueprint-navy);
-  font-family: var(--font-sans);
-  appearance: none;
-  box-shadow: 0 2px 8px rgba(11, 53, 89, 0.08);
-  transition: color 0.2s var(--ease), box-shadow 0.2s var(--ease), border-color 0.2s var(--ease);
-}
-.bp-select:focus {
-  border-color: var(--ring);
-  box-shadow: 0 0 0 3px rgba(88, 144, 166, 0.25);
-  outline: none;
-}
-
-/* --- Buttons (DS: rounded-full px-6 py-2 depth-2 hover:depth-3 shine-effect) --- */
-.bp-btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1.5rem;
-  background-color: var(--blueprint-navy);
-  color: var(--primary-foreground);
-  font-family: var(--font-heading);
-  font-weight: var(--fw-black);
-  font-size: 0.875rem;
-  border: none;
-  border-radius: var(--r-pill);
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(11, 53, 89, 0.12);
-  transition: transform 0.12s var(--ease), box-shadow 0.18s var(--ease), opacity 0.18s var(--ease);
-  position: relative;
-  overflow: hidden;
-}
-.bp-btn-primary::before {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%; width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-  transition: left 0.5s ease;
-}
-.bp-btn-primary:hover::before { left: 100%; }
-.bp-btn-primary:hover {
-  box-shadow: 0 8px 32px rgba(11, 53, 89, 0.16);
-  transform: translateY(-1px);
-}
-.bp-btn-primary:active {
-  transform: translateY(var(--press-y));
-  box-shadow: 0 2px 8px rgba(11, 53, 89, 0.08);
-}
-
-.bp-btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1.5rem;
-  background-color: var(--blueprint-sky);
-  color: #FFFFFF;
-  font-family: var(--font-heading);
-  font-weight: var(--fw-black);
-  font-size: 0.875rem;
-  border: none;
-  border-radius: var(--r-pill);
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(11, 53, 89, 0.12);
-  transition: transform 0.12s var(--ease), box-shadow 0.18s var(--ease), opacity 0.18s var(--ease);
-  position: relative;
-  overflow: hidden;
-}
-.bp-btn-secondary::before {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%; width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-  transition: left 0.5s ease;
-}
-.bp-btn-secondary:hover::before { left: 100%; }
-.bp-btn-secondary:hover {
-  box-shadow: 0 8px 32px rgba(11, 53, 89, 0.16);
-  transform: translateY(-1px);
-}
-.bp-btn-secondary:active {
-  transform: translateY(var(--press-y));
-}
-
-.bp-btn-outline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1.5rem;
-  background-color: transparent;
-  color: var(--blueprint-navy);
-  font-family: var(--font-heading);
-  font-weight: var(--fw-black);
-  font-size: 0.875rem;
-  border: 2px solid var(--blueprint-navy);
-  border-radius: var(--r-pill);
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(11, 53, 89, 0.08);
-  transition: background 0.18s var(--ease), color 0.18s var(--ease), transform 0.12s var(--ease), box-shadow 0.18s var(--ease);
-}
-.bp-btn-outline:hover {
-  background-color: rgba(11, 53, 89, 0.1);
-  box-shadow: 0 4px 16px rgba(11, 53, 89, 0.12);
-}
-
-.bp-btn-ghost {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1.5rem;
-  background-color: var(--muted);
-  color: var(--blueprint-navy);
-  font-family: var(--font-heading);
-  font-weight: var(--fw-black);
-  font-size: 0.875rem;
-  border: 2px solid var(--border);
-  border-radius: var(--r-pill);
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(11, 53, 89, 0.08);
-  transition: background 0.18s var(--ease), color 0.18s var(--ease), transform 0.12s var(--ease), box-shadow 0.18s var(--ease);
-}
-.bp-btn-ghost:hover {
-  background-color: var(--muted);
-  color: var(--foreground);
-  box-shadow: 0 4px 16px rgba(11, 53, 89, 0.12);
-}
-
-.bp-btn-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.5rem;
-  background: transparent;
-  color: var(--blueprint-navy);
-  font-family: var(--font-heading);
-  font-weight: var(--fw-bold);
-  font-size: 0.875rem;
-  border: none;
-  border-radius: var(--r-pill);
-  cursor: pointer;
-  transition: background 0.18s var(--ease);
-}
-.bp-btn-link:hover {
-  background-color: rgba(11, 53, 89, 0.05);
-  text-decoration: underline;
-}
-
-.bp-btn-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem;
-  background-color: var(--blueprint-navy);
-  color: var(--primary-foreground);
-  border: none;
-  border-radius: var(--r-pill);
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(11, 53, 89, 0.12);
-  transition: transform 0.12s var(--ease), box-shadow 0.18s var(--ease);
-  position: relative;
-  overflow: hidden;
-}
-.bp-btn-icon::before {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%; width: 100%; height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-  transition: left 0.5s ease;
-}
-.bp-btn-icon:hover::before { left: 100%; }
-.bp-btn-icon:hover {
-  box-shadow: 0 8px 32px rgba(11, 53, 89, 0.16);
-  transform: translateY(-1px);
-}
-
-/* Button sizes (DS: sm/md/lg) */
-.bp-btn-sm  { padding: 0.375rem 1rem; font-size: 0.875rem; }
-.bp-btn-md  { padding: 0.5rem 1.5rem; font-size: 0.875rem; }
-.bp-btn-lg  { padding: 0.75rem 2rem; font-size: 1.125rem; }
-.bp-btn-full { width: 100%; }
-
-.bp-btn-disabled {
-  background-color: var(--muted);
-  color: var(--blueprint-frost);
-  border: 2px solid var(--border);
-  border-radius: var(--r-pill);
-  padding: 0.5rem 1.5rem;
-  font-family: var(--font-heading);
-  font-weight: var(--fw-black);
-  font-size: 0.875rem;
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-/* --- Back link --- */
-.bp-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  color: var(--blueprint-steel);
-  font-family: var(--font-heading);
-  font-weight: var(--fw-semibold);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: opacity 0.18s ease;
-}
-.bp-back:hover { opacity: 0.7; }
-
-/* --- Nav items --- */
-.bp-nav-active {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  color: var(--blueprint-navy);
-  background-color: rgba(88, 144, 166, 0.1);
-  border-radius: var(--r-pill);
-  padding: 0.5rem;
-  font-size: 0.75rem;
-}
-
-.bp-nav-inactive {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  color: var(--blueprint-steel);
-  background-color: transparent;
-  border-radius: var(--r-pill);
-  padding: 0.5rem;
-  font-size: 0.75rem;
-  transition: color 0.18s var(--ease), background 0.18s var(--ease);
-}
-.bp-nav-inactive:hover {
-  color: var(--foreground);
-}
-
-/* --- Dividers --- */
-.bp-divider        { border-color: var(--muted); }
-.bp-divider-strong { border-color: var(--blueprint-navy); }
-
-/* --- Badges (DS: px-4 py-1.5 rounded-full depth-1 shine-effect) --- */
-.bp-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.375rem 1rem;
-  background-color: var(--muted);
-  color: var(--blueprint-navy);
-  border: 2px solid var(--blueprint-frost);
-  border-radius: var(--r-pill);
-  font-size: 0.875rem;
-  font-weight: var(--fw-medium);
-  box-shadow: 0 2px 8px rgba(11, 53, 89, 0.08);
-}
-
-.bp-badge-primary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.375rem 1rem;
-  background-color: var(--blueprint-navy);
-  color: var(--primary-foreground);
-  border-radius: var(--r-pill);
-  font-size: 0.875rem;
-  font-weight: var(--fw-medium);
-  box-shadow: 0 2px 8px rgba(11, 53, 89, 0.08);
-  position: relative;
-  overflow: hidden;
-}
-
-.bp-badge-accent {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.375rem 1rem;
-  background-color: var(--blueprint-sky);
-  color: #FFFFFF;
-  border-radius: var(--r-pill);
-  font-size: 0.875rem;
-  font-weight: var(--fw-medium);
-  box-shadow: 0 2px 8px rgba(11, 53, 89, 0.08);
-}
-
-/* --- Alerts (DS: glass-card rounded-lg p-4 border-l-4 depth-2) --- */
-.bp-alert {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--blueprint-navy);
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 16px rgba(11, 53, 89, 0.12);
-}
-
-.bp-alert-success { border-left-color: var(--blueprint-sky); }
-.bp-alert-error   { border-left-color: var(--destructive); }
-.bp-alert-warning { border-left-color: var(--muted-foreground); }
-
-/* --- Chart / data-viz --- */
-.bp-chart-tooltip {
-  background-color: var(--blueprint-navy);
-  color: var(--primary-foreground);
-  border-radius: 1rem;
-  padding: 0.5rem 1rem;
-  border: none;
-  font-weight: var(--fw-black);
-  font-size: 0.875rem;
-}
-
-/* --- Misc helpers --- */
-.bp-icon        { color: var(--blueprint-navy); }
-.bp-link-muted  { color: var(--blueprint-frost); transition: opacity 0.18s ease; }
-.bp-link-muted:hover { opacity: 0.7; }
-
-/* --- Bottom nav bar (DS: h-16 border-t shrink-0 grid bg-background) --- */
-.bp-bottomnav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 4rem;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  background-color: #FFFFFF;
-  border-top: 4px solid var(--blueprint-navy);
-  box-shadow: 0 -10px 30px rgba(11, 53, 89, 0.1);
-  z-index: 50;
-}
-
-/* --- Checkbox (DS: w-5 h-5 border-2 rounded) --- */
-.bp-checkbox {
-  width: 1.25rem;
-  height: 1.25rem;
-  appearance: none;
-  border: 2px solid var(--input);
-  border-radius: 0.25rem;
-  background-color: var(--input-background);
-  cursor: pointer;
-  transition: background 0.18s var(--ease), border-color 0.18s var(--ease);
-  box-shadow: 0 2px 8px rgba(11, 53, 89, 0.08);
-}
-.bp-checkbox:checked {
-  background-color: var(--blueprint-navy);
-  border-color: var(--blueprint-navy);
-}
-.bp-checkbox:focus {
-  box-shadow: 0 0 0 3px rgba(88, 144, 166, 0.25);
-  outline: none;
-}
-
-/* --- Section header (title + optional action) --- */
-.bp-section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 1rem;
-}
-
-/* --- List item row --- */
-.bp-list-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--border);
-}
-.bp-list-item:last-child { border-bottom: none; }
-
-/* --- Avatar circle --- */
-.bp-avatar {
-  width: 2rem;
-  height: 2rem;
-  border-radius: var(--r-pill);
-  background-color: rgba(11, 53, 89, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--blueprint-navy);
-}
-
-/* =========================================================
-   OPTIONAL NEW "SYSTEM" CLASSES
-   (won't break anything if unused yet)
-========================================================= */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--s-2);
-  padding: var(--s-3) var(--s-5);
-  font-weight: var(--fw-semibold);
-  border-radius: var(--r-pill);
-  border: 2px solid var(--border-strong);
-  background: var(--surface-2);
-  color: var(--text);
-  cursor: pointer;
 
-  box-shadow: var(--shadow-1);
-  transition:
-    background var(--dur-med) var(--ease),
-    color var(--dur-med) var(--ease),
-    border-color var(--dur-med) var(--ease),
-    transform var(--dur-fast) var(--ease),
-    box-shadow var(--dur-med) var(--ease);
+.shine-effect:hover::after {
+  transform: translateX(100%);
 }
 
-.btn--primary {
-  background: var(--brand);
-  border-color: var(--brand-hover);
-  color: var(--interactive-text);
+.dark .shine-effect::after {
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.05) 50%,
+    transparent 70%
+  );
 }
 
-.btn:hover {
-  background: var(--interactive-bg);
-  color: var(--interactive-text);
-  border-color: var(--interactive-border);
+.elevated-card {
+  transform: translateY(0);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.btn:active {
-  transform: translateY(var(--press-y));
-  box-shadow: var(--shadow-1);
+.elevated-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(11, 53, 89, 0.18), 0 6px 12px rgba(11, 53, 89, 0.12);
 }
 
-/* =========================================================
-   TOGGLE — pill track + BIG pill knob (matches your mock)
-   Supports:
-   - .toggle (recommended)
-   - your existing Tailwind pattern: button.w-12.h-6.rounded-full.relative > div.absolute.top-1.w-4.h-4
-========================================================= */
-
-/* Track */
-.toggle {
-  position: relative;
-  width: 56px !important;
-  height: 28px !important;
-  border-radius: var(--r-pill);
-  background: var(--muted);
-  border: 2px solid var(--border);
-  box-shadow: var(--shadow-1);
-  cursor: pointer;
-
-  transition:
-    background var(--dur-med) var(--ease),
-    border-color var(--dur-med) var(--ease),
-    transform var(--dur-fast) var(--ease),
-    box-shadow var(--dur-med) var(--ease);
-}
-
-.toggle:active {
-  transform: translateY(var(--press-y));
+.dark .elevated-card:hover {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4), 0 6px 12px rgba(88, 144, 166, 0.2);
 }
 
-/* BIG pill knob */
-.toggle::after {
-  content: "";
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 32px;
-  height: 20px;
-  border-radius: var(--r-pill);
-  background: #ffffff;
-  border: 2px solid rgba(11, 53, 89, 0.1);
-  box-shadow: 0 4px 12px rgba(11, 53, 89, 0.18);
-  transform: translateX(0);
-  transition: transform var(--dur-med) var(--ease),
-              background var(--dur-med) var(--ease),
-              border-color var(--dur-med) var(--ease);
+.glow-primary {
+  box-shadow: 0 0 20px rgba(11, 53, 89, 0.3);
 }
 
-/* ON state track - Blueprint Sky */
-.toggle[aria-checked="true"],
-.toggle[data-state="on"] {
-  background: var(--blueprint-sky);
-  border-color: var(--blueprint-steel);
+.dark .glow-primary {
+  box-shadow: 0 0 20px rgba(88, 144, 166, 0.4);
 }
 
-.toggle[aria-checked="true"]::after,
-.toggle[data-state="on"]::after {
-  transform: translateX(18px);
+.glow-accent {
+  box-shadow: 0 0 20px rgba(88, 144, 166, 0.3);
 }
 
-/* Dark-mode knob swap */
-.dark .toggle::after {
-  border-color: rgba(232, 238, 244, 0.20) !important;
+.dark .glow-accent {
+  box-shadow: 0 0 20px rgba(142, 177, 191, 0.4);
 }
 
-/* =========================================================
-   BELOW HERE: YOUR ORIGINAL PROJECT CSS (kept)
-========================================================= */
+/* ========================================
+   BLUEPRINT DESIGN SYSTEM - ALL CUSTOM CLASSES
+   All in @layer base so Tailwind @layer utilities always wins in cascade.
+   ======================================== */
 
-/* Tailwind Overrides for Dynamic Text Size */
-/* Small Size Setting */
-.text-size-s .text-xs { font-size: 0.6875rem; } /* ~11px */
-.text-size-s .text-sm { font-size: 0.75rem; } /* was text-xs */
-.text-size-s .text-base { font-size: 0.875rem; } /* was text-sm */
-.text-size-s .text-lg { font-size: 1rem; } /* was text-base */
-.text-size-s .text-xl { font-size: 1.125rem; } /* was text-lg */
-.text-size-s .text-2xl { font-size: 1.25rem; } /* was text-xl */
-.text-size-s .text-3xl { font-size: 1.5rem; } /* was text-2xl */
-.text-size-s .text-4xl { font-size: 1.875rem; } /* was text-3xl */
-.text-size-s .text-5xl { font-size: 2.25rem; } /* was text-4xl */
-
-/* Medium Size is Tailwind's default, no overrides needed. */
-
-/* Large Size Setting */
-.text-size-l .text-xs { font-size: 0.875rem; } /* was text-sm */
-.text-size-l .text-sm { font-size: 1rem; } /* was text-base */
-.text-size-l .text-base { font-size: 1.125rem; } /* was text-lg */
-.text-size-l .text-lg { font-size: 1.25rem; } /* was text-xl */
-.text-size-l .text-xl { font-size: 1.5rem; } /* was text-2xl */
-.text-size-l .text-2xl { font-size: 1.875rem; } /* was text-3xl */
-.text-size-l .text-3xl { font-size: 2.25rem; } /* was text-4xl */
-.text-size-l .text-4xl { font-size: 3rem; } /* was text-5xl */
-.text-size-l .text-5xl { font-size: 3.75rem; } /* was text-6xl */
-
-/* LoginScreen responsive logo */
-.login-logo {
-  width: 100%;
-  height: auto;
-  max-width: 100%;
-}
+@layer base {
 
-@media (max-width: 991px) {
-  .login-logo {
-    width: 100%;
-    height: auto;
+  /* Container Shapes */
+  .bp-container-compact {
+    border-radius: 9999px;
   }
-}
 
-/* Blueprint Button Styles */
-.blueprint-button {
-  border: 2px solid var(--blueprint-navy);
-  color: var(--blueprint-navy);
-  background-color: #ffffff;
-  font-family: var(--font-heading);
-  font-weight: var(--fw-bold);
-  padding: 12px;
-  border-radius: var(--r-pill);
-  width: 100%;
-  text-align: center;
-  cursor: pointer;
-  transition: background var(--dur-med) var(--ease),
-              color var(--dur-med) var(--ease),
-              border-color var(--dur-med) var(--ease),
-              transform var(--dur-fast) var(--ease),
-              box-shadow var(--dur-med) var(--ease);
-  font-size: 14px;
-  box-shadow: var(--shadow-1);
-}
-
-.blueprint-button:hover:not(:disabled) {
-  background: var(--blueprint-navy);
-  color: var(--primary-foreground);
-  border-color: var(--blueprint-navy);
-  box-shadow: var(--shadow-2);
-  transform: translateY(-1px);
-}
-
-.blueprint-button:active:not(:disabled) {
-  transform: translateY(var(--press-y));
-}
-
-.blueprint-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* Submit Button Styles */
-.sync-button {
-  transition: background-color var(--dur-med) var(--ease), color var(--dur-med) var(--ease);
-}
-
-.sync-button:hover:not(:disabled) {
-  background-color: rgba(11, 53, 89, 0.9);
-}
-
-.sync-button:active:not(:disabled) {
-  background-color: rgba(11, 53, 89, 0.8);
-}
-
-/* Square OAuth Button Responsive Styles */
-.square-oauth-button {
-  border: 3px solid var(--blueprint-navy) !important;
-  border-radius: var(--r-pill) !important;
-  color: var(--blueprint-navy);
-  margin-bottom: 16px;
-  overflow: hidden;
-}
-
-@media (max-width: 991px) {
-  .square-oauth-button {
-    border-style: solid !important;
-    border-width: 3px !important;
-    font: 600 21px/24.5px Raleway, sans-serif;
-    font-size: 16px !important;
-    line-height: 14.5px;
+  .bp-container-tall {
+    border-radius: 9px;
   }
-}
 
-/* Stylist Sign In Button Responsive Styles */
-.stylist-signin-button {
-  border: 3px solid var(--blueprint-navy) !important;
-  border-radius: var(--r-pill) !important;
-  color: var(--blueprint-navy);
-  overflow: hidden;
-}
+  .bp-container-list {
+    border-radius: 9px;
+  }
 
-.stylist-email-input,
-.stylist-password-input {
-  border: 1px solid var(--border) !important;
-  border-radius: var(--r-pill) !important;
-  background-color: #ffffff;
-  color: var(--blueprint-navy);
-  overflow: hidden;
-}
+  .bp-shape-pill {
+    border-radius: 9999px;
+  }
+
+  .bp-shape-soft {
+    border-radius: 9px;
+  }
+
+  /* Typography - Comfortaa for headings */
+  .bp-page-title {
+    font-family: "Comfortaa", sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--foreground);
+    padding-left: 0.5rem;
+  }
+
+  .bp-section-title {
+    font-family: "Comfortaa", sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--foreground);
+  }
+
+  .bp-card-title {
+    font-family: "Comfortaa", sans-serif;
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--foreground);
+  }
+
+  .bp-stat-value {
+    font-family: "Comfortaa", sans-serif;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--foreground);
+  }
+
+  /* Typography - Raleway for body */
+  .bp-overline {
+    font-family: "Raleway", sans-serif;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted-foreground);
+  }
+
+  .bp-body {
+    font-family: "Raleway", sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--foreground);
+  }
+
+  .bp-body-sm {
+    font-family: "Raleway", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--foreground);
+  }
+
+  .bp-caption {
+    font-family: "Raleway", sans-serif;
+    font-size: 0.625rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--muted-foreground);
+  }
+
+  /* Data UI attributes for automatic styling */
+  [data-ui="field"] {
+    border-radius: 9999px;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    background-color: var(--input-background);
+    font-family: "Raleway", sans-serif;
+  }
+
+  [data-ui="button"] {
+    border-radius: 9999px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  [data-ui="button"]:hover {
+    transform: translateY(-1px);
+  }
+
+  [data-ui="button"]:active {
+    transform: scale(0.98);
+  }
+
+  /* Color Input - fill entire container */
+  input[type="color"] {
+    -webkit-appearance: none;
+    appearance: none;
+    border: none;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: inherit;
+  }
+
+  input[type="color"]::-moz-color-swatch {
+    border: none;
+    border-radius: inherit;
+  }
+
+  /* Button Variants */
+  .bp-btn-primary {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    border-radius: 9999px;
+    font-weight: 700;
+  }
+
+  .bp-btn-secondary {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+    border-radius: 9999px;
+    font-weight: 700;
+  }
+
+  .bp-btn-ghost {
+    background-color: var(--muted);
+    color: var(--foreground);
+    border-radius: 9999px;
+    font-weight: 700;
+  }
+
+  .bp-btn-disabled {
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+    border-radius: 9999px;
+    font-weight: 700;
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Input Variants */
+  .bp-input-readonly {
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+  }
+
+  .bp-input {
+    background-color: var(--input-background);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    font-family: "Raleway", sans-serif;
+  }
+
+  /* Navigation */
+  .bp-nav-active {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .bp-nav-inactive {
+    color: var(--muted-foreground);
+    font-weight: 500;
+  }
+
+  /* Card Padding */
+  .bp-card-padding-sm {
+    padding: 0.75rem 1rem;
+  }
+
+  .bp-card-padding-md {
+    padding: 1.25rem 1.5rem;
+  }
+
+  /* Back Button */
+  .bp-back {
+    color: var(--muted-foreground);
+  }
+
+  .bp-back:hover {
+    color: var(--foreground);
+  }
+
+  /* Page Layout */
+  .bp-page {
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 12rem;
+    background-color: var(--background);
+    background-image:
+      linear-gradient(var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight)),
+      linear-gradient(90deg, var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight));
+    background-size: 24px 24px;
+  }
+
+  @media (min-width: 640px) {
+    .bp-page {
+      padding: 1.5rem 2rem;
+      padding-bottom: 12rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .bp-page {
+      padding: 2rem 3rem;
+      padding-bottom: 12rem;
+    }
+  }
+
+  .bp-page-header {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  /* Bottom Nav */
+  .bp-bottomnav {
+    background-color: var(--bottomnav);
+    border-top: 1px solid var(--border);
+    padding: 0.5rem 0;
+  }
+
+  /* Grid Background */
+  .bp-grid-bg {
+    background-image:
+      linear-gradient(rgba(11, 53, 89, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(11, 53, 89, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Text Variants */
+  .bp-text {
+    color: var(--foreground);
+  }
+
+  .bp-text-secondary {
+    color: var(--muted-foreground);
+  }
+
+  .bp-title {
+    font-family: "Comfortaa", sans-serif;
+    font-weight: 700;
+    color: var(--foreground);
+  }
+
+  .bp-label {
+    color: var(--muted-foreground);
+  }
+
+
+  /* Toggle / Switch */
+  .toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 44px;
+    height: 24px;
+    border-radius: 9999px;
+    background-color: var(--switch-background);
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .toggle::after {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+    transform: translateX(0);
+  }
+
+  .toggle[data-state="on"] {
+    background-color: var(--primary);
+  }
+
+  .toggle[data-state="on"]::after {
+    transform: translateX(20px);
+  }
+
+  /* Save Toast */
+  .save-toast {
+    position: fixed;
+    bottom: 6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    animation: toast-in 0.3s ease-out, toast-out 0.3s ease-in 1.7s forwards;
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(1rem);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  @keyframes toast-out {
+    from {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateX(-50%) translateY(1rem);
+    }
+  }
+
+} /* end @layer base */

@@ -3,7 +3,6 @@ import type { Client } from '../types';
 import { PlusIcon, UsersIcon, RefreshIcon } from './icons';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
-import { ensureAccessibleColor } from '../utils/ensureAccessibleColor';
 
 interface SelectClientStepProps {
   clients: any[]; // raw Supabase rows
@@ -24,7 +23,7 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { user } = useAuth();
-  const { createClient, branding } = useSettings();
+  const { createClient } = useSettings();
 
   const isAdmin = user?.role === 'admin';
 
@@ -76,18 +75,18 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
 
   if (isCreating) {
     return (
-      <div className="flex flex-col h-full p-4 pb-12 bg-surface">
+      <div className="flex flex-col h-full p-4 pb-12 bg-card">
         <div className="text-center p-4">
-          <h1 className="text-2xl font-bold mb-1 text-navy">
+          <h1 className="text-2xl font-bold mb-1 text-foreground">
             Create New Client
           </h1>
-          <p className="text-sm text-steel">
+          <p className="text-sm text-muted-foreground">
             This client will be saved to your database.
           </p>
         </div>
         <form onSubmit={handleCreateClient} className="p-4 space-y-4">
           <div>
-            <label className="block text-xs font-bold mb-1 text-steel">
+            <label className="block bp-overline mb-1">
               Full Name
             </label>
             <input
@@ -95,11 +94,11 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
               value={newName}
               onChange={e => setNewName(e.target.value)}
               required
-              className="w-full p-3 border border-surface-border rounded-lg outline-none text-navy focus:border-sky"
+              className="w-full p-3 border border bp-container-compact outline-none text-foreground focus:border-sky"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-steel">
+            <label className="block bp-overline mb-1">
               Email Address
             </label>
             <input
@@ -107,25 +106,17 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
               value={newEmail}
               onChange={e => setNewEmail(e.target.value)}
               required
-              className="w-full p-3 border border-surface-border rounded-lg outline-none text-navy focus:border-sky"
+              className="w-full p-3 border border bp-container-compact outline-none text-foreground focus:border-sky"
             />
           </div>
           {createError && (
-            <p className="text-red-500 text-sm font-bold">{createError}</p>
+            <p className="text-red-500 text-sm font-medium">{createError}</p>
           )}
           <div className="pt-4 space-y-2">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full font-bold py-3 px-4 rounded-full shadow-lg transition-all active:scale-95"
-              style={{
-                backgroundColor: branding.secondaryColor,
-                color: ensureAccessibleColor(
-                  '#FFFFFF',
-                  branding.secondaryColor,
-                  '#F0F4F8'
-                ),
-              }}
+              className="w-full font-bold py-3 px-4 bp-container-compact shadow-lg transition-all active:scale-95 bg-secondary text-secondary-foreground"
             >
               {isSubmitting ? (
                 <RefreshIcon className="w-5 h-5 animate-spin mx-auto" />
@@ -136,7 +127,7 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
             <button
               type="button"
               onClick={() => setIsCreating(false)}
-              className="w-full font-bold py-2 text-steel"
+              className="w-full font-bold py-2 text-muted-foreground"
             >
               Cancel
             </button>
@@ -148,8 +139,8 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
 
   return (
     <div className="flex flex-col h-full pb-12">
-      <div className="p-4 bg-surface border-b border-surface-muted">
-        <h1 className="text-2xl font-bold text-center mb-2 tracking-tighter text-navy">
+      <div className="p-4 bg-card border-b border">
+        <h1 className="text-2xl font-bold text-center mb-2 tracking-tighter text-foreground">
           Select Client
         </h1>
         <div className="relative">
@@ -158,27 +149,19 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
             placeholder="Search clients..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="w-full p-3 pl-10 border border-surface-border rounded-xl outline-none bg-surface-subtle text-navy focus:bg-surface focus:border-sky transition-all"
+            className="w-full p-3 pl-10 border border bp-container-compact outline-none bg-muted text-foreground focus:bg-card focus:border-sky transition-all"
           />
-          <div className="absolute left-3 top-3.5 text-steel">
+          <div className="absolute left-3 top-3.5 text-muted-foreground">
             <UsersIcon className="w-5 h-5" />
           </div>
         </div>
       </div>
 
-      <div className="flex-grow overflow-y-auto p-4 space-y-3 bg-brand-bg">
+      <div className="flex-grow overflow-y-auto p-4 space-y-3 bg-background">
         {isAdmin && (
           <button
             onClick={() => setIsCreating(true)}
-            className="w-full p-4 rounded-xl font-bold mb-4 shadow-md flex items-center justify-center active:scale-95 transition-all"
-            style={{
-              backgroundColor: branding.accentColor,
-              color: ensureAccessibleColor(
-                '#FFFFFF',
-                branding.accentColor,
-                '#F0F4F8'
-              ),
-            }}
+            className="w-full p-4 bp-container-compact font-bold mb-4 shadow-md flex items-center justify-center active:scale-95 transition-all bg-accent text-accent-foreground"
           >
             <PlusIcon className="w-5 h-5 mr-2" />
             Create New Client
@@ -187,27 +170,27 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
 
         {filteredClients.length === 0 ? (
           <div className="text-center py-10">
-            <p className="font-bold text-steel">No clients found.</p>
+            <p className="font-bold text-muted-foreground">No clients found.</p>
           </div>
         ) : (
           filteredClients.map(client => (
             <button
               key={client.id}
               onClick={() => onSelect(client)}
-              className="w-full bg-surface p-3 rounded-xl shadow-sm border border-surface-muted flex items-center transition-all active:scale-[0.98] elevated-card"
+              className="w-full bg-card p-3 bp-container-list shadow-sm border border flex items-center transition-all active:scale-[0.98] elevated-card"
             >
               <img
                 src={client.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(client.name)}&background=random`}
                 alt={client.name}
-                className="w-12 h-12 rounded-full mr-4 border border-surface-muted"
+                className="w-12 h-12 rounded-full mr-4 border border"
               />
               <div className="flex-grow text-left">
-                <h3 className="font-bold leading-tight text-navy">{client.name}</h3>
-                <p className="text-[10px] font-black uppercase tracking-widest mt-0.5 text-frost">
+                <h3 className="font-bold leading-tight text-foreground">{client.name}</h3>
+                <p className="bp-caption mt-0.5">
                   Source: {client.source}
                 </p>
               </div>
-              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-surface-subtle text-steel">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-muted text-muted-foreground">
                   <PlusIcon className="w-4 h-4" />
               </div>
             </button>
@@ -215,10 +198,10 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
         )}
       </div>
 
-      <div className="p-4 bg-surface border-t border-surface-muted">
+      <div className="p-4 bg-card border-t border">
         <button
           onClick={onBack}
-          className="w-full font-bold py-3 rounded-full transition-colors bg-surface-muted text-steel"
+          className="w-full font-bold py-3 bp-container-compact transition-colors bg-muted text-muted-foreground"
         >
           Cancel
         </button>

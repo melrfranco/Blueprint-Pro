@@ -321,19 +321,52 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     };
   }, []);
 
-  // Apply text size to body
+  // Apply text size to html root so all rem units scale
   useEffect(() => {
-    document.body.classList.remove('text-size-s', 'text-size-m', 'text-size-l');
-    if (textSize && textSize !== 'M') {
-      document.body.classList.add(`text-size-${textSize.toLowerCase()}`);
-    }
+    const sizes: Record<string, string> = { S: '13px', M: '16px', L: '20px' };
+    document.documentElement.style.fontSize = sizes[textSize] || '16px';
   }, [textSize]);
+
+  // Normalize existing membership config data on mount
+  useEffect(() => {
+    if (membershipConfig.tiers.length > 0) {
+      const hasInvalidMinSpend = membershipConfig.tiers.some(tier => typeof tier.minSpend !== 'number' || isNaN(Number(tier.minSpend)));
+      if (hasInvalidMinSpend) {
+        console.log('[Settings] Normalizing membership config minSpend values');
+        updateMembershipConfig(prev => ({
+          ...prev,
+          tiers: prev.tiers.map(tier => ({
+            ...tier,
+            minSpend: Number(tier.minSpend) || 0
+          }))
+        }));
+      }
+    }
+  }, []); // Run only once on mount
 
   // Updaters
   const updateServices = (v: Service[]) => setServices(v);
   const updateLevels = (v: StylistLevel[]) => setLevels(v);
   const updateStylists = (v: Stylist[]) => setStylists(v);
   const updateClients = (v: Client[]) => setClients(v);
+
+  const updateMembershipConfig = React.useCallback<React.Dispatch<React.SetStateAction<MembershipConfig>>>(
+    (config) => {
+      setMembershipConfig((prev) => {
+        const newConfig = typeof config === 'function' ? config(prev) : config;
+        // Ensure all minSpend values are numbers
+        const normalizedConfig = {
+          ...newConfig,
+          tiers: newConfig.tiers.map(tier => ({
+            ...tier,
+            minSpend: Number(tier.minSpend) || 0
+          }))
+        };
+        return normalizedConfig;
+      });
+    },
+    []
+  );
 
   const updateBranding = (v: BrandingSettings) => setBranding(v);
   const updateIntegration = (v: IntegrationSettings) => setIntegration(v);
@@ -508,7 +541,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       updateLevels,
       updateStylists,
       updateClients,
-      updateMembershipConfig: setMembershipConfig,
+      updateMembershipConfig,
       updateBranding,
       updateIntegration,
       updateLinkingConfig,

@@ -3,6 +3,10 @@ import url from 'url';
 import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env.local
+dotenv.config({ path: '.env.local' });
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
