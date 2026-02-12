@@ -34,6 +34,7 @@ export default async function handler(req: any, res: any) {
     const name = body?.name?.trim();
     const email = body?.email?.trim();
     const levelId = body?.levelId || 'lvl_1';
+    const squareTeamMemberId = body?.squareTeamMemberId?.trim() || null;
 
     if (!name || !email) {
       return res.status(400).json({ message: 'Stylist name and email are required.' });
@@ -67,7 +68,7 @@ export default async function handler(req: any, res: any) {
       return res.status(403).json({ message: 'Only admins can invite stylists.' });
     }
 
-    const stylistId = randomUUID();
+    const stylistId = squareTeamMemberId || randomUUID();
 
     const forwardedProto = req.headers['x-forwarded-proto'];
     const forwardedHost = req.headers['x-forwarded-host'] || req.headers['host'];

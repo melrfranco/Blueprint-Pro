@@ -43,14 +43,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const metadataRole = authUser.user_metadata?.role;
       const role: UserRole = isSquareOAuthUser
         ? 'admin'
-        : metadataRole === 'client'
-          ? 'client'
-          : metadataRole === 'owner'
-            ? 'admin'
-            : 'admin';
+        : metadataRole === 'stylist'
+          ? 'stylist'
+          : metadataRole === 'client'
+            ? 'client'
+            : metadataRole === 'owner'
+              ? 'admin'
+              : 'admin';
       const resolvedName = role === 'client'
         ? authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Client'
-        : authUser.user_metadata?.business_name || authUser.email?.split('@')[0] || 'Admin';
+        : role === 'stylist'
+          ? authUser.user_metadata?.stylist_name || authUser.user_metadata?.name || authUser.email?.split('@')[0] || 'Stylist'
+          : authUser.user_metadata?.business_name || authUser.email?.split('@')[0] || 'Admin';
 
       console.log('[AuthContext] Setting user with role:', {
         userId: authUser.id,
@@ -60,14 +64,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isSquareOAuthUser: authUser.email?.includes('@square-oauth.blueprint'),
       });
 
-      setUser({
+      const userObj: User = {
         id: authUser.id,
         name: resolvedName,
         role,
         email: authUser.email,
         avatarUrl: authUser.user_metadata?.avatar_url || undefined,
         isMock: false,
-      });
+      };
+
+      if (role === 'stylist') {
+        userObj.stylistData = {
+          id: authUser.user_metadata?.stylist_id || authUser.id,
+          name: resolvedName,
+          email: authUser.email || '',
+          role: 'Stylist',
+          levelId: authUser.user_metadata?.level_id || 'lvl_1',
+          permissions: authUser.user_metadata?.permissions || {},
+        };
+      }
+
+      setUser(userObj);
 
       setAuthInitialized(true);
     };
@@ -197,10 +214,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // (Used only for any existing non-Square demo flows.)
   const login = async (role: UserRole, specificId?: string) => {
     if (role === 'admin') {
-      const adminUser = {
+      const adminUser: User = {
         id: specificId || 'admin',
         name: 'Admin',
-        role: 'admin',
+        role: 'admin' as UserRole,
         isMock: true,
       };
       setUser(adminUser);

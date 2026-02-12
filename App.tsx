@@ -6,6 +6,7 @@ import AdminDashboard from './components/AdminDashboardV2';
 import LoginScreen from './components/LoginScreen';
 import MissingCredentialsScreen from './components/MissingCredentialsScreen';
 import DesignSystemShowcase from './components/DesignSystemShowcase';
+import SetPasswordScreen from './components/SetPasswordScreen';
 
 import { SettingsProvider } from './contexts/SettingsContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -21,6 +22,15 @@ const AppContent: React.FC = () => {
   const { user, authInitialized } = useAuth();
   const { needsSquareConnect } = useSettings();
   const [forceAdmin, setForceAdmin] = useState(false);
+  const [needsPasswordSetup, setNeedsPasswordSetup] = useState(false);
+
+  // Detect invite/recovery token in URL hash (Supabase redirects with #type=invite&access_token=...)
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && (hash.includes('type=invite') || hash.includes('type=recovery'))) {
+      setNeedsPasswordSetup(true);
+    }
+  }, []);
 
   // Show design system showcase for styling review
   const showDesignSystem = window.location.search.includes('design-system');
@@ -89,6 +99,17 @@ const AppContent: React.FC = () => {
     );
   }
 
+  if (needsPasswordSetup && user) {
+    return (
+      <SetPasswordScreen
+        onComplete={() => {
+          setNeedsPasswordSetup(false);
+          window.location.hash = '';
+        }}
+      />
+    );
+  }
+
   if (!user) {
     return <LoginScreen />;
   }
@@ -109,6 +130,9 @@ const AppContent: React.FC = () => {
 
   switch (user.role) {
     case 'admin':
+      return <AdminDashboard role="admin" />;
+    case 'stylist':
+      // TODO: Replace with StylistDashboard once built
       return <AdminDashboard role="admin" />;
     default:
       return <LoginScreen />;
