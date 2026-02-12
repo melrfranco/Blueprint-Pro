@@ -56,24 +56,30 @@ export default async function handler(req: any, res: any) {
       console.log('[TEAM SYNC] Token from headers:', squareAccessToken ? '✓' : '✗');
     }
 
-    const authHeader = req.headers['authorization'];
-    const bearer =
-      typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
-        ? authHeader.slice(7)
-        : null;
-
     let supabaseUserId: string | undefined;
 
-    if (bearer) {
-      // FIX: Cast to 'any' to bypass Supabase auth method type errors, likely from an environment configuration issue.
-      const { data: userData } = await (supabaseAdmin.auth as any).getUser(bearer);
-      supabaseUserId = userData?.user?.id;
-
-      if (!supabaseUserId) {
-        return res.status(401).json({ message: 'Invalid user.' });
-      }
+    // Try X-User-Id header first (lightweight, avoids Vercel 494 header size limit)
+    const userIdHeader = req.headers['x-user-id'] as string | undefined;
+    if (userIdHeader) {
+      supabaseUserId = userIdHeader;
+      console.log('[TEAM SYNC] User ID from X-User-Id header:', supabaseUserId);
     } else {
-      return res.status(401).json({ message: 'Missing auth token. Bearer token required.' });
+      // Fall back to Bearer JWT
+      const authHeader = req.headers['authorization'];
+      const bearer =
+        typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
+          ? authHeader.slice(7)
+          : null;
+
+      if (bearer) {
+        const { data: userData } = await (supabaseAdmin.auth as any).getUser(bearer);
+        supabaseUserId = userData?.user?.id;
+        console.log('[TEAM SYNC] User ID from Bearer token:', supabaseUserId);
+      }
+    }
+
+    if (!supabaseUserId) {
+      return res.status(401).json({ message: 'Missing auth. Provide X-User-Id or Bearer token.' });
     }
 
     /* -------------------------------------------------

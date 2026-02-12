@@ -88,32 +88,38 @@ export default function SquareCallback() {
 
       console.log('[OAuth Callback] Session created. User ID:', session.user.id);
 
-      const jwtToken = session.access_token;
+      const userId = session.user.id;
 
-      // Step 3: Sync team and clients (blocking - wait so data is available on /admin)
-      console.log('[OAuth Callback] Syncing team and clients...');
+      // Step 3: Sync team, clients, and services (blocking - wait so data is available on /admin)
+      console.log('[OAuth Callback] Syncing team, clients, and services...');
 
-      const [teamResult, clientResult] = await Promise.allSettled([
+      const syncHeaders = {
+        'Content-Type': 'application/json',
+        'X-User-Id': userId,
+      };
+      const syncBody = JSON.stringify({ squareAccessToken: squareToken });
+
+      const [teamResult, clientResult, servicesResult] = await Promise.allSettled([
         fetch('/api/square/team', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwtToken}`,
-          },
-          body: JSON.stringify({ squareAccessToken: squareToken }),
+          headers: syncHeaders,
+          body: syncBody,
         }).then(r => r.json()),
         fetch('/api/square/clients', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwtToken}`,
-          },
-          body: JSON.stringify({ squareAccessToken: squareToken }),
+          headers: syncHeaders,
+          body: syncBody,
+        }).then(r => r.json()),
+        fetch('/api/square/services', {
+          method: 'POST',
+          headers: syncHeaders,
+          body: syncBody,
         }).then(r => r.json()),
       ]);
 
       console.log('[OAuth Callback] Team sync:', teamResult.status, teamResult.status === 'fulfilled' ? teamResult.value : teamResult.reason);
       console.log('[OAuth Callback] Client sync:', clientResult.status, clientResult.status === 'fulfilled' ? clientResult.value : clientResult.reason);
+      console.log('[OAuth Callback] Services sync:', servicesResult.status, servicesResult.status === 'fulfilled' ? servicesResult.value : servicesResult.reason);
       console.log('[OAuth Callback] Redirecting to /admin');
 
       // Use regular redirect instead of replace to ensure session is persisted
