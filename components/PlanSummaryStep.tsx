@@ -909,7 +909,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                                       <ChevronRightIcon className="w-6 h-6 text-muted-foreground" />
                                                   </div>
                                                   
-                                                  <div className="border-t-2 mt-4 pt-4 space-y-2 border">
+                                                  <div className="border-t mt-4 pt-4 space-y-2 border-border">
                                                       <p className="bp-caption uppercase tracking-widest mb-1 text-muted-foreground">Visit Details:</p>
                                                       <div className="flex justify-between items-center text-sm">
                                                           <span className="font-bold text-muted-foreground">Services:</span>
