@@ -120,7 +120,7 @@ export default async function handler(req: any, res: any) {
       }
 
       // Sign in to get a valid session
-      const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({ email, password: tempPassword });
+      const { data: signInData, error: signInError } = await (supabaseAdmin.auth as any).signInWithPassword({ email, password: tempPassword });
       if (signInError) {
         console.error('[CREATE SESSION] Sign in failed after password update:', signInError);
         return res.status(500).json({
@@ -133,7 +133,7 @@ export default async function handler(req: any, res: any) {
       console.log('[CREATE SESSION] Creating new user for merchant');
 
       // Create new user
-      const { data: signUpData, error: signUpError } = await supabaseAdmin.auth.signUp({
+      const { data: signUpData, error: signUpError } = await (supabaseAdmin.auth as any).signUp({
         email,
         password: tempPassword,
         options: {
@@ -181,7 +181,7 @@ export default async function handler(req: any, res: any) {
       console.log('[CREATE SESSION] Merchant settings upserted for user:', user.id);
 
       // After creating new user, sign them in to get a session
-      const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({ email, password: tempPassword });
+      const { data: signInData, error: signInError } = await (supabaseAdmin.auth as any).signInWithPassword({ email, password: tempPassword });
       if (signInError) {
         console.error('[CREATE SESSION] Failed to sign in new user:', signInError);
         return res.status(500).json({
