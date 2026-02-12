@@ -21,6 +21,7 @@ import type {
 import { ALL_SERVICES, STYLIST_LEVELS } from '../data/mockData';
 import { supabase } from '../lib/supabase';
 import { canCustomizeBranding } from '../utils/isEnterpriseAccount';
+import { SquareIntegrationService } from '../services/squareIntegration';
 
 // Blueprint default branding - uses Blueprint Design System v1.0.0 palette
 export const BLUEPRINT_DEFAULT_BRANDING: BrandingSettings = {
@@ -180,6 +181,25 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         setNeedsSquareConnect(!merchantSettings?.square_access_token);
       }
 
+      // ---- Services: fetch from Square catalog (replaces mock data)
+      if (merchantSettings?.square_access_token) {
+        try {
+          console.log('[Settings] Fetching services from Square catalog...');
+          const squareServices = await SquareIntegrationService.fetchCatalog();
+          if (cancelled) return;
+          if (squareServices.length > 0) {
+            console.log('[Settings] Loaded', squareServices.length, 'services from Square');
+            setServices(squareServices);
+          } else {
+            console.log('[Settings] No services from Square, keeping defaults');
+          }
+        } catch (e) {
+          if (!cancelled) {
+            console.warn('[Settings] Failed to fetch Square catalog, keeping defaults:', e);
+          }
+        }
+      }
+
       // ---- Clients: scoped by supabase_user_id (avoids loading everyone)
       try {
         let { data, error } = await supabase
@@ -206,12 +226,40 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
           }
         }
 
+        // If still no data from Supabase, fetch directly from Square API
+        if ((data?.length ?? 0) === 0 && merchantSettings?.square_access_token) {
+          console.log('[Settings] No clients in Supabase, fetching directly from Square API...');
+          try {
+            const squareClients = await SquareIntegrationService.fetchCustomers();
+            if (cancelled) return;
+            if (squareClients.length > 0) {
+              console.log('[Settings] Loaded', squareClients.length, 'clients from Square API');
+              const mapped: Client[] = squareClients.map((c: any) => ({
+                id: c.id || c.externalId,
+                externalId: c.externalId || c.id,
+                name: c.name || 'Client',
+                email: c.email,
+                phone: c.phone,
+                avatarUrl: c.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name || 'C')}&background=random`,
+                historicalData: [],
+                source: 'square',
+              }));
+              setClients(mapped);
+              // Skip the Supabase mapping below
+              setLoadingTeam(true);
+              setTeamError(null);
+            }
+          } catch (clientApiErr) {
+            console.warn('[Settings] Square clients API fallback failed:', clientApiErr);
+          }
+        }
+
         if (cancelled) return;
 
         if (error) {
           console.error('[Settings] Failed to load clients:', error);
           setClients([]);
-        } else {
+        } else if ((data?.length ?? 0) > 0) {
           console.log('[Settings] Setting clients:', (data || []).length);
           const mapped: Client[] = (data || []).map((row: any) => ({
             id: row.id,
@@ -256,6 +304,23 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
           console.log('[Settings] Fallback team members query returned:', { count: legacyData?.length || 0 });
           if (legacyData && legacyData.length > 0) {
             data = legacyData;
+          }
+        }
+
+        // If still no data from Supabase, fetch directly from Square API
+        if ((data?.length ?? 0) === 0 && merchantSettings?.square_access_token) {
+          console.log('[Settings] No team in Supabase, fetching directly from Square API...');
+          try {
+            const squareTeam = await SquareIntegrationService.fetchTeam();
+            if (cancelled) return;
+            if (squareTeam.length > 0) {
+              console.log('[Settings] Loaded', squareTeam.length, 'team members from Square API');
+              setStylists(squareTeam);
+              setLoadingTeam(false);
+              return; // Skip the Supabase mapping below
+            }
+          } catch (teamApiErr) {
+            console.warn('[Settings] Square team API fallback failed:', teamApiErr);
           }
         }
 
