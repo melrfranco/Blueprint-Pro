@@ -28,10 +28,10 @@ const JoinScreen: React.FC<JoinScreenProps> = ({ onComplete }) => {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/stylists/verify-pin', {
+      const response = await fetch('/api/stylists', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin }),
+        body: JSON.stringify({ action: 'verify-pin', pin }),
       });
 
       const data = await response.json();
@@ -71,10 +71,10 @@ const JoinScreen: React.FC<JoinScreenProps> = ({ onComplete }) => {
 
     setLoading(true);
     try {
-      const response = await fetch('/api/stylists/join', {
+      const response = await fetch('/api/stylists', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin, email, password }),
+        body: JSON.stringify({ action: 'join', pin, email, password }),
       });
 
       const data = await response.json();

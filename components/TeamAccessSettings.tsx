@@ -80,13 +80,13 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
       const accessToken = sessionData.session?.access_token;
       if (!accessToken) throw new Error('Please log in again.');
 
-      const response = await fetch('/api/stylists/generate-pin', {
+      const response = await fetch('/api/stylists', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ squareTeamMemberId: stylist.id, name: stylist.name, email: stylist.email }),
+        body: JSON.stringify({ action: 'generate-pin', squareTeamMemberId: stylist.id, name: stylist.name, email: stylist.email }),
       });
 
       const data = await response.json();
