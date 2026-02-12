@@ -153,13 +153,14 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     const loadForUser = async () => {
       console.log('[Settings] loadForUser called');
 
-      // FIX: Cast to 'any' to bypass Supabase auth method type errors, likely from an environment configuration issue.
-      const { data: userResp, error: userErr } = await (supabase.auth as any).getUser();
+      // Use getSession() instead of getUser() — getSession reads from local cache
+      // and doesn't require a network call to /auth/v1/user (which fails with ERR_CONNECTION_RESET)
+      const { data: sessionData, error: sessionErr } = await supabase.auth.getSession();
       if (cancelled) return;
 
-      const user = userResp?.user;
-      if (userErr || !user) {
-        console.log('[Settings] No authenticated user, skipping data load', { error: userErr?.message });
+      const user = sessionData?.session?.user;
+      if (sessionErr || !user) {
+        console.log('[Settings] No authenticated session, skipping data load', { error: sessionErr?.message });
         setNeedsSquareConnect(false);
         return;
       }
