@@ -10,13 +10,14 @@ type Step = 'pin' | 'setup';
 const JoinScreen: React.FC<JoinScreenProps> = ({ onComplete }) => {
   const [step, setStep] = useState<Step>('pin');
   const [pin, setPin] = useState('');
+  const [stylistName, setStylistName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handlePinSubmit = (e: React.FormEvent) => {
+  const handlePinSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -25,7 +26,27 @@ const JoinScreen: React.FC<JoinScreenProps> = ({ onComplete }) => {
       return;
     }
 
-    setStep('setup');
+    setLoading(true);
+    try {
+      const response = await fetch('/api/stylists/verify-pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data?.message || 'Invalid PIN.');
+      }
+
+      setStylistName(data.name || '');
+      setEmail(data.email || '');
+      setStep('setup');
+    } catch (err: any) {
+      setError(err.message || 'Failed to verify PIN.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSetup = async (e: React.FormEvent) => {
@@ -94,7 +115,7 @@ const JoinScreen: React.FC<JoinScreenProps> = ({ onComplete }) => {
             <>
               <h2 className="bp-section-title text-center mb-2">Join Your Team</h2>
               <p className="bp-body-sm text-center text-muted-foreground mb-6">
-                Enter the 4-digit PIN from your admin to get started.
+                Enter the 4-digit PIN your admin gave you.
               </p>
 
               <form onSubmit={handlePinSubmit} className="space-y-4">
@@ -118,18 +139,21 @@ const JoinScreen: React.FC<JoinScreenProps> = ({ onComplete }) => {
 
                 <button
                   type="submit"
-                  className="w-full py-4 bp-btn-primary text-center"
+                  disabled={loading}
+                  className="w-full py-4 bp-btn-primary text-center disabled:opacity-50"
                   data-ui="button"
                 >
-                  Continue
+                  {loading ? 'Verifying...' : 'Continue'}
                 </button>
               </form>
             </>
           ) : (
             <>
-              <h2 className="bp-section-title text-center mb-2">Set Up Your Account</h2>
+              <h2 className="bp-section-title text-center mb-2">
+                {stylistName ? `Welcome, ${stylistName.split(' ')[0]}!` : 'Set Up Your Account'}
+              </h2>
               <p className="bp-body-sm text-center text-muted-foreground mb-6">
-                Create your login credentials.
+                Confirm your email and set a password.
               </p>
 
               <form onSubmit={handleSetup} className="space-y-4">
