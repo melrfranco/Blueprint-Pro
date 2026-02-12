@@ -7,6 +7,7 @@ import LoginScreen from './components/LoginScreen';
 import MissingCredentialsScreen from './components/MissingCredentialsScreen';
 import DesignSystemShowcase from './components/DesignSystemShowcase';
 import SetPasswordScreen from './components/SetPasswordScreen';
+import StylistDashboard from './components/StylistDashboard';
 
 import { SettingsProvider } from './contexts/SettingsContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -132,8 +133,7 @@ const AppContent: React.FC = () => {
     case 'admin':
       return <AdminDashboard role="admin" />;
     case 'stylist':
-      // TODO: Replace with StylistDashboard once built
-      return <AdminDashboard role="admin" />;
+      return <StylistDashboard />;
     default:
       return <LoginScreen />;
   }

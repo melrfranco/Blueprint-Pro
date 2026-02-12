@@ -106,6 +106,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
           name: inviteName.trim(),
           email: inviteEmail.trim(),
           levelId: inviteLevelId || levels[0]?.id || 'lvl_1',
+          squareTeamMemberId: stylists.find(s => s.email === inviteEmail.trim())?.id || undefined,
         }),
       });
 
