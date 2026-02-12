@@ -14,16 +14,10 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
   const { levels, updateLevels, stylists, updateStylists, saveAll } = useSettings();
   const { toastVisible, showToast, hideToast } = useSaveToast();
   const [editingStylist, setEditingStylist] = useState<Stylist | null>(null);
-  const [showInviteForm, setShowInviteForm] = useState(false);
-  const [inviteName, setInviteName] = useState('');
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteLevelId, setInviteLevelId] = useState('lvl_1');
-  const [inviteLoading, setInviteLoading] = useState(false);
-  const [inviteError, setInviteError] = useState<string | null>(null);
-  const [inviteStatus, setInviteStatus] = useState<string | null>(null);
-  const [invitingStylistId, setInvitingStylistId] = useState<string | null>(null);
-  const [invitedStylistIds, setInvitedStylistIds] = useState<Set<string>>(new Set());
-  const [inviteLinkMap, setInviteLinkMap] = useState<Record<string, string>>({});
+  const [pinLoading, setPinLoading] = useState(false);
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [pinLoadingStylistId, setPinLoadingStylistId] = useState<string | null>(null);
+  const [pinMap, setPinMap] = useState<Record<string, string>>({});
   const [stylistSaveLoading, setStylistSaveLoading] = useState(false);
   const [stylistSaveError, setStylistSaveError] = useState<string | null>(null);
 
@@ -74,119 +68,36 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
     updateLevels([...levels, nextLevel]);
   };
 
-  const handleInviteStylist = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setInviteError(null);
-    setInviteStatus(null);
-
-    if (!inviteName.trim() || !inviteEmail.trim()) {
-      setInviteError('Enter a name and email for the stylist.');
-      return;
-    }
-
-    if (!supabase) {
-      setInviteError('Supabase is not configured.');
-      return;
-    }
-
-    setInviteLoading(true);
-
-    try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const accessToken = sessionData.session?.access_token;
-
-      if (!accessToken) {
-        throw new Error('Please log in again to send invites.');
-      }
-
-      const response = await fetch('/api/stylists/invite', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          name: inviteName.trim(),
-          email: inviteEmail.trim(),
-          levelId: inviteLevelId || levels[0]?.id || 'lvl_1',
-          squareTeamMemberId: stylists.find(s => s.email === inviteEmail.trim())?.id || undefined,
-        }),
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data?.message || 'Failed to send invite.');
-      }
-
-      if (data?.stylist) {
-        const nextStylists = stylists.some(s => s.id === data.stylist.id)
-          ? stylists.map(s => (s.id === data.stylist.id ? data.stylist : s))
-          : [...stylists, data.stylist];
-        updateStylists(nextStylists);
-      }
-
-      setInviteStatus('Invite sent.');
-      setInviteName('');
-      setInviteEmail('');
-      setInviteLevelId(levels[0]?.id || 'lvl_1');
-      setShowInviteForm(false);
-    } catch (e: any) {
-      setInviteError(e.message || 'Failed to send invite.');
-    } finally {
-      setInviteLoading(false);
-    }
-  };
-
-  const handleInviteExistingMember = async (stylist: Stylist) => {
-    if (!stylist.email) {
-      setInviteError('This team member has no email on file. Add their email in Square first.');
-      setInvitingStylistId(stylist.id);
-      return;
-    }
-
+  const handleGeneratePin = async (stylist: Stylist) => {
     if (!supabase) return;
 
-    setInvitingStylistId(stylist.id);
-    setInviteLoading(true);
-    setInviteError(null);
+    setPinLoadingStylistId(stylist.id);
+    setPinLoading(true);
+    setPinError(null);
 
     try {
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
       if (!accessToken) throw new Error('Please log in again.');
 
-      const response = await fetch('/api/stylists/invite', {
+      const response = await fetch('/api/stylists/generate-pin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({
-          name: stylist.name,
-          email: stylist.email,
-          levelId: stylist.levelId || levels[0]?.id || 'lvl_1',
-          squareTeamMemberId: stylist.id,
-        }),
+        body: JSON.stringify({ squareTeamMemberId: stylist.id }),
       });
 
       const data = await response.json();
-      console.log('[Invite] API response:', JSON.stringify(data, null, 2));
-      if (!response.ok) throw new Error(data?.message || 'Failed to send invite.');
+      if (!response.ok) throw new Error(data?.message || 'Failed to generate PIN.');
 
-      setInvitedStylistIds(prev => new Set(prev).add(stylist.id));
-      if (data?.inviteLink) {
-        setInviteLinkMap(prev => ({ ...prev, [stylist.id]: data.inviteLink }));
-      }
-      if (data?.emailStatus === 'failed') {
-        setInviteError(`Email failed: ${data.emailError || 'unknown error'}. Use the link below instead.`);
-        setInvitingStylistId(stylist.id);
-      } else {
-        setInvitingStylistId(null);
-      }
+      setPinMap(prev => ({ ...prev, [stylist.id]: data.pin }));
+      setPinLoadingStylistId(null);
     } catch (e: any) {
-      setInviteError(e.message || 'Failed to send invite.');
+      setPinError(e.message || 'Failed to generate PIN.');
     } finally {
-      setInviteLoading(false);
+      setPinLoading(false);
     }
   };
 
@@ -340,42 +251,41 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
                         </p>
                       )}
                     </div>
-                    {invitedStylistIds.has(stylist.id) ? (
-                      <span className="bp-caption text-green-600 font-bold">Invited</span>
-                    ) : (
-                      <button
-                        data-ui="button"
-                        onClick={() => handleInviteExistingMember(stylist)}
-                        disabled={inviteLoading && invitingStylistId === stylist.id}
-                        className="px-4 py-1.5 text-xs uppercase tracking-widest bp-btn-primary disabled:opacity-50"
-                      >
-                        {inviteLoading && invitingStylistId === stylist.id ? 'Sending...' : 'Invite'}
-                      </button>
-                    )}
+                    <button
+                      data-ui="button"
+                      onClick={() => handleGeneratePin(stylist)}
+                      disabled={pinLoading && pinLoadingStylistId === stylist.id}
+                      className="px-4 py-1.5 text-xs uppercase tracking-widest bp-btn-primary disabled:opacity-50"
+                    >
+                      {pinLoading && pinLoadingStylistId === stylist.id ? 'Generating...' : pinMap[stylist.id] ? 'New PIN' : 'Generate PIN'}
+                    </button>
                   </div>
-                  {inviteError && invitingStylistId === stylist.id && (
-                    <p className="text-xs text-red-600 font-medium mt-2">{inviteError}</p>
+                  {pinError && pinLoadingStylistId === stylist.id && (
+                    <p className="text-xs text-red-600 font-medium mt-2">{pinError}</p>
                   )}
-                  {inviteLinkMap[stylist.id] && (
-                    <div className="mt-3 p-3 bg-muted bp-container-compact border border-border">
-                      <p className="bp-caption mb-2">Share this link with {stylist.name.split(' ')[0]}:</p>
-                      <div className="flex items-center gap-2">
-                        <input
-                          readOnly
-                          value={inviteLinkMap[stylist.id]}
-                          className="flex-1 text-xs px-3 py-2 bg-card border border-border bp-container-compact text-foreground truncate"
-                          onClick={(e) => (e.target as HTMLInputElement).select()}
-                        />
+                  {pinMap[stylist.id] && (
+                    <div className="mt-3 p-4 bg-muted bp-container-compact border border-border text-center">
+                      <p className="bp-caption mb-3">Share this PIN with {stylist.name.split(' ')[0]}:</p>
+                      <p className="text-4xl font-bold tracking-[0.3em] text-foreground mb-3">{pinMap[stylist.id]}</p>
+                      <p className="bp-caption mb-2">Then have them go to:</p>
+                      <div className="flex items-center justify-center gap-2">
+                        <code className="text-xs px-3 py-2 bg-card border border-border bp-container-compact text-accent font-bold">
+                          {window.location.origin}/join
+                        </code>
                         <button
                           data-ui="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(inviteLinkMap[stylist.id]);
-                          }}
+                          onClick={() => navigator.clipboard.writeText(`${window.location.origin}/join`)}
                           className="px-3 py-2 text-xs uppercase tracking-widest bp-btn-primary whitespace-nowrap"
                         >
                           Copy
                         </button>
                       </div>
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${window.location.origin}/join`)}`}
+                        alt="QR Code"
+                        className="mx-auto mt-4 w-28 h-28"
+                      />
+                      <p className="bp-caption mt-2 text-muted-foreground">PIN expires in 24 hours</p>
                     </div>
                   )}
                 </>
@@ -468,7 +378,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="bp-overline">Team Members</p>
-              <p className="bp-body text-foreground">Synced from Square. Invite members to give them app access.</p>
+              <p className="bp-body text-foreground">Synced from Square. Generate a PIN to give them app access.</p>
             </div>
           </div>
 

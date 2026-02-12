@@ -8,6 +8,7 @@ import MissingCredentialsScreen from './components/MissingCredentialsScreen';
 import DesignSystemShowcase from './components/DesignSystemShowcase';
 import SetPasswordScreen from './components/SetPasswordScreen';
 import StylistDashboard from './components/StylistDashboard';
+import JoinScreen from './components/JoinScreen';
 
 import { SettingsProvider } from './contexts/SettingsContext';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -56,6 +57,12 @@ const AppContent: React.FC = () => {
       })();
     }
   }, []);
+
+  // Show /join screen for stylist PIN-based onboarding
+  const isJoinPage = window.location.pathname === '/join';
+  if (isJoinPage) {
+    return <JoinScreen onComplete={() => { window.location.href = '/'; }} />;
+  }
 
   // Show design system showcase for styling review
   const showDesignSystem = window.location.search.includes('design-system');
