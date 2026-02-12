@@ -11,6 +11,7 @@ import type { GeneratedPlan } from '../types';
 export default function StylistDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [editingPlan, setEditingPlan] = useState<GeneratedPlan | null>(null);
+  const [isCreatingPlan, setIsCreatingPlan] = useState(false);
 
   const { user, logout } = useAuth();
   const { services: allServices } = useSettings();
@@ -99,12 +100,23 @@ export default function StylistDashboard() {
         )}
       </div>
 
+      {/* New Plan Button */}
+      <div className="mb-6">
+        <button
+          data-ui="button"
+          onClick={() => setIsCreatingPlan(true)}
+          className="w-full py-4 bp-btn-primary text-center font-bold"
+        >
+          + New Plan
+        </button>
+      </div>
+
       {/* Recent Plans */}
       <div>
         <h2 className="bp-section-title mb-4 pl-4">My Plans</h2>
         {myPlans.length === 0 ? (
           <div className="bg-card p-6 bp-container-list border border-border shadow-sm text-center elevated-card">
-            <p className="bp-body-sm text-muted-foreground">No plans assigned to you yet</p>
+            <p className="bp-body-sm text-muted-foreground">No plans yet — create your first one!</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -135,11 +147,20 @@ export default function StylistDashboard() {
   const renderPlans = () => (
     <div className="bp-page">
       <h1 className="bp-page-title mb-8">My Plans</h1>
+
+      <button
+        data-ui="button"
+        onClick={() => setIsCreatingPlan(true)}
+        className="w-full py-4 bp-btn-primary text-center font-bold mb-6"
+      >
+        + New Plan
+      </button>
+
       <div className="space-y-4">
         {myPlans.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 bg-card border border-border bp-container-list shadow-sm">
             <p className="bp-section-title mb-2">No plans yet</p>
-            <p className="bp-overline">Plans assigned to you will appear here</p>
+            <p className="bp-overline">Create your first plan above!</p>
           </div>
         ) : (
           myPlans.map(plan => (
@@ -168,19 +189,20 @@ export default function StylistDashboard() {
   );
 
   const renderActiveTab = () => {
-    if (editingPlan) {
+    if (isCreatingPlan || editingPlan) {
       return (
         <PlanWizard
           role="stylist"
-          client={editingPlan.client}
-          existingPlan={editingPlan}
+          client={editingPlan?.client}
+          existingPlan={editingPlan || undefined}
           onPlanChange={(plan) => {
             setEditingPlan(plan);
             if (!plan) {
+              setIsCreatingPlan(false);
               setActiveTab('plans');
             }
           }}
-          initialStep="summary"
+          initialStep={isCreatingPlan ? 'select-client' : 'summary'}
         />
       );
     }
@@ -196,6 +218,7 @@ export default function StylistDashboard() {
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab);
     setEditingPlan(null);
+    setIsCreatingPlan(false);
   };
 
   return (
