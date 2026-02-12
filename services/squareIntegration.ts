@@ -305,11 +305,35 @@ export const SquareIntegrationService = {
       const isInvalidTeamMemberId = !teamMemberId || teamMemberId.startsWith('TM-') || teamMemberId === 'admin';
 
       if (isInvalidTeamMemberId) {
-          const teamMembers = await SquareIntegrationService.fetchTeam();
-          if (!teamMembers || teamMembers.length === 0) {
-              throw new Error("No bookable team members found in Square to assign this appointment to.");
+          // First try to get owner_team_member_id from merchant_settings
+          let foundFromDb = false;
+          try {
+              const { data: { session } } = await supabase.auth.getSession();
+              if (session) {
+                  const { data: ms } = await supabase
+                      .from('merchant_settings')
+                      .select('owner_team_member_id')
+                      .eq('supabase_user_id', session.user.id)
+                      .maybeSingle();
+                  if (ms?.owner_team_member_id) {
+                      resolvedTeamMemberId = ms.owner_team_member_id;
+                      foundFromDb = true;
+                      console.log('[BOOKING] Using owner_team_member_id from merchant_settings:', resolvedTeamMemberId);
+                  }
+              }
+          } catch (dbErr) {
+              console.warn('[BOOKING] Failed to look up owner_team_member_id:', dbErr);
           }
-          resolvedTeamMemberId = teamMembers[0].id;
+
+          // Fall back to fetching team from Square API
+          if (!foundFromDb) {
+              const teamMembers = await SquareIntegrationService.fetchTeam();
+              if (!teamMembers || teamMembers.length === 0) {
+                  throw new Error("No bookable team members found in Square to assign this appointment to.");
+              }
+              resolvedTeamMemberId = teamMembers[0].id;
+              console.log('[BOOKING] Using first team member from Square API:', resolvedTeamMemberId);
+          }
       }
       
       const serviceVersionMap = new Map<string, number>();

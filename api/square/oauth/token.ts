@@ -211,6 +211,42 @@ export default async function handler(req: any, res: any) {
               merchantData?.merchant?.business_email;
     }
 
+    // Always fetch team members to: (a) find owner email if needed, (b) get owner team_member_id for bookings
+    let ownerTeamMemberId: string | undefined;
+    console.log('[OAUTH TOKEN] Fetching team members for owner info...');
+    try {
+      const teamData = await squareApiFetch(
+        `${baseUrl}/v2/team-members/search`,
+        access_token,
+        {
+          method: 'POST',
+          body: JSON.stringify({ query: { filter: {} }, limit: 100 }),
+        }
+      );
+      const members = (teamData as any)?.team_members || [];
+      console.log('[OAUTH TOKEN] Found', members.length, 'team members');
+
+      // Store the owner's team member ID for booking purposes
+      const ownerMember = members.find((m: any) => m.is_owner);
+      if (ownerMember) {
+        ownerTeamMemberId = ownerMember.id;
+        console.log('[OAUTH TOKEN] Owner team member ID:', ownerTeamMemberId);
+      }
+
+      // If we still need an email, try to get it from team members
+      if (!email) {
+        const owner = members.find((m: any) => m.is_owner && m.email_address);
+        const anyWithEmail = members.find((m: any) => m.email_address);
+        const teamMember = owner || anyWithEmail;
+        if (teamMember?.email_address) {
+          email = teamMember.email_address;
+          console.log('[OAUTH TOKEN] Found email from team members API:', email);
+        }
+      }
+    } catch (teamErr) {
+      console.warn('[OAUTH TOKEN] Team members lookup failed:', teamErr);
+    }
+
     // If still no email, ask the user to provide one
     if (!email) {
       console.log('[OAUTH TOKEN] No email found in Square data, asking user to provide one');
@@ -331,18 +367,19 @@ export default async function handler(req: any, res: any) {
 
     console.log('[OAUTH TOKEN] ✅ Session created');
 
-    // Save merchant settings
+    // Save merchant settings (include owner team member ID if found)
+    const merchantUpsertData: any = {
+      supabase_user_id: user.id,
+      square_merchant_id: merchant_id,
+      square_access_token: access_token,
+      square_connected_at: new Date().toISOString(),
+    };
+    if (ownerTeamMemberId) {
+      merchantUpsertData.owner_team_member_id = ownerTeamMemberId;
+    }
     const { error: upsertError } = await supabaseAdmin
       .from('merchant_settings')
-      .upsert(
-        {
-          supabase_user_id: user.id,
-          square_merchant_id: merchant_id,
-          square_access_token: access_token,
-          square_connected_at: new Date().toISOString(),
-        },
-        { onConflict: 'square_merchant_id' }
-      );
+      .upsert(merchantUpsertData, { onConflict: 'square_merchant_id' });
 
     if (upsertError) {
       console.error('[OAUTH TOKEN] ❌ Failed to upsert merchant_settings:', upsertError.message);

@@ -9,7 +9,7 @@ export default function SquareCallback() {
   const [squareTokenData, setSquareTokenData] = useState<any>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleTokenExchange = async (emailValue?: string) => {
+  const handleTokenExchange = async (emailValue?: string, codeOverride?: string) => {
     try {
       const body: any = {};
 
@@ -20,8 +20,8 @@ export default function SquareCallback() {
         body.access_token = squareTokenData.access_token;
         body.merchant_id = squareTokenData.merchant_id;
       } else {
-        // First attempt: only use code
-        body.code = code;
+        // First attempt: only use code (prefer override since React state may be stale)
+        body.code = codeOverride || code;
         if (emailValue) {
           body.email = emailValue;
         }
@@ -99,27 +99,30 @@ export default function SquareCallback() {
 
       const jwtToken = supabase_session.access_token;
 
-      // Step 3: Sync team and clients (non-blocking - don't wait for these to complete)
+      // Step 3: Sync team and clients (blocking - wait so data is available on /admin)
       console.log('[OAuth Callback] Syncing team and clients...');
 
-      fetch('/api/square/team', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwtToken}`,
-        },
-        body: JSON.stringify({ squareAccessToken: squareToken }),
-      }).catch(err => console.warn('[OAuth Callback] Team sync failed:', err));
+      const [teamResult, clientResult] = await Promise.allSettled([
+        fetch('/api/square/team', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwtToken}`,
+          },
+          body: JSON.stringify({ squareAccessToken: squareToken }),
+        }).then(r => r.json()),
+        fetch('/api/square/clients', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwtToken}`,
+          },
+          body: JSON.stringify({ squareAccessToken: squareToken }),
+        }).then(r => r.json()),
+      ]);
 
-      fetch('/api/square/clients', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwtToken}`,
-        },
-        body: JSON.stringify({ squareAccessToken: squareToken }),
-      }).catch(err => console.warn('[OAuth Callback] Clients sync failed:', err));
-
+      console.log('[OAuth Callback] Team sync:', teamResult.status, teamResult.status === 'fulfilled' ? teamResult.value : teamResult.reason);
+      console.log('[OAuth Callback] Client sync:', clientResult.status, clientResult.status === 'fulfilled' ? clientResult.value : clientResult.reason);
       console.log('[OAuth Callback] Redirecting to /admin');
 
       // Use regular redirect instead of replace to ensure session is persisted
@@ -144,8 +147,8 @@ export default function SquareCallback() {
     }
 
     setCode(codeParam);
-    console.log('OAuth callback: handling full OAuth flow');
-    handleTokenExchange();
+    console.log('OAuth callback: handling full OAuth flow with code:', codeParam.substring(0, 10) + '...');
+    handleTokenExchange(undefined, codeParam);
   }, []);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {

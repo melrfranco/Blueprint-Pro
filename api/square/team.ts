@@ -34,7 +34,11 @@ export default async function handler(req: any, res: any) {
     // Try to read token from request body first (preferred)
     if (req.method === 'POST') {
       try {
-        const body = await req.json();
+        // Vercel auto-parses JSON bodies into req.body
+        let body = req.body;
+        if (typeof body === 'string') {
+          try { body = JSON.parse(body); } catch { body = {}; }
+        }
         squareAccessToken = body?.squareAccessToken;
         console.log('[TEAM SYNC] Token from body:', squareAccessToken ? '✓ (found)' : '✗ (not found)');
         console.log('[TEAM SYNC] Body keys:', Object.keys(body || {}));
@@ -68,11 +72,8 @@ export default async function handler(req: any, res: any) {
       if (!supabaseUserId) {
         return res.status(401).json({ message: 'Invalid user.' });
       }
-    } else if (squareAccessToken) {
-      // For token-based sync, use the real admin account UID (Square OAuth account)
-      supabaseUserId = 'c6598212-8148-4cf9-b53f-15066b92f679';
     } else {
-      return res.status(401).json({ message: 'Missing auth token.' });
+      return res.status(401).json({ message: 'Missing auth token. Bearer token required.' });
     }
 
     /* -------------------------------------------------
