@@ -97,7 +97,7 @@ const SelectServicesStep: React.FC<SelectServicesStepProps> = ({ availableServic
         </div>
       </div>
       
-      <div className="flex-grow overflow-y-auto px-4 pb-48 pt-4">
+      <div className="flex-grow overflow-y-auto px-4 pb-4 pt-4">
         {linkingSuggestion && (
             <div className="mb-6 bg-secondary text-secondary-foreground p-5 bp-container-list border-b-4 border-black/20 shadow-xl animate-bounce-in flex items-center justify-between">
                 <div className="pr-4">
@@ -143,7 +143,7 @@ const SelectServicesStep: React.FC<SelectServicesStepProps> = ({ availableServic
         ))}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-5 bg-card border-t-8 border-primary z-40 pb-10" style={{ boxShadow: '0 -20px 50px rgba(11, 53, 89, 0.2)' }}>
+      <div className="sticky bottom-0 p-5 bg-card border-t-8 border-primary z-40 pb-28 flex-shrink-0" style={{ boxShadow: '0 -20px 50px rgba(11, 53, 89, 0.2)' }}>
         <button 
             onClick={handleNext} 
             disabled={selectedIds.size === 0} 
