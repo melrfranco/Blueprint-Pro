@@ -540,10 +540,19 @@ html {
     color: var(--foreground);
   }
 
+  .bp-subtitle {
+    font-family: "Raleway", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted-foreground);
+  }
+
   /* Typography - Raleway for body */
   .bp-overline {
     font-family: "Raleway", sans-serif;
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;

@@ -476,12 +476,12 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
   return (
     <div className="flex flex-col h-full bg-background relative">
       <div className="flex-grow p-4 overflow-y-auto text-foreground">
-        <div className="mb-6 flex justify-between items-end border-b-2 pb-4 border">
+        <div className="mb-6 flex justify-between items-end border-b pb-4 border-border">
             <div>
                 <h1 className="bp-page-title leading-none mb-1">Blueprint Summary</h1>
-                <p className="bp-overline">{plan.client.name}</p>
+                <p className="bp-subtitle pl-2">{plan.client.name}</p>
             </div>
-            <span className={`bp-overline px-4 py-1.5 bp-container-compact border-2 shadow-sm ${isPlanActive ? 'bg-accent/10 text-accent border-accent' : 'bg-muted text-foreground border-secondary'}`}>
+            <span className={`bp-overline px-4 py-1.5 bp-container-compact border-2 shadow-sm ${isPlanActive ? 'bg-accent/10 text-accent border-accent' : 'bg-foreground/10 text-foreground border-foreground/30'}`}>
                 {isPlanActive ? 'PUBLISHED' : 'DRAFT'}
             </span>
         </div>
