@@ -661,7 +661,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
         
         <div className="flex flex-col gap-4 mb-4">
             {!isClient && !isPlanActive && (
-                <button onClick={handlePublish} disabled={isPublishing} className="w-full py-4 bp-container-compact font-bold text-lg shadow-sm flex items-center justify-center space-x-3 active:scale-95 transition-all bg-primary text-primary-foreground">
+                <button onClick={handlePublish} disabled={isPublishing} className="w-full py-4 bp-container-compact font-bold text-lg shadow-sm flex items-center justify-center space-x-3 active:scale-95 transition-all bg-accent text-accent-foreground">
                     {isPublishing ? <RefreshIcon className="w-6 h-6 animate-spin" /> : <GlobeIcon className="w-6 h-6" />}
                     <span>PUBLISH TO CLIENT</span>
                 </button>
@@ -670,7 +670,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             {!isClient && membershipConfig.enabled && (
                 <button
                     onClick={() => setMembershipModalOpen(true)}
-                    className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all ${isMemberOffered || isMemberActive ? 'bg-accent text-accent-foreground' : 'bg-primary text-primary-foreground'}`}
+                    className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all bg-accent text-accent-foreground`}
                 >
                     {isMemberOffered || isMemberActive ? <CheckCircleIcon className="w-6 h-6" /> : <PlusIcon className="w-6 h-6" />}
                     <span>{isMemberOffered ? 'INVITATION SENT' : isMemberActive ? 'MEMBERSHIP ACTIVE' : 'SEND MEMBERSHIP INVITATION'}</span>
@@ -680,7 +680,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             <button 
                 onClick={handleOpenBooking} 
                 disabled={!canBook}
-                className={`w-full py-4 bp-container-compact font-bold text-lg shadow-sm active:scale-95 transition-all flex items-center justify-center space-x-3 ${canBook ? 'bg-accent text-accent-foreground border-2 border-accent' : 'cursor-not-allowed bg-muted text-muted-foreground'}`}
+                className={`w-full py-4 bp-container-compact font-bold text-lg shadow-sm active:scale-95 transition-all flex items-center justify-center space-x-3 ${canBook ? 'bg-accent text-accent-foreground' : 'cursor-not-allowed bg-muted text-muted-foreground'}`}
             >
                 <CalendarIcon className="w-6 h-6" />
                 <span>{isClient ? 'BOOK APPOINTMENT' : canBook ? 'Book an Upcoming Appointment' : 'SYNC DISABLED'}</span>
