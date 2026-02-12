@@ -68,7 +68,7 @@ const SetFrequencyStep: React.FC<SetFrequencyStepProps> = ({ selectedServices, p
         <button
           onClick={() => onNext(localDetails)}
           disabled={isNextDisabled}
-          className="w-full font-bold py-3 px-4 bp-container-compact shadow-lg transition-transform transform hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed bg-secondary text-secondary-foreground"
+          className="w-full font-bold py-3 px-4 bp-container-compact shadow-lg transition-transform transform hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed bg-primary text-primary-foreground"
         >
           Create Maintenance Roadmap
         </button>
