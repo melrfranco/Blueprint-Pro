@@ -680,9 +680,9 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             <button 
                 onClick={handleOpenBooking} 
                 disabled={!canBook}
-                className={`w-full py-4 bp-container-compact font-bold text-lg shadow-sm active:scale-95 transition-all flex items-center justify-center space-x-3 ${canBook ? 'bg-secondary text-secondary-foreground' : 'cursor-not-allowed bg-muted text-muted-foreground'}`}
+                className={`w-full py-4 bp-container-compact font-bold text-lg shadow-sm active:scale-95 transition-all flex items-center justify-center space-x-3 ${canBook ? 'bg-accent text-accent-foreground border-2 border-accent' : 'cursor-not-allowed bg-muted text-muted-foreground'}`}
             >
-                <CalendarIcon className={`w-6 h-6 ${canBook ? 'text-accent' : ''}`} />
+                <CalendarIcon className="w-6 h-6" />
                 <span>{isClient ? 'BOOK APPOINTMENT' : canBook ? 'Book an Upcoming Appointment' : 'SYNC DISABLED'}</span>
             </button>
         </div>
