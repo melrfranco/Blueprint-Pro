@@ -50,17 +50,17 @@ export default function SquareCallback() {
         throw new Error(tokenData?.message || 'Square login failed');
       }
 
-      const { access_token: squareToken, merchant_id, supabase_session } = tokenData;
+      const { access_token: squareToken, merchant_id, supabase_auth } = tokenData;
 
       if (!squareToken) {
         throw new Error('No Square access token received');
       }
 
-      if (!supabase_session?.access_token) {
-        throw new Error('No Supabase session received from server');
+      if (!supabase_auth?.email || !supabase_auth?.password) {
+        throw new Error('No Supabase credentials received from server');
       }
 
-      // Step 2: Use the session tokens from the server (no re-authentication needed)
+      // Step 2: Sign in on the client side to get a proper session with valid refresh tokens
       const { supabase } = await import('../lib/supabase');
 
       if (!supabase) {
@@ -70,34 +70,25 @@ export default function SquareCallback() {
       // Clear any mock user session before setting real session
       localStorage.removeItem('mock_admin_user');
 
-      console.log('[OAuth Callback] Setting Supabase session...');
+      console.log('[OAuth Callback] Signing in with Supabase...');
 
-      // Set the session in Supabase client
-      const { error: setSessionError } = await supabase.auth.setSession({
-        access_token: supabase_session.access_token,
-        refresh_token: supabase_session.refresh_token,
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email: supabase_auth.email,
+        password: supabase_auth.password,
       });
 
-      if (setSessionError) {
-        throw new Error(`Failed to set session: ${setSessionError.message}`);
+      if (signInError) {
+        throw new Error(`Failed to sign in: ${signInError.message}`);
       }
 
-      // Give the browser a moment to persist the session to localStorage
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Verify session was set
-      const { data: sessionCheck, error: getSessionError } = await supabase.auth.getSession();
-      if (getSessionError) {
-        console.error('[OAuth Callback] Error checking session:', getSessionError);
-      }
-      if (!sessionCheck?.session) {
-        console.error('[OAuth Callback] Session check failed. Session data:', sessionCheck);
-        throw new Error('Failed to set Supabase session');
+      const session = signInData?.session;
+      if (!session) {
+        throw new Error('No session returned from sign-in');
       }
 
-      console.log('[OAuth Callback] Session verified. User ID:', sessionCheck.session.user.id);
+      console.log('[OAuth Callback] Session created. User ID:', session.user.id);
 
-      const jwtToken = supabase_session.access_token;
+      const jwtToken = session.access_token;
 
       // Step 3: Sync team and clients (blocking - wait so data is available on /admin)
       console.log('[OAuth Callback] Syncing team and clients...');

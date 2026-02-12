@@ -340,32 +340,7 @@ export default async function handler(req: any, res: any) {
       throw new Error('User creation failed');
     }
 
-    // Now sign in with the anon key to get a session
-    console.log('[OAUTH TOKEN] Signing in with anon key...');
-    const publicSupabase = createClient(supabaseUrl, publishableKey, {
-      auth: { autoRefreshToken: false, persistSession: false }
-    });
-
-    const { data: signInData, error: signInError } = await publicSupabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (signInError) {
-      console.error('[OAUTH TOKEN] ❌ Sign-in failed:', {
-        email,
-        error: signInError.message,
-      });
-      throw new Error(`Failed to create session: ${signInError.message}`);
-    }
-
-    const session = signInData?.session;
-
-    if (!session) {
-      throw new Error('No session returned from sign-in');
-    }
-
-    console.log('[OAUTH TOKEN] ✅ Session created');
+    console.log('[OAUTH TOKEN] ✅ User ready for client-side sign-in');
 
     // Save merchant settings (include owner team member ID if found)
     const merchantUpsertData: any = {
@@ -392,12 +367,12 @@ export default async function handler(req: any, res: any) {
       merchant_id,
       business_name,
       access_token,
-      supabase_session: session
-        ? {
-            access_token: session.access_token,
-            refresh_token: session.refresh_token,
-          }
-        : null,
+      // Return credentials for client-side signInWithPassword
+      // (server-side sessions produce refresh tokens that fail client-side)
+      supabase_auth: {
+        email,
+        password,
+      },
     });
 
   } catch (e: any) {
