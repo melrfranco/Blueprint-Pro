@@ -35,6 +35,7 @@ const JoinScreen: React.FC<JoinScreenProps> = ({ onComplete }) => {
       });
 
       const data = await response.json();
+      console.log('[Join] verify-pin response:', JSON.stringify(data, null, 2));
       if (!response.ok) {
         throw new Error(data?.message || 'Invalid PIN.');
       }

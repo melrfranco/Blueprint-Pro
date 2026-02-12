@@ -86,7 +86,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
           'Content-Type': 'application/json',
           Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ squareTeamMemberId: stylist.id }),
+        body: JSON.stringify({ squareTeamMemberId: stylist.id, name: stylist.name, email: stylist.email }),
       });
 
       const data = await response.json();

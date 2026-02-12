@@ -38,7 +38,14 @@ export default async function handler(req: any, res: any) {
     const match = (members || []).find((m: any) => m.raw?.join_pin === pin);
 
     if (!match) {
-      return res.status(400).json({ message: 'Invalid PIN. Please check with your admin.' });
+      const existingPins = (members || []).map((m: any) => ({
+        id: m.square_team_member_id,
+        pin: m.raw?.join_pin || null,
+      }));
+      return res.status(400).json({
+        message: 'Invalid PIN. Please check with your admin.',
+        debug: { searchedPin: pin, rowCount: (members || []).length, existingPins },
+      });
     }
 
     // Check if PIN is expired (24 hours)

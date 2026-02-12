@@ -13,6 +13,8 @@ export default async function handler(req: any, res: any) {
     }
 
     const squareTeamMemberId = body?.squareTeamMemberId?.trim();
+    const name = body?.name?.trim() || '';
+    const email = body?.email?.trim() || '';
     if (!squareTeamMemberId) {
       return res.status(400).json({ message: 'squareTeamMemberId is required.' });
     }
@@ -48,7 +50,7 @@ export default async function handler(req: any, res: any) {
     // Store the PIN in the square_team_members row's raw column
     const { data: existing, error: fetchError } = await supabaseAdmin
       .from('square_team_members')
-      .select('raw')
+      .select('*')
       .eq('square_team_member_id', squareTeamMemberId)
       .maybeSingle();
 
@@ -59,16 +61,39 @@ export default async function handler(req: any, res: any) {
       pin_created_at: new Date().toISOString(),
     };
 
-    const { error: updateError } = await supabaseAdmin
-      .from('square_team_members')
-      .update({ raw: updatedRaw, updated_at: new Date().toISOString() })
-      .eq('square_team_member_id', squareTeamMemberId);
+    if (existing) {
+      // Row exists — update it (also ensure name/email are set)
+      const updateFields: any = { raw: updatedRaw, updated_at: new Date().toISOString() };
+      if (name) updateFields.name = name;
+      if (email) updateFields.email = email;
+      const { error: updateError } = await supabaseAdmin
+        .from('square_team_members')
+        .update(updateFields)
+        .eq('square_team_member_id', squareTeamMemberId);
 
-    if (updateError) {
-      return res.status(500).json({ message: updateError.message });
+      if (updateError) {
+        return res.status(500).json({ message: updateError.message });
+      }
+    } else {
+      // Row doesn't exist — insert it
+      const { error: insertError } = await supabaseAdmin
+        .from('square_team_members')
+        .insert({
+          square_team_member_id: squareTeamMemberId,
+          merchant_id: authData.user.user_metadata?.merchant_id || null,
+          name: name || null,
+          email: email || null,
+          raw: updatedRaw,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (insertError) {
+        return res.status(500).json({ message: insertError.message });
+      }
     }
 
-    return res.status(200).json({ pin });
+    return res.status(200).json({ pin, debug: { rowExisted: !!existing, squareTeamMemberId } });
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Failed to generate PIN.' });
   }
