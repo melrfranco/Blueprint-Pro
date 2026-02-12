@@ -583,6 +583,25 @@ html {
     color: var(--muted-foreground);
   }
 
+  /* Page-level indent hierarchy: sub-elements indent further than page title */
+  .bp-page > .bp-overline,
+  .bp-page > .bp-subtitle,
+  .bp-page > .bp-section-title,
+  .bp-page > .bp-body,
+  .bp-page > .bp-body-sm {
+    padding-left: 1rem;
+  }
+
+  /* Sub-page title: used for h2 on settings sub-pages, smaller than bp-page-title */
+  .bp-page-subtitle {
+    font-family: "Comfortaa", sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--foreground);
+    padding-left: 0.5rem;
+  }
+
   /* Data UI attributes for automatic styling */
   [data-ui="field"] {
     border-radius: 9999px;

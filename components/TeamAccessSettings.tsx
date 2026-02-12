@@ -350,7 +350,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
         Back
       </button>
 
-      <h2 className="bp-page-title mb-8">Team Access</h2>
+      <h2 className="bp-page-subtitle mb-8">Team Access</h2>
 
       <div className="space-y-8">
         <div>

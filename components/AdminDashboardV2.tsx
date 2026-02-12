@@ -108,7 +108,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
       return (
         <div className="bp-page">
           <button onClick={() => setActiveSettingsView('menu')} className="mb-6 flex items-center text-sm font-semibold hover:opacity-80 transition-colors bp-back"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
-          <h2 className="bp-page-title mb-8">Branding</h2>
+          <h2 className="bp-page-subtitle mb-8">Branding</h2>
           <div className="space-y-6">
             <div>
               <label className="block bp-overline mb-2">Salon Name</label>
@@ -197,7 +197,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
       return (
         <div className="bp-page">
           <button onClick={() => setActiveSettingsView('menu')} className="mb-6 flex items-center text-sm font-semibold hover:opacity-80 transition-colors bp-back"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
-          <h2 className="bp-page-title mb-8">Appearance</h2>
+          <h2 className="bp-page-subtitle mb-8">Appearance</h2>
           <div className="space-y-6">
             <div className="bg-card p-8 bp-container-list border border-border shadow-sm text-center">
               <input type="file" accept="image/*" id="avatar-upload" className="hidden" onChange={handleAvatarChange} />

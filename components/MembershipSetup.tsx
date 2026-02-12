@@ -75,7 +75,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
   return (
     <div className="bp-page">
       <button data-ui="button" onClick={onBack} className="mb-6 flex items-center text-sm font-semibold hover:opacity-80 transition-colors bp-back"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
-      <h2 className="bp-page-title mb-8">Memberships</h2>
+      <h2 className="bp-page-subtitle mb-8">Memberships</h2>
       <div className="space-y-6">
         <div className="bg-card bp-card-padding-md bp-container-list border-4 border shadow-sm">
           <div className="flex items-center justify-between">
