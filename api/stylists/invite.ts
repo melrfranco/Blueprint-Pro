@@ -81,20 +81,44 @@ export default async function handler(req: any, res: any) {
     const requestOrigin = resolvedHost ? `${protocol}://${resolvedHost}` : null;
     const redirectTo = process.env.VITE_STYLIST_APP_URL || (requestOrigin ? `${requestOrigin}/` : undefined);
 
-    const { error: inviteError } = await (supabaseAdmin.auth as any).admin.inviteUserByEmail(email, {
-      data: {
-        role: 'stylist',
-        stylist_id: stylistId,
-        stylist_name: name,
-        level_id: levelId,
-        permissions: DEFAULT_PERMISSIONS,
+    let linkData: any = null;
+    let linkError: any = null;
+
+    // Try invite first (creates user + generates link)
+    const inviteResult = await (supabaseAdmin.auth as any).admin.generateLink({
+      type: 'invite',
+      email,
+      options: {
+        data: {
+          role: 'stylist',
+          stylist_id: stylistId,
+          stylist_name: name,
+          level_id: levelId,
+          permissions: DEFAULT_PERMISSIONS,
+        },
+        redirectTo,
       },
-      redirectTo,
     });
 
-    if (inviteError) {
-      return res.status(400).json({ message: inviteError.message });
+    if (inviteResult.error) {
+      // User may already exist — fall back to magic link for re-invites
+      const magicResult = await (supabaseAdmin.auth as any).admin.generateLink({
+        type: 'magiclink',
+        email,
+        options: { redirectTo },
+      });
+      linkData = magicResult.data;
+      linkError = magicResult.error;
+    } else {
+      linkData = inviteResult.data;
     }
+
+    if (linkError) {
+      return res.status(400).json({ message: linkError.message });
+    }
+
+    // Build the invite link from the token hash returned by generateLink
+    const actionLink = linkData?.properties?.action_link || null;
 
     const { data: merchantSettings } = await supabaseAdmin
       .from('merchant_settings')
@@ -131,6 +155,7 @@ export default async function handler(req: any, res: any) {
         levelId,
         permissions: DEFAULT_PERMISSIONS,
       },
+      inviteLink: actionLink,
     });
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Failed to send invite.' });

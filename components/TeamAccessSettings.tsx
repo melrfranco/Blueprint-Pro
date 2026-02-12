@@ -23,6 +23,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
   const [inviteStatus, setInviteStatus] = useState<string | null>(null);
   const [invitingStylistId, setInvitingStylistId] = useState<string | null>(null);
   const [invitedStylistIds, setInvitedStylistIds] = useState<Set<string>>(new Set());
+  const [inviteLinkMap, setInviteLinkMap] = useState<Record<string, string>>({});
   const [stylistSaveLoading, setStylistSaveLoading] = useState(false);
   const [stylistSaveError, setStylistSaveError] = useState<string | null>(null);
 
@@ -172,6 +173,9 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
       if (!response.ok) throw new Error(data?.message || 'Failed to send invite.');
 
       setInvitedStylistIds(prev => new Set(prev).add(stylist.id));
+      if (data?.inviteLink) {
+        setInviteLinkMap(prev => ({ ...prev, [stylist.id]: data.inviteLink }));
+      }
       setInvitingStylistId(null);
     } catch (e: any) {
       setInviteError(e.message || 'Failed to send invite.');
@@ -331,7 +335,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
                       )}
                     </div>
                     {invitedStylistIds.has(stylist.id) ? (
-                      <span className="bp-caption text-green-600 font-bold">Invite Sent</span>
+                      <span className="bp-caption text-green-600 font-bold">Invited</span>
                     ) : (
                       <button
                         data-ui="button"
@@ -345,6 +349,28 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
                   </div>
                   {inviteError && invitingStylistId === stylist.id && (
                     <p className="text-xs text-red-600 font-medium mt-2">{inviteError}</p>
+                  )}
+                  {inviteLinkMap[stylist.id] && (
+                    <div className="mt-3 p-3 bg-muted bp-container-compact border border-border">
+                      <p className="bp-caption mb-2">Share this link with {stylist.name.split(' ')[0]}:</p>
+                      <div className="flex items-center gap-2">
+                        <input
+                          readOnly
+                          value={inviteLinkMap[stylist.id]}
+                          className="flex-1 text-xs px-3 py-2 bg-card border border-border bp-container-compact text-foreground truncate"
+                          onClick={(e) => (e.target as HTMLInputElement).select()}
+                        />
+                        <button
+                          data-ui="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(inviteLinkMap[stylist.id]);
+                          }}
+                          className="px-3 py-2 text-xs uppercase tracking-widest bp-btn-primary whitespace-nowrap"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </div>
                   )}
                 </>
               )}
