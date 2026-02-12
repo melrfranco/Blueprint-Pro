@@ -66,7 +66,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
   const renderDashboard = () => (
     <div className="bp-page">
       <h1 className="bp-page-title mb-1">Dashboard</h1>
-      {user?.name && <p className="bp-overline mb-8 pl-3">Welcome back, {user.name.split(' ')[0]}</p>}
+      {user?.name && <p className="bp-subtitle mb-8 pl-4">Welcome back, {user.name.split(' ')[0]}</p>}
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="col-span-2 p-8 bg-primary text-primary-foreground bp-container-list border-4 border-primary shadow-lg hover:shadow-xl transition-shadow">
           <div className="flex flex-col items-center justify-center text-center h-full py-4">

@@ -542,10 +542,10 @@ html {
 
   .bp-subtitle {
     font-family: "Raleway", sans-serif;
-    font-size: 0.875rem;
+    font-size: 1.125rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     color: var(--muted-foreground);
   }
 
