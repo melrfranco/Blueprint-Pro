@@ -25,11 +25,35 @@ const AppContent: React.FC = () => {
   const [forceAdmin, setForceAdmin] = useState(false);
   const [needsPasswordSetup, setNeedsPasswordSetup] = useState(false);
 
-  // Detect invite/recovery token in URL hash (Supabase redirects with #type=invite&access_token=...)
+  // Detect invite/recovery token in URL hash or search params
   useEffect(() => {
     const hash = window.location.hash;
+    const params = new URLSearchParams(window.location.search);
+    const tokenHash = params.get('token_hash');
+    const type = params.get('type');
+
     if (hash && (hash.includes('type=invite') || hash.includes('type=recovery'))) {
       setNeedsPasswordSetup(true);
+      return;
+    }
+
+    // Handle /auth/confirm?token_hash=...&type=invite from email template
+    if (tokenHash && (type === 'invite' || type === 'recovery' || type === 'magiclink')) {
+      (async () => {
+        const { supabase } = await import('./lib/supabase');
+        if (!supabase) return;
+        const { error } = await supabase.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: type === 'invite' ? 'invite' : type === 'recovery' ? 'recovery' : 'magiclink',
+        });
+        if (!error) {
+          // Clear the URL params so they don't persist
+          window.history.replaceState({}, '', '/');
+          setNeedsPasswordSetup(true);
+        } else {
+          console.error('[Auth] Token verification failed:', error.message);
+        }
+      })();
     }
   }, []);
 
