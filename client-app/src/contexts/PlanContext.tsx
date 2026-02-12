@@ -162,9 +162,10 @@ export const PlanProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             throw new Error("Supabase client not available.");
         }
 
-        // --- UUID ASSERTION GUARD (MANDATORY) ---
-        if (!newPlan.client.id || !UUID_REGEX.test(newPlan.client.id)) {
-            const errorMessage = `CRITICAL INVARIANT VIOLATION: Attempted to save a plan with an invalid or missing client_id ('${newPlan.client.id}'). This must be a valid UUID. Operation aborted.`;
+        // --- CLIENT ID ASSERTION GUARD ---
+        // Accept both UUIDs (Supabase) and Square external IDs (alphanumeric strings)
+        if (!newPlan.client.id || newPlan.client.id.trim().length === 0) {
+            const errorMessage = `Client ID is missing or empty. Operation aborted.`;
             console.error(errorMessage);
             throw new Error(errorMessage);
         }
