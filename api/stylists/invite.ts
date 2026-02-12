@@ -110,9 +110,7 @@ export default async function handler(req: any, res: any) {
       email,
       role: 'Stylist',
       status: 'active',
-      level_id: levelId,
-      permissions: DEFAULT_PERMISSIONS,
-      raw: { source: 'invite' },
+      raw: { source: 'invite', level_id: levelId, permissions: DEFAULT_PERMISSIONS },
       updated_at: new Date().toISOString(),
     };
 
