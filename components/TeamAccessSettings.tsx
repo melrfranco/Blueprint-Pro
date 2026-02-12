@@ -21,6 +21,8 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteError, setInviteError] = useState<string | null>(null);
   const [inviteStatus, setInviteStatus] = useState<string | null>(null);
+  const [invitingStylistId, setInvitingStylistId] = useState<string | null>(null);
+  const [invitedStylistIds, setInvitedStylistIds] = useState<Set<string>>(new Set());
   const [stylistSaveLoading, setStylistSaveLoading] = useState(false);
   const [stylistSaveError, setStylistSaveError] = useState<string | null>(null);
 
@@ -127,6 +129,50 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
       setInviteEmail('');
       setInviteLevelId(levels[0]?.id || 'lvl_1');
       setShowInviteForm(false);
+    } catch (e: any) {
+      setInviteError(e.message || 'Failed to send invite.');
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
+  const handleInviteExistingMember = async (stylist: Stylist) => {
+    if (!stylist.email) {
+      setInviteError('This team member has no email on file. Add their email in Square first.');
+      setInvitingStylistId(stylist.id);
+      return;
+    }
+
+    if (!supabase) return;
+
+    setInvitingStylistId(stylist.id);
+    setInviteLoading(true);
+    setInviteError(null);
+
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) throw new Error('Please log in again.');
+
+      const response = await fetch('/api/stylists/invite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          name: stylist.name,
+          email: stylist.email,
+          levelId: stylist.levelId || levels[0]?.id || 'lvl_1',
+          squareTeamMemberId: stylist.id,
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.message || 'Failed to send invite.');
+
+      setInvitedStylistIds(prev => new Set(prev).add(stylist.id));
+      setInvitingStylistId(null);
     } catch (e: any) {
       setInviteError(e.message || 'Failed to send invite.');
     } finally {
@@ -258,10 +304,10 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
                 </>
               ) : (
                 <>
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex-1 text-center">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex-1">
                       <p className="font-semibold text-sm text-foreground">{stylist.name}</p>
-                      <p className="text-xs font-regular text-foreground">{stylist.email}</p>
+                      <p className="text-xs text-muted-foreground">{stylist.email || 'No email on file'}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <div className="px-3 py-1.5 bp-container-compact text-xs font-bold text-primary-foreground" style={{ backgroundColor: levelColor }}>
@@ -276,10 +322,29 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
                       </button>
                     </div>
                   </div>
-                  {stylist.permissionOverrides && Object.keys(stylist.permissionOverrides).length > 0 && (
-                    <p className="bp-caption text-center">
-                      {Object.keys(stylist.permissionOverrides).length} custom permission(s)
-                    </p>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      {stylist.permissionOverrides && Object.keys(stylist.permissionOverrides).length > 0 && (
+                        <p className="bp-caption">
+                          {Object.keys(stylist.permissionOverrides).length} custom permission(s)
+                        </p>
+                      )}
+                    </div>
+                    {invitedStylistIds.has(stylist.id) ? (
+                      <span className="bp-caption text-green-600 font-bold">Invite Sent</span>
+                    ) : (
+                      <button
+                        data-ui="button"
+                        onClick={() => handleInviteExistingMember(stylist)}
+                        disabled={inviteLoading && invitingStylistId === stylist.id}
+                        className="px-4 py-1.5 text-xs uppercase tracking-widest bp-btn-primary disabled:opacity-50"
+                      >
+                        {inviteLoading && invitingStylistId === stylist.id ? 'Sending...' : 'Invite'}
+                      </button>
+                    )}
+                  </div>
+                  {inviteError && invitingStylistId === stylist.id && (
+                    <p className="text-xs text-red-600 font-medium mt-2">{inviteError}</p>
                   )}
                 </>
               )}
@@ -371,62 +436,9 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
           <div className="flex items-center justify-between mb-4">
             <div>
               <p className="bp-overline">Team Members</p>
-              <p className="bp-body text-foreground">Invite and manage your team.</p>
+              <p className="bp-body text-foreground">Synced from Square. Invite members to give them app access.</p>
             </div>
-            <button data-ui="button" onClick={() => setShowInviteForm(!showInviteForm)} className="px-4 py-2 text-xs uppercase tracking-widest bp-btn-primary">
-              {showInviteForm ? 'Cancel' : 'Invite'}
-            </button>
           </div>
-
-          {showInviteForm && (
-            <form onSubmit={handleInviteStylist} className="mb-4 bp-card-padding-sm bg-card border-2 border bp-container-tall space-y-4">
-              <div>
-                <label className="block bp-overline mb-2">Name</label>
-                <input
-                  data-ui="field"
-                  type="text"
-                  value={inviteName}
-                  onChange={(e) => setInviteName(e.target.value)}
-                  placeholder="Full name"
-                  className="w-full px-4 py-3 border-2 border font-medium text-sm text-foreground focus:outline-none focus:border-sky"
-                />
-              </div>
-              <div>
-                <label className="block bp-overline mb-2">Email</label>
-                <input
-                  data-ui="field"
-                  type="email"
-                  required
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  placeholder="email@example.com"
-                  className="w-full px-4 py-3 border-2 border font-medium text-sm text-foreground focus:outline-none focus:border-sky"
-                />
-              </div>
-              <div>
-                <label className="block bp-overline mb-2">Access Level</label>
-                <select
-                  data-ui="field"
-                  value={inviteLevelId}
-                  onChange={(e) => setInviteLevelId(e.target.value)}
-                  className="w-full px-4 py-3 border-2 border font-medium text-sm text-foreground focus:outline-none focus:border-sky"
-                >
-                  {levels.map((level) => (
-                    <option key={level.id} value={level.id}>
-                      {level.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {inviteError && <p className="text-xs text-red-600 font-medium">{inviteError}</p>}
-              {inviteStatus && <p className="text-xs text-green-600 font-medium">{inviteStatus}</p>}
-
-              <button data-ui="button" type="submit" disabled={inviteLoading} className="w-full px-4 py-3 text-xs uppercase tracking-widest disabled:opacity-50 bp-btn-primary">
-                {inviteLoading ? 'Sending...' : 'Send invite'}
-              </button>
-            </form>
-          )}
 
           {renderStylists()}
         </div>
