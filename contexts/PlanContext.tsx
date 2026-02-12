@@ -35,10 +35,17 @@ export const PlanProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const [loading, setLoading] = useState(true);
     const { user } = useAuth();
 
+    const userId = user?.id;
+    const userRole = user?.role;
+
     useEffect(() => {
         const fetchData = async () => {
             if (!supabase) {
-                console.error("Supabase client not available.");
+                setLoading(false);
+                return;
+            }
+            if (!userId) {
+                console.log('[PlanContext] No user ID yet, skipping fetch');
                 setLoading(false);
                 return;
             }
@@ -46,22 +53,15 @@ export const PlanProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             setLoading(true);
 
             try {
-                console.log('User info:', user);
-                console.log('User role:', user?.role);
-                console.log('Supabase available?', !!supabase);
+                console.log('[PlanContext] Fetching plans for user:', userId, 'role:', userRole);
 
                 let plansQuery = supabase.from('plans').select('*');
                 let bookingsQuery = supabase.from('bookings').select('*');
 
-                if (user?.role === 'client' && user.id) {
-                    console.log('Filtering for client:', user.id);
-                    plansQuery = plansQuery.eq('client_id', user.id);
-                    bookingsQuery = bookingsQuery.eq('client_id', user.id);
-                } else {
-                    console.log('Admin user - fetching all plans');
+                if (userRole === 'client' && userId) {
+                    plansQuery = plansQuery.eq('client_id', userId);
+                    bookingsQuery = bookingsQuery.eq('client_id', userId);
                 }
-
-                console.log('About to execute query...');
                 const [pRes, bRes] = await Promise.all([plansQuery, bookingsQuery]);
 
                 console.log('Query response:', { hasError: !!pRes.error, dataLength: pRes.data?.length, pRes });
@@ -152,7 +152,7 @@ export const PlanProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         };
 
         fetchData();
-    }, [user]);
+    }, [userId, userRole]);
 
     const savePlan = async (newPlan: GeneratedPlan): Promise<GeneratedPlan> => {
         console.log('savePlan called with:', newPlan);
