@@ -70,16 +70,11 @@ export default async function handler(req: any, res: any) {
 
     const stylistId = squareTeamMemberId || randomUUID();
 
-    const forwardedProto = req.headers['x-forwarded-proto'];
-    const forwardedHost = req.headers['x-forwarded-host'] || req.headers['host'];
-    const resolvedProto = Array.isArray(forwardedProto) ? forwardedProto[0] : forwardedProto;
-    const resolvedHost = Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost;
-    const inferredProto = resolvedProto || (req.secure ? 'https' : 'http');
-    const protocol = resolvedHost && !resolvedHost.includes('localhost') && !resolvedHost.includes('127.0.0.1')
-      ? 'https'
-      : inferredProto;
-    const requestOrigin = resolvedHost ? `${protocol}://${resolvedHost}` : null;
-    const redirectTo = process.env.VITE_STYLIST_APP_URL || (requestOrigin ? `${requestOrigin}/` : undefined);
+    // Redirect URL after the stylist clicks the invite link in their email
+    const redirectTo = process.env.VITE_STYLIST_APP_URL
+      || (process.env.VERCEL_PROJECT_PRODUCTION_URL
+        ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+        : 'https://v0-blueprint-pro-lemon.vercel.app/');
 
     const userData = {
       role: 'stylist',
