@@ -326,81 +326,21 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
     setBookingStep('select-date');
   };
 
-  const confirmPeriodAndFetch = async (period: TimePeriod) => {
+  const confirmPeriodAndFetch = (period: TimePeriod) => {
     setTimePeriod(period);
     setBookingStep('select-slot');
-    setIsFetchingSlots(true);
-    setFetchError(null);
-
-    try {
-        if (!selectedVisit || !bookingDate) throw new Error("No visit selected.");
-
-        const loc = await SquareIntegrationService.fetchLocation();
-
-        let stylistId = isClient ? plan.stylistId : (user?.stylistData?.id || allStylists[0]?.id);
-
-        if (stylistId && !String(stylistId).startsWith('TM')) {
-            console.log('[BOOKING PERIOD] Stylist ID is not a Square Team Member ID, finding valid one:', stylistId);
-            const validStylist = allStylists.find(s => String(s.id).startsWith('TM'));
-            if (validStylist) {
-                stylistId = validStylist.id;
-                console.log('[BOOKING PERIOD] Resolved to valid Square Team Member:', stylistId);
-            }
-        }
-
-        console.log('[BOOKING PERIOD] Stylist lookup:', {
-            isClient,
-            planStylistId: plan.stylistId,
-            userStylistDataId: user?.stylistData?.id,
-            allStylists: allStylists.map(s => ({ id: s.id, name: s.name })),
-            resolvedId: stylistId
-        });
-        if (!stylistId) throw new Error("No team member selected or found.");
-
-        const serviceToBook = selectedVisit.services[0];
-        if (!serviceToBook) {
-            throw new Error(`No service selected for this visit.`);
-        }
-
-        const squareCatalog = await SquareIntegrationService.fetchCatalog();
-        let serviceVariationId = serviceToBook.id;
-
-        const existingService = squareCatalog.find(s => s.id === serviceVariationId);
-
-        if (!existingService) {
-            let squareService = squareCatalog.find(s => s.name === serviceToBook.name);
-
-            if (!squareService) {
-                const searchName = serviceToBook.name.toLowerCase();
-                squareService = squareCatalog.find(s => s.name.toLowerCase() === searchName);
-            }
-
-            if (!squareService || !squareService.id) {
-                const availableServices = squareCatalog.map(s => s.name).join(', ');
-                throw new Error(`Service "${serviceToBook.name}" not found in your Square catalog. Available: ${availableServices}`);
-            }
-            serviceVariationId = squareService.id;
-            console.log('[BOOKING] Mapped service to Square by name:', { name: serviceToBook.name, plannedId: serviceToBook.id, squareId: serviceVariationId });
-        }
-
-        const searchStart = new Date(bookingDate);
-        searchStart.setDate(searchStart.getDate() - 3);
-        const now = new Date();
-        if (searchStart < now) searchStart.setTime(now.getTime());
-
-        const slots = await SquareIntegrationService.findAvailableSlots({
-            locationId: loc.id,
-            startAt: SquareIntegrationService.formatDate(searchStart, loc.timezone),
-            teamMemberId: stylistId,
-            serviceVariationId: serviceVariationId
-        });
-        setAvailableSlots(slots);
-    } catch (e: any) {
-        setFetchError(e.message);
-    } finally {
-        setIsFetchingSlots(false);
-    }
   };
+
+  const availablePeriods = useMemo(() => {
+      const periods = { morning: false, afternoon: false, evening: false };
+      availableSlots.forEach(s => {
+          const hour = new Date(s).getHours();
+          if (hour < 12) periods.morning = true;
+          else if (hour < 17) periods.afternoon = true;
+          else periods.evening = true;
+      });
+      return periods;
+  }, [availableSlots]);
 
   const filteredSlots = useMemo(() => {
       return availableSlots.filter(s => {
@@ -1046,11 +986,50 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                         </div>
 
                                         <button 
-                                            onClick={() => setBookingStep('select-period')}
-                                            disabled={!bookingDate}
+                                            onClick={async () => {
+                                                if (!bookingDate || !selectedVisit) return;
+                                                setIsFetchingSlots(true);
+                                                setFetchError(null);
+                                                try {
+                                                    const loc = await SquareIntegrationService.fetchLocation();
+                                                    let stylistId = isClient ? plan.stylistId : (user?.stylistData?.id || allStylists[0]?.id);
+                                                    if (stylistId && !String(stylistId).startsWith('TM')) {
+                                                        const validStylist = allStylists.find(s => String(s.id).startsWith('TM'));
+                                                        if (validStylist) stylistId = validStylist.id;
+                                                    }
+                                                    if (!stylistId) throw new Error("No team member selected or found.");
+                                                    const serviceToBook = selectedVisit.services[0];
+                                                    if (!serviceToBook) throw new Error("No service selected for this visit.");
+                                                    const squareCatalog = await SquareIntegrationService.fetchCatalog();
+                                                    let serviceVariationId = serviceToBook.id;
+                                                    const existingService = squareCatalog.find(s => s.id === serviceVariationId);
+                                                    if (!existingService) {
+                                                        let squareService = squareCatalog.find(s => s.name === serviceToBook.name) || squareCatalog.find(s => s.name.toLowerCase() === serviceToBook.name.toLowerCase());
+                                                        if (!squareService?.id) throw new Error(`Service "${serviceToBook.name}" not found in Square catalog.`);
+                                                        serviceVariationId = squareService.id;
+                                                    }
+                                                    const searchStart = new Date(bookingDate);
+                                                    searchStart.setDate(searchStart.getDate() - 3);
+                                                    const now = new Date();
+                                                    if (searchStart < now) searchStart.setTime(now.getTime());
+                                                    const slots = await SquareIntegrationService.findAvailableSlots({
+                                                        locationId: loc.id,
+                                                        startAt: SquareIntegrationService.formatDate(searchStart, loc.timezone),
+                                                        teamMemberId: stylistId,
+                                                        serviceVariationId
+                                                    });
+                                                    setAvailableSlots(slots);
+                                                    setBookingStep('select-period');
+                                                } catch (e: any) {
+                                                    setFetchError(e.message);
+                                                } finally {
+                                                    setIsFetchingSlots(false);
+                                                }
+                                            }}
+                                            disabled={!bookingDate || isFetchingSlots}
                                             className={`w-full font-bold py-5 bp-container-compact shadow-xl transition-all active:scale-95 border-b-8 border-black/20 disabled:opacity-40 ${bookingDate ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
                                         >
-                                            Confirm Date
+                                            {isFetchingSlots ? 'Finding openings...' : 'Confirm Date'}
                                         </button>
                                     </div>
                                 )
@@ -1058,6 +1037,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                               
                               {bookingStep === 'select-period' && (
                                   <div className="space-y-4">
+                                      {availablePeriods.morning && (
                                       <button onClick={() => confirmPeriodAndFetch('morning')} className="w-full p-6 bg-primary/5 border-4 border bp-container-list text-left flex items-center space-x-4 active:scale-95 transition-all">
                                           <div className="bg-primary text-primary-foreground p-3 bp-container-list text-xl">{'🌅'}</div>
                                           <div>
@@ -1065,6 +1045,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                               <p className="bp-caption uppercase tracking-widest text-muted-foreground mt-2">Before 12:00 PM</p>
                                           </div>
                                       </button>
+                                      )}
+                                      {availablePeriods.afternoon && (
                                       <button onClick={() => confirmPeriodAndFetch('afternoon')} className="w-full p-6 bg-accent/5 border-4 border bp-container-list text-left flex items-center space-x-4 active:scale-95 transition-all">
                                           <div className="bg-accent text-accent-foreground p-3 bp-container-list text-xl">{'☀️'}</div>
                                           <div>
@@ -1072,6 +1054,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                               <p className="bp-caption uppercase tracking-widest text-muted-foreground mt-2">12:00 PM - 5:00 PM</p>
                                           </div>
                                       </button>
+                                      )}
+                                      {availablePeriods.evening && (
                                       <button onClick={() => confirmPeriodAndFetch('evening')} className="w-full p-6 bg-secondary/5 border-4 border bp-container-list text-left flex items-center space-x-4 active:scale-95 transition-all">
                                           <div className="bg-secondary text-secondary-foreground p-3 bp-container-list text-xl">{'🌙'}</div>
                                           <div>
@@ -1079,6 +1063,13 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                               <p className="bp-caption uppercase tracking-widest text-muted-foreground mt-2">After 5:00 PM</p>
                                           </div>
                                       </button>
+                                      )}
+                                      {!availablePeriods.morning && !availablePeriods.afternoon && !availablePeriods.evening && (
+                                          <div className="text-center py-10 text-foreground">
+                                              <p className="font-bold text-lg leading-tight">No openings found<br/>for this date range.</p>
+                                              <button onClick={() => setBookingStep('select-date')} className="mt-4 text-accent font-bold underline">Try a different date</button>
+                                          </div>
+                                      )}
                                   </div>
                               )}
 
