@@ -173,7 +173,14 @@ async function handleJoin(req: any, res: any) {
   const stylistId = match.square_team_member_id;
   const levelId = match.raw?.level_id || 'lvl_1';
 
-  const { error: signUpError } = await (supabaseAdmin.auth as any).admin.createUser({
+  // If user already exists (e.g. from a previous invite), delete and recreate
+  const { data: existingUsers } = await (supabaseAdmin.auth as any).admin.listUsers();
+  const existingUser = existingUsers?.users?.find((u: any) => u.email === email);
+  if (existingUser) {
+    await (supabaseAdmin.auth as any).admin.deleteUser(existingUser.id);
+  }
+
+  const { data: createData, error: signUpError } = await (supabaseAdmin.auth as any).admin.createUser({
     email,
     password,
     email_confirm: true,
@@ -187,27 +194,7 @@ async function handleJoin(req: any, res: any) {
   });
 
   if (signUpError) {
-    if (signUpError.message?.includes('already') || signUpError.message?.includes('exists')) {
-      const { data: existingUsers } = await (supabaseAdmin.auth as any).admin.listUsers();
-      const existingUser = existingUsers?.users?.find((u: any) => u.email === email);
-      if (existingUser) {
-        const { error: updateErr } = await (supabaseAdmin.auth as any).admin.updateUserById(existingUser.id, {
-          password,
-          user_metadata: {
-            role: 'stylist',
-            stylist_id: stylistId,
-            stylist_name: stylistName,
-            level_id: levelId,
-            permissions: DEFAULT_PERMISSIONS,
-          },
-        });
-        if (updateErr) return res.status(400).json({ message: updateErr.message });
-      } else {
-        return res.status(400).json({ message: signUpError.message });
-      }
-    } else {
-      return res.status(400).json({ message: signUpError.message });
-    }
+    return res.status(400).json({ message: signUpError.message });
   }
 
   // Clear PIN from the row
