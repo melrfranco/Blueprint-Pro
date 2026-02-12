@@ -74,12 +74,40 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
       return sortedTiers.find(t => projectedMonthlySpend >= t.minSpend) || sortedTiers[sortedTiers.length - 1];
   }, [projectedMonthlySpend, membershipConfig?.tiers]);
 
+  const serviceSummary = useMemo(() => {
+    const counts: Record<string, number> = {};
+    plan.appointments.forEach(appt => {
+      appt.services.forEach(s => {
+        counts[s.name] = (counts[s.name] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [plan.appointments]);
+
+  const membershipDates = useMemo(() => {
+    if (plan.appointments.length === 0) return { start: '', end: '' };
+    const sorted = [...plan.appointments].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const start = new Date(sorted[0].date);
+    const end = new Date(start);
+    end.setFullYear(end.getFullYear() + 1);
+    return {
+      start: start.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' }),
+      end: end.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' }),
+    };
+  }, [plan.appointments]);
+
   const invitationMessage = useMemo(() => {
     if (!qualifyingTier || !plan.client.name) return '';
     const firstName = plan.client.name.split(' ')[0];
-    const perks = qualifyingTier.perks?.slice(0, 2).join(' & ') || 'exclusive benefits';
-    return `Hi ${firstName}! This is ${user?.name || 'your stylist'} from the salon. Based on your new maintenance roadmap, you qualify for our ${qualifyingTier.name} status! This includes ${perks}. Check out your full roadmap here: [Link]`;
-  }, [plan, qualifyingTier, user]);
+    const serviceLines = Object.entries(serviceSummary)
+      .map(([name, count]) => `  - ${name}: ${count}x per year`)
+      .join('\n');
+    const perkLines = qualifyingTier.perks?.length
+      ? qualifyingTier.perks.map(p => `  - ${p}`).join('\n')
+      : '  - Exclusive member benefits';
+
+    return `Hi ${firstName}! Based on your maintenance blueprint, you qualify for our ${qualifyingTier.name} membership.\n\nMonthly Cost: ${formatCurrency(projectedMonthlySpend)}/mo\n\nIncluded Services (12-month plan):\n${serviceLines}\n\nMembership Period:\n  ${membershipDates.start} — ${membershipDates.end}\n\nPerks:\n${perkLines}\n\nCheck out your full roadmap here: [Link]`;
+  }, [plan, qualifyingTier, serviceSummary, membershipDates, projectedMonthlySpend]);
 
   const futureVisits = useMemo(() => {
       const today = new Date();
@@ -786,8 +814,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
                             <div className="p-4 bp-container-list border-2 bg-muted border">
                                 <p className="bp-caption uppercase mb-2 tracking-widest text-muted-foreground">Message Preview</p>
-                                <div className="bg-card p-4 bp-container-list border-2 text-xs font-bold leading-relaxed italic shadow-inner border text-muted-foreground">
-                                    {'"'}{invitationMessage}{'"'}
+                                <div className="bg-card p-4 bp-container-list border-2 text-xs font-bold leading-relaxed shadow-inner border text-muted-foreground whitespace-pre-wrap">
+                                    {invitationMessage}
                                 </div>
                             </div>
 
