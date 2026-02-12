@@ -15,7 +15,7 @@ interface PlanSummaryStepProps {
   onEditPlan?: () => void;
 }
 
-type BookingStep = 'select-visit' | 'select-date' | 'select-period' | 'select-slot';
+type BookingStep = 'select-visit' | 'select-date' | 'select-period' | 'select-slot' | 'confirm';
 type TimePeriod = 'morning' | 'afternoon' | 'evening' | 'all';
 type DeliveryMethod = 'sms' | 'email' | 'link';
 
@@ -49,8 +49,9 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
   const [isAccepting, setIsAccepting] = useState(false);
   const [isViewingMembershipDetails, setIsViewingMembershipDetails] = useState(false);
   const [selectedChartVisit, setSelectedChartVisit] = useState<PlanAppointment | null>(null);
+  const [selectedSlotTime, setSelectedSlotTime] = useState<string | null>(null);
   
-  const { membershipConfig, integration, services: allServices, stylists: allStylists } = useSettings();
+  const { membershipConfig, integration, services: allServices, stylists: allStylists, cancellationPolicy } = useSettings();
   const { savePlan, saveBooking } = usePlans();
   const { user } = useAuth();
 
@@ -909,7 +910,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                   <div className="text-primary-foreground p-6 relative bg-primary">
                     {bookingStep !== 'select-visit' && !bookingSuccess && (
                         <button onClick={() => {
-                           if (bookingStep === 'select-slot') setBookingStep('select-period');
+                           if (bookingStep === 'confirm') setBookingStep('select-slot');
+                           else if (bookingStep === 'select-slot') setBookingStep('select-period');
                            else if (bookingStep === 'select-period') setBookingStep('select-date');
                            else if (bookingStep === 'select-date') setBookingStep('select-visit');
                         }} className="absolute left-4 top-6">
@@ -920,7 +922,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                     <p className="bp-caption text-center uppercase tracking-widest mt-1 text-primary-foreground/80">
                         {bookingStep === 'select-visit' ? 'Which visit are you booking?' : 
                          bookingStep === 'select-date' ? 'Confirm your appointment date' :
-                         bookingStep === 'select-period' ? 'What time of day do you prefer?' : 'Choose your perfect opening'}
+                         bookingStep === 'select-period' ? 'What time of day do you prefer?' :
+                         bookingStep === 'confirm' ? 'Review & confirm your booking' : 'Choose your perfect opening'}
                     </p>
                   </div>
 
@@ -1086,7 +1089,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                               <h3 className="bp-caption uppercase mb-3 tracking-widest border-b-2 pb-2 text-muted-foreground border">{day}</h3>
                                               <div className="grid grid-cols-2 gap-2">
                                                   {(slots as string[]).map((s, i) => (
-                                                      <button key={i} onClick={() => executeBooking(s)} disabled={isBooking} className="p-4 border-4 bp-container-list text-center hover:border-accent active:scale-95 transition-all elevated-card border text-foreground">
+                                                      <button key={i} onClick={() => { setSelectedSlotTime(s); setBookingStep('confirm'); }} disabled={isBooking} className="p-4 border-4 bp-container-list text-center hover:border-accent active:scale-95 transition-all elevated-card border text-foreground">
                                                           <span className="font-bold text-base">{new Date(s).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
                                                       </button>
                                                   ))}
@@ -1106,12 +1109,80 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                       )}
                                   </div>
                               )}
+
+                              {bookingStep === 'confirm' && selectedSlotTime && selectedVisit && (
+                                  <div className="space-y-5">
+                                      <div className="p-5 bp-container-list border-2 bg-muted border">
+                                          <p className="bp-overline mb-3">Appointment Date & Time</p>
+                                          <p className="text-lg font-bold text-foreground">
+                                              {new Date(selectedSlotTime).toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+                                          </p>
+                                          <p className="text-2xl bp-stat-value text-accent mt-1">
+                                              {new Date(selectedSlotTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                          </p>
+                                      </div>
+
+                                      <div className="p-5 bp-container-list border-2 bg-muted border">
+                                          <p className="bp-overline mb-3">Services</p>
+                                          <div className="space-y-2">
+                                              {selectedVisit.services.map((s, i) => (
+                                                  <div key={i} className="flex justify-between items-center">
+                                                      <div>
+                                                          <p className="font-bold text-sm text-foreground">{s.name}</p>
+                                                          <p className="bp-caption text-muted-foreground">{s.duration} min</p>
+                                                      </div>
+                                                      <p className="font-bold text-foreground">{formatCurrency(s.cost)}</p>
+                                                  </div>
+                                              ))}
+                                          </div>
+                                          <div className="border-t mt-3 pt-3 flex justify-between items-center border-border">
+                                              <div>
+                                                  <p className="font-bold text-sm text-foreground">Total</p>
+                                                  <p className="bp-caption text-muted-foreground">
+                                                      {selectedVisit.services.reduce((sum, s) => sum + s.duration, 0)} min
+                                                  </p>
+                                              </div>
+                                              <p className="text-lg bp-stat-value text-foreground">
+                                                  {formatCurrency(selectedVisit.services.reduce((sum, s) => sum + s.cost, 0))}
+                                              </p>
+                                          </div>
+                                      </div>
+
+                                      <div className="p-5 bp-container-list border-2 bg-muted border">
+                                          <p className="bp-overline mb-2">Client</p>
+                                          <p className="font-bold text-foreground">{plan.client.name}</p>
+                                      </div>
+
+                                      {cancellationPolicy && (
+                                          <div className="p-4 bp-container-list border-2 border-amber-500/30 bg-amber-500/5">
+                                              <p className="bp-overline mb-2 text-amber-600">Cancellation Policy</p>
+                                              <p className="bp-body-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{cancellationPolicy}</p>
+                                          </div>
+                                      )}
+
+                                      <button
+                                          onClick={() => executeBooking(selectedSlotTime)}
+                                          disabled={isBooking}
+                                          className="w-full font-bold py-5 bp-container-compact shadow-xl flex items-center justify-center space-x-3 active:scale-95 transition-all border-b-8 border-black/20 disabled:opacity-50 bg-accent text-accent-foreground"
+                                      >
+                                          {isBooking ? (
+                                              <RefreshIcon className="w-6 h-6 animate-spin" />
+                                          ) : (
+                                              <CalendarIcon className="w-6 h-6" />
+                                          )}
+                                          <span>{isBooking ? 'BOOKING...' : 'CONFIRM BOOKING'}</span>
+                                      </button>
+                                  </div>
+                              )}
                           </>
                       )}
                   </div>
 
-                  {!bookingSuccess && (
+                  {!bookingSuccess && bookingStep !== 'confirm' && (
                       <button onClick={() => setBookingModalOpen(false)} className="w-full p-6 font-bold uppercase tracking-widest bp-caption border-t-4 hover:opacity-70 transition-colors text-muted-foreground border">Cancel Booking</button>
+                  )}
+                  {bookingStep === 'confirm' && !bookingSuccess && (
+                      <button onClick={() => setBookingModalOpen(false)} className="w-full p-6 font-bold uppercase tracking-widest bp-caption border-t-4 hover:opacity-70 transition-colors text-muted-foreground border">Cancel</button>
                   )}
               </div>
           </div>

@@ -3,7 +3,7 @@ import type { User } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
 import { Toggle } from './Toggle';
 import { SaveToast, useSaveToast } from './SaveToast';
-import { SettingsIcon, UsersIcon, TrashIcon } from './icons';
+import { SettingsIcon, UsersIcon, TrashIcon, DocumentTextIcon } from './icons';
 
 
 interface AccountSettingsProps {
@@ -14,7 +14,7 @@ interface AccountSettingsProps {
 
 const AccountSettings: React.FC<AccountSettingsProps> = ({ user, onLogout, subtitle }) => {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const { pushAlertsEnabled, updatePushAlertsEnabled, saveAll } = useSettings();
+  const { pushAlertsEnabled, updatePushAlertsEnabled, cancellationPolicy, updateCancellationPolicy, saveAll } = useSettings();
   const { toastVisible, showToast, hideToast } = useSaveToast();
 
   const handlePasswordChange = () => {
@@ -105,6 +105,22 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ user, onLogout, subti
                         )}
                     </div>
                 </div>
+            </div>
+
+            <div className="bg-card p-6 px-8 bp-container-tall border border-border shadow-sm space-y-4">
+                <h3 className="bp-overline mb-2 flex items-center">
+                    <DocumentTextIcon className="w-4 h-4 mr-2" />
+                    Cancellation Policy
+                </h3>
+                <p className="bp-caption text-muted-foreground">This will be shown to clients when confirming a booking.</p>
+                <textarea
+                    value={cancellationPolicy}
+                    onChange={(e) => updateCancellationPolicy(e.target.value)}
+                    onBlur={() => saveAll().then(showToast)}
+                    placeholder="e.g. Cancellations must be made at least 24 hours in advance. Late cancellations may be subject to a fee."
+                    rows={4}
+                    className="w-full p-4 bg-muted border-2 border bp-container-list font-medium text-sm outline-none resize-none text-foreground placeholder:text-muted-foreground/50"
+                />
             </div>
 
             <button data-ui="button" onClick={onLogout} className="w-full py-5 border-b-8 border-black/20 uppercase tracking-widest text-lg shadow-xl active:scale-95 transition-all flex items-center justify-center space-x-3 bp-btn-primary">

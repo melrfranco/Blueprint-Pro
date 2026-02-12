@@ -73,6 +73,9 @@ interface SettingsContextType {
   updatePushAlertsEnabled: (enabled: boolean) => void;
   updatePinnedReports: (userId: string | number, reportIds: string[]) => void;
 
+  cancellationPolicy: string;
+  updateCancellationPolicy: (policy: string) => void;
+
   createClient: (clientData: { name: string; email: string }) => Promise<Client>;
   resolveClientByExternalId: (
     externalId: string,
@@ -139,6 +142,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [textSize, setTextSize] = useState<AppTextSize>('M');
   const [pushAlertsEnabled, setPushAlertsEnabled] = useState(false);
   const [pinnedReports, setPinnedReports] = useState<{ [userId: string]: string[] }>({});
+
+  const [cancellationPolicy, setCancellationPolicy] = useState('');
 
   const [loadingTeam, setLoadingTeam] = useState(false);
   const [teamError, setTeamError] = useState<string | null>(null);
@@ -586,6 +591,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       updateTextSize,
       updatePushAlertsEnabled,
       updatePinnedReports,
+      cancellationPolicy,
+      updateCancellationPolicy: setCancellationPolicy,
       createClient,
       resolveClientByExternalId,
       saveAll,
@@ -602,6 +609,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       textSize,
       pushAlertsEnabled,
       pinnedReports,
+      cancellationPolicy,
       loadingTeam,
       teamError,
       needsSquareConnect,
