@@ -71,13 +71,22 @@ const LoginScreen: React.FC = () => {
           </div>
 
           {!showStylistLogin ? (
-            <button
-              data-ui="button"
-              onClick={() => setShowStylistLogin(true)}
-              className="w-full py-4 bp-btn-secondary text-center"
-            >
-              Stylist Login
-            </button>
+            <div className="space-y-3">
+              <button
+                data-ui="button"
+                onClick={() => setShowStylistLogin(true)}
+                className="w-full py-4 bp-btn-secondary text-center"
+              >
+                Stylist Login
+              </button>
+              <button
+                data-ui="button"
+                onClick={() => { window.location.href = '/join'; }}
+                className="w-full py-3 text-xs uppercase tracking-widest font-bold text-muted-foreground hover:text-foreground transition-colors"
+              >
+                New here? Join with PIN
+              </button>
+            </div>
           ) : (
             <form onSubmit={handleStylistLogin} className="space-y-3">
               <input
