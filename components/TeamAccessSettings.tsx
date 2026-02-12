@@ -170,13 +170,19 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
       });
 
       const data = await response.json();
+      console.log('[Invite] API response:', JSON.stringify(data, null, 2));
       if (!response.ok) throw new Error(data?.message || 'Failed to send invite.');
 
       setInvitedStylistIds(prev => new Set(prev).add(stylist.id));
       if (data?.inviteLink) {
         setInviteLinkMap(prev => ({ ...prev, [stylist.id]: data.inviteLink }));
       }
-      setInvitingStylistId(null);
+      if (data?.emailStatus === 'failed') {
+        setInviteError(`Email failed: ${data.emailError || 'unknown error'}. Use the link below instead.`);
+        setInvitingStylistId(stylist.id);
+      } else {
+        setInvitingStylistId(null);
+      }
     } catch (e: any) {
       setInviteError(e.message || 'Failed to send invite.');
     } finally {

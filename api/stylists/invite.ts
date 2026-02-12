@@ -177,15 +177,18 @@ export default async function handler(req: any, res: any) {
     }
 
     // Send our own branded email via Resend
+    let emailStatus = 'skipped';
+    let emailError: string | null = null;
     if (inviteLink) {
       const emailResult = await sendEmailViaResend(
         email,
         `You're invited to Blueprint Pro`,
         buildInviteEmail(name, inviteLink),
       );
+      emailStatus = emailResult.ok ? 'sent' : 'failed';
+      emailError = emailResult.error || null;
       if (!emailResult.ok) {
         console.error('[Invite] Email send failed:', emailResult.error);
-        // Don't fail the whole invite — the link is still available as backup
       }
     }
 
@@ -225,6 +228,13 @@ export default async function handler(req: any, res: any) {
         permissions: DEFAULT_PERMISSIONS,
       },
       inviteLink,
+      emailStatus,
+      emailError,
+      debug: {
+        hasResendKey: !!process.env.RESEND_API_KEY,
+        actionLinkPresent: !!actionLink,
+        inviteLinkPresent: !!inviteLink,
+      },
     });
   } catch (error: any) {
     return res.status(500).json({ message: error.message || 'Failed to send invite.' });
