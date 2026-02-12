@@ -88,9 +88,9 @@ const SelectServicesStep: React.FC<SelectServicesStepProps> = ({ availableServic
                 className="w-full p-4 border-4 border bp-container-compact font-medium shadow-inner outline-none bg-muted text-foreground focus:bg-card focus:border-sky transition-all"
             />
         </div>
-        <div className="flex space-x-2 mt-4 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex flex-wrap gap-2 mt-4">
             {categories.map(cat => (
-                <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-5 py-2 text-xs font-bold bp-container-compact whitespace-nowrap transition-all uppercase tracking-widest ${activeCategory === cat || (cat === 'All' && !activeCategory) ? 'bg-accent text-accent-foreground shadow-lg scale-105' : 'border border bg-muted text-muted-foreground'}`}>
+                <button key={cat} onClick={() => setActiveCategory(cat)} className={`px-4 py-1.5 text-xs font-bold bp-container-compact whitespace-nowrap transition-all uppercase tracking-widest ${activeCategory === cat || (cat === 'All' && !activeCategory) ? 'bg-accent text-accent-foreground shadow-lg' : 'border border bg-muted text-muted-foreground'}`}>
                     {cat}
                 </button>
             ))}
