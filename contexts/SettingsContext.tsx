@@ -151,26 +151,29 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     let cancelled = false;
 
     const loadForUser = async () => {
+      console.log('[Settings] loadForUser called');
+
       // FIX: Cast to 'any' to bypass Supabase auth method type errors, likely from an environment configuration issue.
       const { data: userResp, error: userErr } = await (supabase.auth as any).getUser();
       if (cancelled) return;
 
       const user = userResp?.user;
       if (userErr || !user) {
+        console.log('[Settings] No authenticated user, skipping data load', { error: userErr?.message });
         setNeedsSquareConnect(false);
         return;
       }
 
-      console.log('[Settings] Current user ID:', user.id, 'Email:', user.email);
+      console.log('[Settings] Authenticated user:', user.id, user.email, 'metadata:', JSON.stringify(user.user_metadata));
 
-      // --- Check Square Connection Status ---
+      // --- Check Square Connection Status (informational only) ---
       const { data: merchantSettings, error: msError } = await supabase
         .from('merchant_settings')
         .select('square_access_token')
         .eq('supabase_user_id', user.id)
         .maybeSingle();
 
-      console.log('[Settings] Merchant settings lookup for user', user.id, ':', {
+      console.log('[Settings] merchant_settings query:', {
         found: !!merchantSettings,
         hasToken: !!merchantSettings?.square_access_token,
         error: msError?.message || null,
@@ -178,194 +181,131 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
       if (cancelled) return;
 
-      // Determine if user has Square connected:
-      // - If we can read merchant_settings and it has a token, yes
-      // - If RLS blocks the read (msError or null), check user metadata as fallback
       const hasSquareFromDb = !!merchantSettings?.square_access_token;
       const hasSquareFromMeta = !!user.user_metadata?.merchant_id;
-      const hasSquareConnection = hasSquareFromDb || hasSquareFromMeta;
 
-      console.log('[Settings] Square connection:', { hasSquareFromDb, hasSquareFromMeta, hasSquareConnection });
-
-      if (msError) {
-        console.error('[Settings] Failed to load merchant settings:', msError);
-        // If user has merchant_id in metadata, they connected via OAuth - don't block them
-        setNeedsSquareConnect(!hasSquareFromMeta);
+      if (msError && !hasSquareFromMeta) {
+        setNeedsSquareConnect(true);
+      } else if (!hasSquareFromDb && !hasSquareFromMeta) {
+        setNeedsSquareConnect(true);
       } else {
-        setNeedsSquareConnect(!merchantSettings?.square_access_token);
+        setNeedsSquareConnect(false);
       }
 
-      // ---- Services: fetch from Square catalog (replaces mock data)
-      // The proxy resolves the Square token server-side, so we don't need it client-side
-      if (hasSquareConnection) {
-        try {
-          console.log('[Settings] Fetching services from Square catalog...');
-          const squareServices = await SquareIntegrationService.fetchCatalog();
-          if (cancelled) return;
-          if (squareServices.length > 0) {
-            console.log('[Settings] Loaded', squareServices.length, 'services from Square');
-            setServices(squareServices);
-          } else {
-            console.log('[Settings] No services from Square, keeping defaults');
-          }
-        } catch (e) {
-          if (!cancelled) {
-            console.warn('[Settings] Failed to fetch Square catalog, keeping defaults:', e);
-          }
-        }
-      }
+      // ---- ALWAYS try to fetch from Square API ----
+      // The proxy resolves the Square token server-side from merchant_settings.
+      // We don't need the token client-side. Just try and catch errors gracefully.
 
-      // ---- Clients: scoped by supabase_user_id (avoids loading everyone)
+      // ---- Services ----
+      console.log('[Settings] Fetching services from Square catalog...');
       try {
-        let { data, error } = await supabase
-          .from('clients')
-          .select('*')
-          .eq('supabase_user_id', user.id)
-          .order('created_at', { ascending: true });
-
+        const squareServices = await SquareIntegrationService.fetchCatalog();
         if (cancelled) return;
-
-        console.log('[Settings] Scoped clients query for user', user.id, ':', { count: data?.length || 0, error });
-
-        // Fallback: if no data found, get any synced data (ignore user ID)
-        if ((data?.length ?? 0) === 0) {
-          console.log('[Settings] Clients query returned 0, trying fallback (no user filter)');
-          const { data: legacyData } = await supabase
-            .from('clients')
-            .select('*')
-            .order('created_at', { ascending: true })
-            .limit(100);
-          console.log('[Settings] Fallback clients query returned:', { count: legacyData?.length || 0 });
-          if (legacyData && legacyData.length > 0) {
-            data = legacyData;
-          }
-        }
-
-        // If still no data from Supabase, fetch directly from Square API
-        if ((data?.length ?? 0) === 0 && hasSquareConnection) {
-          console.log('[Settings] No clients in Supabase, fetching directly from Square API...');
-          try {
-            const squareClients = await SquareIntegrationService.fetchCustomers();
-            if (cancelled) return;
-            if (squareClients.length > 0) {
-              console.log('[Settings] Loaded', squareClients.length, 'clients from Square API');
-              const mapped: Client[] = squareClients.map((c: any) => ({
-                id: c.id || c.externalId,
-                externalId: c.externalId || c.id,
-                name: c.name || 'Client',
-                email: c.email,
-                phone: c.phone,
-                avatarUrl: c.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name || 'C')}&background=random`,
-                historicalData: [],
-                source: 'square',
-              }));
-              setClients(mapped);
-            }
-          } catch (clientApiErr) {
-            console.warn('[Settings] Square clients API fallback failed:', clientApiErr);
-          }
-        }
-
-        if (cancelled) return;
-
-        if (error) {
-          console.error('[Settings] Failed to load clients:', error);
-          setClients([]);
-        } else if ((data?.length ?? 0) > 0) {
-          console.log('[Settings] Setting clients:', (data || []).length);
-          const mapped: Client[] = (data || []).map((row: any) => ({
-            id: row.id,
-            externalId: row.external_id,
-            name: row.name,
-            email: row.email,
-            phone: row.phone,
-            avatarUrl: row.avatar_url,
-            historicalData: [],
-            source: row.source || 'manual',
-          }));
-          setClients(mapped);
+        if (squareServices.length > 0) {
+          console.log('[Settings] ✅ Loaded', squareServices.length, 'services from Square');
+          setServices(squareServices);
+        } else {
+          console.log('[Settings] Square returned 0 services, keeping defaults');
         }
       } catch (e) {
         if (!cancelled) {
-          console.error('[Settings] Clients load fatal:', e);
-          setClients([]);
+          console.warn('[Settings] ⚠️ Failed to fetch Square catalog:', e);
         }
       }
 
-      // ---- Team: does NOT block app (empty is OK)
+      if (cancelled) return;
+
+      // ---- Clients ----
+      console.log('[Settings] Fetching clients from Square...');
+      try {
+        const squareClients = await SquareIntegrationService.fetchCustomers();
+        if (cancelled) return;
+        if (squareClients.length > 0) {
+          console.log('[Settings] ✅ Loaded', squareClients.length, 'clients from Square');
+          const mapped: Client[] = squareClients.map((c: any) => ({
+            id: c.id || c.externalId,
+            externalId: c.externalId || c.id,
+            name: c.name || 'Client',
+            email: c.email,
+            phone: c.phone,
+            avatarUrl: c.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name || 'C')}&background=random`,
+            historicalData: [],
+            source: 'square',
+          }));
+          setClients(mapped);
+        } else {
+          console.log('[Settings] Square returned 0 clients');
+        }
+      } catch (e) {
+        if (!cancelled) {
+          console.warn('[Settings] ⚠️ Failed to fetch Square clients:', e);
+          // Fallback: try Supabase
+          try {
+            const { data } = await supabase
+              .from('clients')
+              .select('*')
+              .eq('supabase_user_id', user.id)
+              .order('created_at', { ascending: true });
+            if (data && data.length > 0) {
+              console.log('[Settings] Loaded', data.length, 'clients from Supabase fallback');
+              setClients(data.map((row: any) => ({
+                id: row.id,
+                externalId: row.external_id,
+                name: row.name,
+                email: row.email,
+                phone: row.phone,
+                avatarUrl: row.avatar_url,
+                historicalData: [],
+                source: row.source || 'manual',
+              })));
+            }
+          } catch (sbErr) {
+            console.warn('[Settings] Supabase client fallback also failed:', sbErr);
+          }
+        }
+      }
+
+      if (cancelled) return;
+
+      // ---- Team ----
       setLoadingTeam(true);
       setTeamError(null);
-
+      console.log('[Settings] Fetching team from Square...');
       try {
-        let { data, error } = await supabase
-          .from('square_team_members')
-          .select('*')
-          .eq('supabase_user_id', user.id);
-
+        const squareTeam = await SquareIntegrationService.fetchTeam();
         if (cancelled) return;
-
-        console.log('[Settings] Scoped team members query for user', user.id, ':', { count: data?.length || 0, error });
-
-        // Fallback: if no data found, get any synced data (ignore user ID)
-        if ((data?.length ?? 0) === 0) {
-          console.log('[Settings] Team members query returned 0, trying fallback (no user filter)');
-          const { data: legacyData } = await supabase
+        if (squareTeam.length > 0) {
+          console.log('[Settings] ✅ Loaded', squareTeam.length, 'team members from Square');
+          setStylists(squareTeam);
+        } else {
+          console.log('[Settings] Square returned 0 team members');
+          // Fallback: try Supabase
+          const { data } = await supabase
             .from('square_team_members')
             .select('*')
-            .limit(100);
-          console.log('[Settings] Fallback team members query returned:', { count: legacyData?.length || 0 });
-          if (legacyData && legacyData.length > 0) {
-            data = legacyData;
+            .eq('supabase_user_id', user.id);
+          if (data && data.length > 0) {
+            console.log('[Settings] Loaded', data.length, 'team members from Supabase fallback');
+            setStylists(data.map((row: any) => {
+              const levelId = row.level_id || levels[0]?.id || 'lvl_1';
+              const permissionOverrides = row.permission_overrides || row.permissions || {};
+              const levelDefaults = resolveLevelDefaults(levelId);
+              const permissions = { ...levelDefaults, ...permissionOverrides };
+              return {
+                id: row.square_team_member_id,
+                name: row.name,
+                role: row.role || 'Team Member',
+                email: row.email,
+                levelId,
+                permissions,
+                permissionOverrides,
+              };
+            }));
           }
-        }
-
-        // If still no data from Supabase, fetch directly from Square API
-        if ((data?.length ?? 0) === 0 && hasSquareConnection) {
-          console.log('[Settings] No team in Supabase, fetching directly from Square API...');
-          try {
-            const squareTeam = await SquareIntegrationService.fetchTeam();
-            if (cancelled) return;
-            if (squareTeam.length > 0) {
-              console.log('[Settings] Loaded', squareTeam.length, 'team members from Square API');
-              setStylists(squareTeam);
-              setLoadingTeam(false);
-              return; // Skip the Supabase mapping below
-            }
-          } catch (teamApiErr) {
-            console.warn('[Settings] Square team API fallback failed:', teamApiErr);
-          }
-        }
-
-        if (cancelled) return;
-
-        if (error) {
-          console.warn('[Settings] Team not available:', error.message);
-          setStylists([]);
-          setTeamError(null);
-        } else {
-          console.log('[Settings] Setting stylists:', (data || []).length);
-          const mapped: Stylist[] = (data || []).map((row: any) => {
-            const levelId = row.level_id || levels[0]?.id || 'lvl_1';
-            const permissionOverrides = row.permission_overrides || row.permissions || {};
-            const levelDefaults = resolveLevelDefaults(levelId);
-            const permissions = { ...levelDefaults, ...permissionOverrides };
-
-            return {
-              id: row.square_team_member_id,
-              name: row.name,
-              role: row.role || 'Team Member',
-              email: row.email,
-              levelId,
-              permissions,
-              permissionOverrides,
-            };
-          });
-          setStylists(mapped);
         }
       } catch (e: any) {
         if (!cancelled) {
-          console.error('[Settings] Team load fatal:', e);
-          setStylists([]);
+          console.warn('[Settings] ⚠️ Failed to fetch Square team:', e);
           setTeamError(e?.message || 'Failed to load team');
         }
       } finally {
