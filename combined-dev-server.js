@@ -149,6 +149,8 @@ const createCombinedServer = async () => {
             handler = await vite.ssrLoadModule('./api/square/services.ts');
           } else if (pathname === '/api/stylists') {
             handler = await vite.ssrLoadModule('./api/stylists/index.ts');
+          } else if (pathname === '/api/stylist-data') {
+            handler = await vite.ssrLoadModule('./api/stylist-data.ts');
           } else {
             res.statusCode = 404;
             return res.json({ message: `API endpoint ${pathname} not found` });

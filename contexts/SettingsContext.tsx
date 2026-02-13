@@ -213,11 +213,105 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         setNeedsSquareConnect(false);
       }
 
-      // ---- ALWAYS try to fetch from Square API ----
-      // The proxy resolves the Square token server-side from merchant_settings.
-      // We don't need the token client-side. Just try and catch errors gracefully.
+      // ---- Determine data loading strategy based on role ----
+      const isStylist = user.user_metadata?.role === 'stylist';
 
-      // ---- Services (fetched server-side to bypass RLS + resolve admin token for stylists) ----
+      if (isStylist) {
+        // ═══════════════════════════════════════════════════════════
+        // STYLIST PATH: Read from Supabase (admin already synced data)
+        // No Square API calls — just read what the admin imported.
+        // ═══════════════════════════════════════════════════════════
+        console.log('[Settings] STYLIST path — reading admin data from Supabase');
+        setLoadingTeam(true);
+
+        try {
+          const dataRes = await fetch('/api/stylist-data', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-User-Id': user.id,
+            },
+          });
+          const dataJson = await dataRes.json();
+          console.log('[Settings] /api/stylist-data response:', dataRes.status, {
+            services: dataJson.services?.length ?? 0,
+            clients: dataJson.clients?.length ?? 0,
+            team: dataJson.team?.length ?? 0,
+            adminUserId: dataJson.adminUserId,
+          });
+
+          if (cancelled) return;
+
+          if (!dataRes.ok) {
+            console.error('[Settings] ⚠️ stylist-data failed:', dataJson.message);
+          } else {
+            // Services
+            if (dataJson.services?.length > 0) {
+              console.log('[Settings] ✅ Loaded', dataJson.services.length, 'services from admin Supabase data');
+              setServices(dataJson.services.map((row: any) => ({
+                id: row.square_variation_id || row.square_item_id,
+                name: row.name || 'Unnamed Service',
+                variationName: row.variation_name,
+                price: row.price_cents != null ? row.price_cents / 100 : 0,
+                duration: row.duration_minutes || 60,
+                category: row.category || '',
+              })));
+            }
+
+            // Clients
+            if (dataJson.clients?.length > 0) {
+              console.log('[Settings] ✅ Loaded', dataJson.clients.length, 'clients from admin Supabase data');
+              setClients(dataJson.clients.map((row: any) => ({
+                id: row.external_id || row.id,
+                externalId: row.external_id,
+                name: row.name || 'Client',
+                email: row.email,
+                phone: row.phone,
+                avatarUrl: row.avatar_url,
+                historicalData: [],
+                source: 'square',
+              })));
+            }
+
+            // Team
+            if (dataJson.team?.length > 0) {
+              console.log('[Settings] ✅ Loaded', dataJson.team.length, 'team members from admin Supabase data');
+              setStylists(dataJson.team.map((row: any) => {
+                const levelId = row.level_id || levels[0]?.id || 'lvl_1';
+                const permissionOverrides = row.permission_overrides || row.permissions || {};
+                const levelDefaults = resolveLevelDefaults(levelId);
+                const permissions = { ...levelDefaults, ...permissionOverrides };
+                return {
+                  id: row.square_team_member_id,
+                  name: row.name,
+                  role: row.role || 'Team Member',
+                  email: row.email,
+                  levelId,
+                  permissions,
+                  permissionOverrides,
+                };
+              }));
+            }
+          }
+        } catch (e: any) {
+          if (!cancelled) console.error('[Settings] ⚠️ stylist-data fetch failed:', e);
+        } finally {
+          if (!cancelled) {
+            setLoadingTeam(false);
+            isLoading = false;
+            if (user?.id) lastLoadedUserId = user.id;
+          }
+          console.log('[Settings] STYLIST loadForUser completed for user:', user?.id);
+        }
+        return; // Done — skip the admin/Square path below
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      // ADMIN PATH: Sync fresh data from Square API into Supabase
+      // ═══════════════════════════════════════════════════════════
+      console.log('[Settings] ADMIN path — syncing from Square API');
+
+      // ---- Services ----
       console.log('[Settings] Fetching services via /api/square/services for user:', user.id);
       try {
         const svcRes = await fetch('/api/square/services', {
@@ -252,12 +346,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
       if (cancelled) return;
 
-      // ---- Clients (fetched server-side to bypass RLS) ----
-      // /api/square/clients uses the service role key to:
-      //   1. Resolve the Square token (admin's own or via square_team_members for stylists)
-      //   2. Fetch fresh clients from Square API
-      //   3. Upsert to Supabase clients table
-      //   4. Return the client data directly (bypasses RLS)
+      // ---- Clients ----
       console.log('[Settings] Fetching clients via /api/square/clients for user:', user.id);
       try {
         const syncRes = await fetch('/api/square/clients', {
@@ -338,7 +427,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         if (!cancelled) setLoadingTeam(false);
         isLoading = false;
         if (user?.id) lastLoadedUserId = user.id;
-        console.log('[Settings] loadForUser completed for user:', user?.id);
+        console.log('[Settings] ADMIN loadForUser completed for user:', user?.id);
       }
     };
 
