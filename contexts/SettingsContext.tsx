@@ -237,51 +237,114 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       if (cancelled) return;
 
       // ---- Clients ----
-      console.log('[Settings] Fetching clients from Square...');
-      try {
-        const squareClients = await SquareIntegrationService.fetchCustomers();
-        if (cancelled) return;
-        if (squareClients.length > 0) {
-          console.log('[Settings] ✅ Loaded', squareClients.length, 'clients from Square');
-          const mapped: Client[] = squareClients.map((c: any) => ({
-            id: c.id || c.externalId,
-            externalId: c.externalId || c.id,
-            name: c.name || 'Client',
-            email: c.email,
-            phone: c.phone,
-            avatarUrl: c.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name || 'C')}&background=random`,
-            historicalData: [],
-            source: 'square',
-          }));
-          setClients(mapped);
-        } else {
-          console.log('[Settings] Square returned 0 clients');
+      const userRole = user.user_metadata?.role || 'admin';
+      let merchantId = user.user_metadata?.merchant_id;
+      const stylistSquareId = user.user_metadata?.stylist_id;
+
+      // Fallback: if stylist has no merchant_id in metadata, look it up from square_team_members
+      if (userRole === 'stylist' && !merchantId && stylistSquareId) {
+        try {
+          const { data: tmRow } = await supabase
+            .from('square_team_members')
+            .select('merchant_id')
+            .eq('square_team_member_id', stylistSquareId)
+            .maybeSingle();
+          if (tmRow?.merchant_id) {
+            merchantId = tmRow.merchant_id;
+            console.log('[Settings] Resolved merchant_id from square_team_members:', merchantId);
+          }
+        } catch (e) {
+          console.warn('[Settings] Failed to resolve merchant_id from square_team_members:', e);
         }
-      } catch (e) {
-        if (!cancelled) {
-          console.warn('[Settings] ⚠️ Failed to fetch Square clients:', e);
-          // Fallback: try Supabase
-          try {
-            const { data } = await supabase
-              .from('clients')
-              .select('*')
-              .eq('supabase_user_id', user.id)
-              .order('created_at', { ascending: true });
-            if (data && data.length > 0) {
-              console.log('[Settings] Loaded', data.length, 'clients from Supabase fallback');
-              setClients(data.map((row: any) => ({
-                id: row.id,
-                externalId: row.external_id,
-                name: row.name,
-                email: row.email,
-                phone: row.phone,
-                avatarUrl: row.avatar_url,
-                historicalData: [],
-                source: row.source || 'manual',
-              })));
+      }
+
+      if (userRole === 'stylist' && merchantId) {
+        // Stylist: load clients from the admin who owns this merchant
+        console.log('[Settings] Stylist detected, loading clients for merchant:', merchantId);
+        try {
+          // Find the admin's user ID from merchant_settings
+          const { data: ms } = await supabase
+            .from('merchant_settings')
+            .select('supabase_user_id')
+            .eq('square_merchant_id', merchantId)
+            .maybeSingle();
+
+          const adminUserId = ms?.supabase_user_id;
+          const userIdsToQuery = adminUserId ? [adminUserId, user.id] : [user.id];
+
+          const { data } = await supabase
+            .from('clients')
+            .select('*')
+            .in('supabase_user_id', userIdsToQuery)
+            .order('created_at', { ascending: true });
+
+          if (cancelled) return;
+          if (data && data.length > 0) {
+            console.log('[Settings] ✅ Loaded', data.length, 'clients for stylist (admin + own)');
+            setClients(data.map((row: any) => ({
+              id: row.id,
+              externalId: row.external_id,
+              name: row.name,
+              email: row.email,
+              phone: row.phone,
+              avatarUrl: row.avatar_url,
+              historicalData: [],
+              source: row.source || 'manual',
+            })));
+          } else {
+            console.log('[Settings] No clients found for stylist');
+          }
+        } catch (e) {
+          if (!cancelled) console.warn('[Settings] ⚠️ Failed to load clients for stylist:', e);
+        }
+      } else {
+        // Admin: try Square first, then Supabase fallback
+        console.log('[Settings] Fetching clients from Square...');
+        try {
+          const squareClients = await SquareIntegrationService.fetchCustomers();
+          if (cancelled) return;
+          if (squareClients.length > 0) {
+            console.log('[Settings] ✅ Loaded', squareClients.length, 'clients from Square');
+            const mapped: Client[] = squareClients.map((c: any) => ({
+              id: c.id || c.externalId,
+              externalId: c.externalId || c.id,
+              name: c.name || 'Client',
+              email: c.email,
+              phone: c.phone,
+              avatarUrl: c.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name || 'C')}&background=random`,
+              historicalData: [],
+              source: 'square',
+            }));
+            setClients(mapped);
+          } else {
+            console.log('[Settings] Square returned 0 clients');
+          }
+        } catch (e) {
+          if (!cancelled) {
+            console.warn('[Settings] ⚠️ Failed to fetch Square clients:', e);
+            // Fallback: try Supabase
+            try {
+              const { data } = await supabase
+                .from('clients')
+                .select('*')
+                .eq('supabase_user_id', user.id)
+                .order('created_at', { ascending: true });
+              if (data && data.length > 0) {
+                console.log('[Settings] Loaded', data.length, 'clients from Supabase fallback');
+                setClients(data.map((row: any) => ({
+                  id: row.id,
+                  externalId: row.external_id,
+                  name: row.name,
+                  email: row.email,
+                  phone: row.phone,
+                  avatarUrl: row.avatar_url,
+                  historicalData: [],
+                  source: row.source || 'manual',
+                })));
+              }
+            } catch (sbErr) {
+              console.warn('[Settings] Supabase client fallback also failed:', sbErr);
             }
-          } catch (sbErr) {
-            console.warn('[Settings] Supabase client fallback also failed:', sbErr);
           }
         }
       }
