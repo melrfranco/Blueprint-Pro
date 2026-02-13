@@ -72,65 +72,56 @@ export default async function handler(req: any, res: any) {
       return res.status(401).json({ message: 'Missing auth. Provide X-User-Id or Bearer token.' });
     }
 
-    // If token not provided in request, try to fetch from merchant_settings
-    let merchantId: string | undefined;
+    // Resolve the Square access token and the admin user ID who owns the clients
+    let adminUserId = supabaseUserId; // default: caller is the admin
 
     if (!squareAccessToken) {
-      const { data: ms, error: msErr } = await supabaseAdmin
+      // 1. Try caller's own merchant_settings first (admin path)
+      const { data: ms } = await supabaseAdmin
         .from('merchant_settings')
         .select('id, square_access_token')
         .eq('supabase_user_id', supabaseUserId)
         .maybeSingle();
 
-      if (msErr || !ms?.square_access_token) {
-        console.error('[CLIENT SYNC] merchant_settings lookup failed:', msErr);
-        return res.status(401).json({
-          message: 'Missing Square access token in request or merchant settings.',
-        });
-      }
-
-      squareAccessToken = ms.square_access_token;
-      merchantId = ms.id;
-      console.log('[CLIENT SYNC] Token from merchant_settings:', squareAccessToken ? '✓' : '✗');
-    } else {
-      console.log('[CLIENT SYNC] Token from request body:', squareAccessToken ? '✓' : '✗');
-
-      // If token provided but no merchant_settings exists, create it
-      const { data: ms } = await supabaseAdmin
-        .from('merchant_settings')
-        .select('id')
-        .eq('supabase_user_id', supabaseUserId)
-        .maybeSingle();
-
-      if (!ms?.id) {
-        const { data: newMerchant } = await supabaseAdmin
-          .from('merchant_settings')
-          .insert([{
-            supabase_user_id: supabaseUserId,
-            square_access_token: squareAccessToken,
-          }])
-          .select('id')
-          .single();
-        merchantId = newMerchant?.id;
-        console.log('[CLIENT SYNC] Created merchant_settings with ID:', merchantId);
+      if (ms?.square_access_token) {
+        squareAccessToken = ms.square_access_token;
+        console.log('[CLIENT SYNC] Token from own merchant_settings ✓');
       } else {
-        merchantId = ms.id;
-        // If token provided and merchant_settings exists, update the token
-        if (squareAccessToken && ms.id) {
-          const { error: updateErr } = await supabaseAdmin
-            .from('merchant_settings')
-            .update({
-              square_access_token: squareAccessToken,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', ms.id);
+        // 2. Caller might be a stylist — resolve admin via square_team_members
+        // Get the caller's user metadata to find their stylist_id
+        const { data: userData } = await (supabaseAdmin.auth as any).admin.getUserById(supabaseUserId);
+        const stylistSquareId = userData?.user?.user_metadata?.stylist_id;
+        let resolvedAdminId = userData?.user?.user_metadata?.admin_user_id;
 
-          if (updateErr) {
-            console.error('[CLIENT SYNC] Failed to update merchant_settings:', updateErr);
-          } else {
-            console.log('[CLIENT SYNC] Updated merchant_settings token');
+        // Fallback: look up admin from square_team_members
+        if (!resolvedAdminId && stylistSquareId) {
+          const { data: tmRow } = await supabaseAdmin
+            .from('square_team_members')
+            .select('supabase_user_id')
+            .eq('square_team_member_id', stylistSquareId)
+            .maybeSingle();
+          resolvedAdminId = tmRow?.supabase_user_id;
+        }
+
+        if (resolvedAdminId) {
+          adminUserId = resolvedAdminId;
+          const { data: adminMs } = await supabaseAdmin
+            .from('merchant_settings')
+            .select('id, square_access_token')
+            .eq('supabase_user_id', resolvedAdminId)
+            .maybeSingle();
+
+          if (adminMs?.square_access_token) {
+            squareAccessToken = adminMs.square_access_token;
+            console.log('[CLIENT SYNC] Token from admin merchant_settings ✓ (admin:', resolvedAdminId, ')');
           }
         }
+      }
+
+      if (!squareAccessToken) {
+        return res.status(401).json({
+          message: 'Could not resolve Square access token for this user or their admin.',
+        });
       }
     }
 
@@ -154,7 +145,7 @@ export default async function handler(req: any, res: any) {
     const customers = json.customers || [];
 
     const rows = customers.map((c: any) => ({
-      supabase_user_id: supabaseUserId,
+      supabase_user_id: adminUserId,
       name: [c.given_name, c.family_name].filter(Boolean).join(' ') || 'Client',
       email: c.email_address || null,
       phone: c.phone_number || null,

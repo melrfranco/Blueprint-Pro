@@ -236,15 +236,38 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
       if (cancelled) return;
 
-      // ---- Clients ----
+      // ---- Clients (unified: sync from Square via server, then read from Supabase) ----
+      // /api/square/clients handles both admins and stylists:
+      //   - Admins: uses their own Square token
+      //   - Stylists: resolves admin's token via square_team_members
+      console.log('[Settings] Syncing clients from Square via server...');
+      try {
+        const syncRes = await fetch('/api/square/clients', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-Id': user.id,
+          },
+        });
+        const syncJson = await syncRes.json();
+        if (syncRes.ok) {
+          console.log('[Settings] ✅ Square client sync:', syncJson.inserted, 'clients synced');
+        } else {
+          console.warn('[Settings] ⚠️ Square client sync failed:', syncJson.message);
+        }
+      } catch (e) {
+        console.warn('[Settings] ⚠️ Square client sync request failed:', e);
+      }
+
+      if (cancelled) return;
+
+      // Now load all synced clients from Supabase
+      // For stylists, also include admin's clients
       const userRole = user.user_metadata?.role || 'admin';
+      let ownerIds = [user.id];
 
       if (userRole === 'stylist') {
-        // Stylist: load clients from the admin who owns this salon
-        // admin_user_id is stored directly in stylist's user_metadata
         let adminUserId = user.user_metadata?.admin_user_id;
-
-        // Fallback: look up admin's user ID from square_team_members
         if (!adminUserId) {
           const stylistSquareId = user.user_metadata?.stylist_id;
           if (stylistSquareId) {
@@ -254,93 +277,40 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
                 .select('supabase_user_id')
                 .eq('square_team_member_id', stylistSquareId)
                 .maybeSingle();
-              adminUserId = tmRow?.supabase_user_id;
-              console.log('[Settings] Resolved admin_user_id from square_team_members:', adminUserId);
+              if (tmRow?.supabase_user_id) adminUserId = tmRow.supabase_user_id;
             } catch (e) {
               console.warn('[Settings] Failed to resolve admin_user_id:', e);
             }
           }
         }
+        if (adminUserId && adminUserId !== user.id) ownerIds.push(adminUserId);
+      }
 
-        console.log('[Settings] Stylist loading clients. admin_user_id:', adminUserId, 'own_id:', user.id);
-        const userIdsToQuery = adminUserId ? [adminUserId, user.id] : [user.id];
+      try {
+        const { data } = await supabase
+          .from('clients')
+          .select('*')
+          .in('supabase_user_id', ownerIds)
+          .order('created_at', { ascending: true });
 
-        try {
-          const { data } = await supabase
-            .from('clients')
-            .select('*')
-            .in('supabase_user_id', userIdsToQuery)
-            .order('created_at', { ascending: true });
-
-          if (cancelled) return;
-          if (data && data.length > 0) {
-            console.log('[Settings] ✅ Loaded', data.length, 'clients for stylist');
-            setClients(data.map((row: any) => ({
-              id: row.id,
-              externalId: row.external_id,
-              name: row.name,
-              email: row.email,
-              phone: row.phone,
-              avatarUrl: row.avatar_url,
-              historicalData: [],
-              source: row.source || 'manual',
-            })));
-          } else {
-            console.log('[Settings] No clients found for stylist (queried:', userIdsToQuery, ')');
-          }
-        } catch (e) {
-          if (!cancelled) console.warn('[Settings] ⚠️ Failed to load clients for stylist:', e);
+        if (cancelled) return;
+        if (data && data.length > 0) {
+          console.log('[Settings] ✅ Loaded', data.length, 'clients from Supabase');
+          setClients(data.map((row: any) => ({
+            id: row.id,
+            externalId: row.external_id,
+            name: row.name,
+            email: row.email,
+            phone: row.phone,
+            avatarUrl: row.avatar_url,
+            historicalData: [],
+            source: row.source || 'manual',
+          })));
+        } else {
+          console.log('[Settings] No clients found in Supabase for:', ownerIds);
         }
-      } else {
-        // Admin: try Square first, then Supabase fallback
-        console.log('[Settings] Fetching clients from Square...');
-        try {
-          const squareClients = await SquareIntegrationService.fetchCustomers();
-          if (cancelled) return;
-          if (squareClients.length > 0) {
-            console.log('[Settings] ✅ Loaded', squareClients.length, 'clients from Square');
-            const mapped: Client[] = squareClients.map((c: any) => ({
-              id: c.id || c.externalId,
-              externalId: c.externalId || c.id,
-              name: c.name || 'Client',
-              email: c.email,
-              phone: c.phone,
-              avatarUrl: c.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.name || 'C')}&background=random`,
-              historicalData: [],
-              source: 'square',
-            }));
-            setClients(mapped);
-          } else {
-            console.log('[Settings] Square returned 0 clients');
-          }
-        } catch (e) {
-          if (!cancelled) {
-            console.warn('[Settings] ⚠️ Failed to fetch Square clients:', e);
-            // Fallback: try Supabase
-            try {
-              const { data } = await supabase
-                .from('clients')
-                .select('*')
-                .eq('supabase_user_id', user.id)
-                .order('created_at', { ascending: true });
-              if (data && data.length > 0) {
-                console.log('[Settings] Loaded', data.length, 'clients from Supabase fallback');
-                setClients(data.map((row: any) => ({
-                  id: row.id,
-                  externalId: row.external_id,
-                  name: row.name,
-                  email: row.email,
-                  phone: row.phone,
-                  avatarUrl: row.avatar_url,
-                  historicalData: [],
-                  source: row.source || 'manual',
-                })));
-              }
-            } catch (sbErr) {
-              console.warn('[Settings] Supabase client fallback also failed:', sbErr);
-            }
-          }
-        }
+      } catch (e) {
+        if (!cancelled) console.warn('[Settings] ⚠️ Failed to load clients from Supabase:', e);
       }
 
       if (cancelled) return;
