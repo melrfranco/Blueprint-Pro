@@ -185,7 +185,7 @@ export default function StylistDashboard() {
   );
 
   const renderSettings = () => (
-    <AccountSettings user={user} onLogout={logout} subtitle="Team Member" />
+    <AccountSettings user={user} onLogout={logout} subtitle="Team Member" role="stylist" />
   );
 
   const renderActiveTab = () => {

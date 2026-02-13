@@ -1,25 +1,63 @@
 import React, { useState } from 'react';
 import type { User } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Toggle } from './Toggle';
 import { SaveToast, useSaveToast } from './SaveToast';
-import { SettingsIcon, UsersIcon, TrashIcon, DocumentTextIcon } from './icons';
+import ThemeToggle from './ThemeToggle';
+import { SettingsIcon, UsersIcon, TrashIcon, DocumentTextIcon, SunIcon } from './icons';
 
 
 interface AccountSettingsProps {
   user: User | null;
   onLogout: () => void;
   subtitle: string;
+  role?: 'admin' | 'stylist';
 }
 
-const AccountSettings: React.FC<AccountSettingsProps> = ({ user, onLogout, subtitle }) => {
+const AccountSettings: React.FC<AccountSettingsProps> = ({ user, onLogout, subtitle, role = 'admin' }) => {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const { pushAlertsEnabled, updatePushAlertsEnabled, cancellationPolicy, updateCancellationPolicy, saveAll } = useSettings();
+  const { pushAlertsEnabled, updatePushAlertsEnabled, cancellationPolicy, updateCancellationPolicy, textSize, updateTextSize, saveAll } = useSettings();
   const { toastVisible, showToast, hideToast } = useSaveToast();
+  const { updateUser } = useAuth();
+
+  const isStylist = role === 'stylist';
 
   const handlePasswordChange = () => {
     alert("Password change functionality is not yet connected to the backend.");
     setIsChangingPassword(false);
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    try {
+      const { supabase } = await import('../lib/supabase');
+      if (!supabase) return;
+
+      const ext = file.name.split('.').pop();
+      const path = `avatars/${user.id}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: true });
+
+      if (uploadError) {
+        console.warn('[Avatar] Upload failed:', uploadError.message);
+        return;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(path);
+
+      if (urlData?.publicUrl) {
+        updateUser({ avatarUrl: urlData.publicUrl });
+      }
+    } catch (err) {
+      console.warn('[Avatar] Storage upload failed:', err);
+    }
   };
 
   const isMockUser = !!user?.isMock;
@@ -30,7 +68,16 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ user, onLogout, subti
 
         <div className="space-y-6 animate-fade-in px-1">
             <div className="bg-card p-8 bp-container-list border border-border shadow-sm text-center">
-                <h2 className="bp-section-title leading-none mb-2">{user?.name}</h2>
+                <input type="file" accept="image/*" id="avatar-upload" className="hidden" onChange={handleAvatarChange} />
+                <label htmlFor="avatar-upload" className="cursor-pointer block">
+                  {user?.avatarUrl ? (
+                    <img src={user.avatarUrl} className="w-20 h-20 rounded-full mx-auto mb-3 border-4 border-primary shadow-lg object-cover hover:opacity-80 transition-opacity" />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl font-bold shadow-xl border-4 bg-primary text-primary-foreground border-primary hover:opacity-80 transition-opacity">{user?.name?.[0]}</div>
+                  )}
+                  <span className="bp-caption text-accent">Tap to change photo</span>
+                </label>
+                <h2 className="bp-section-title leading-none mb-2 mt-3">{user?.name}</h2>
                 <p className="bp-overline">{subtitle}</p>
             </div>
 
@@ -107,21 +154,53 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ user, onLogout, subti
                 </div>
             </div>
 
-            <div className="bg-card p-6 px-8 bp-container-tall border border-border shadow-sm space-y-4">
-                <h3 className="bp-overline mb-2 flex items-center">
-                    <DocumentTextIcon className="w-4 h-4 mr-2" />
-                    Cancellation Policy
-                </h3>
-                <p className="bp-caption text-muted-foreground">This will be shown to clients when confirming a booking.</p>
-                <textarea
-                    value={cancellationPolicy}
-                    onChange={(e) => updateCancellationPolicy(e.target.value)}
-                    onBlur={() => saveAll().then(showToast)}
-                    placeholder="e.g. Cancellations must be made at least 24 hours in advance. Late cancellations may be subject to a fee."
-                    rows={4}
-                    className="w-full p-4 bg-muted border-2 border bp-container-list font-medium text-sm outline-none resize-none text-foreground placeholder:text-muted-foreground/50"
-                />
+            {/* Appearance: Theme + Text Size */}
+            <div className="bg-card p-6 px-8 bp-container-tall border border-border shadow-sm space-y-6">
+                <div>
+                    <h3 className="bp-overline mb-4 flex items-center">
+                        <SunIcon className="w-4 h-4 mr-2" />
+                        Appearance
+                    </h3>
+                    <ThemeToggle />
+                </div>
+                <div className="pt-4 border-t border-border">
+                    <h3 className="bp-overline mb-4">Text Size</h3>
+                    <div className="flex p-1 rounded-full bg-muted w-fit">
+                      {(['S', 'M', 'L'] as const).map(sz => (
+                        <button
+                          data-ui="button"
+                          key={sz}
+                          onClick={() => {
+                            updateTextSize(sz);
+                            saveAll().then(showToast);
+                          }}
+                          className={`px-5 py-2 rounded-full text-xs font-bold transition-all ${sz === textSize ? 'bg-card shadow text-foreground' : 'text-muted-foreground'}`}
+                        >
+                          {sz}
+                        </button>
+                      ))}
+                    </div>
+                </div>
             </div>
+
+            {/* Cancellation Policy — admin only */}
+            {!isStylist && (
+              <div className="bg-card p-6 px-8 bp-container-tall border border-border shadow-sm space-y-4">
+                  <h3 className="bp-overline mb-2 flex items-center">
+                      <DocumentTextIcon className="w-4 h-4 mr-2" />
+                      Cancellation Policy
+                  </h3>
+                  <p className="bp-caption text-muted-foreground">This will be shown to clients when confirming a booking.</p>
+                  <textarea
+                      value={cancellationPolicy}
+                      onChange={(e) => updateCancellationPolicy(e.target.value)}
+                      onBlur={() => saveAll().then(showToast)}
+                      placeholder="e.g. Cancellations must be made at least 24 hours in advance. Late cancellations may be subject to a fee."
+                      rows={4}
+                      className="w-full p-4 bg-muted border-2 border bp-container-list font-medium text-sm outline-none resize-none text-foreground placeholder:text-muted-foreground/50"
+                  />
+              </div>
+            )}
 
             <button data-ui="button" onClick={onLogout} className="w-full py-5 border-b-8 border-black/20 uppercase tracking-widest text-lg shadow-xl active:scale-95 transition-all flex items-center justify-center space-x-3 bp-btn-primary">
                 <TrashIcon className="w-6 h-6" />

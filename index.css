@@ -81,7 +81,7 @@
   /* Dark Mode Theme - Blueprint inspired with WCAG AA compliant contrast */
   --background: #060D12;
   --foreground: #F5F9FC;
-  --card: #112D3E;
+  --card: #132F42;
   --card-foreground: #FFFFFF;
   --popover: #112D3E;
   --popover-foreground: #FFFFFF;
@@ -90,14 +90,14 @@
   --secondary: #5890A6;
   --secondary-foreground: #FFFFFF;
   --muted: #0E2230;
-  --muted-foreground: #C5E0EB;
+  --muted-foreground: #D6ECF5;
   --accent: #5890A6;
   --accent-foreground: #FFFFFF;
   --destructive: #FF6B6B;
   --destructive-foreground: #FFFFFF;
-  --border: rgba(88, 144, 166, 0.25);
-  --input: rgba(88, 144, 166, 0.3);
-  --input-background: #174A6F;
+  --border: rgba(88, 144, 166, 0.45);
+  --input: rgba(88, 144, 166, 0.5);
+  --input-background: #1A5580;
   --switch-background: #42708C;
   --bottomnav: #42708C;
   --ring: #5890A6;
@@ -135,7 +135,7 @@
   /* Blueprint-specific design tokens for dark mode */
   --grid-color: rgba(88, 144, 166, 0.2);
   --grid-line-weight: 1px;
-  --technical-border: rgba(142, 177, 191, 0.4);
+  --technical-border: rgba(142, 177, 191, 0.55);
   --blueprint-overlay: rgba(88, 144, 166, 0.1);
 }
 
@@ -148,7 +148,7 @@
 /* Dark mode: add visible outlines to card containers only */
 .dark .bp-container-list,
 .dark .bp-container-tall {
-  outline: 1.5px solid rgba(88, 144, 166, 0.5);
+  outline: 1.5px solid rgba(88, 144, 166, 0.65);
 }
 
 @theme inline {
