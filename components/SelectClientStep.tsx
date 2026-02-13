@@ -158,19 +158,19 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
       </div>
 
       <div className="flex-grow overflow-y-auto p-4 space-y-3 bg-background">
-        {isAdmin && (
-          <button
-            onClick={() => setIsCreating(true)}
-            className="w-full p-4 bp-container-compact font-bold mb-4 shadow-md flex items-center justify-center active:scale-95 transition-all bg-accent text-accent-foreground"
-          >
-            <PlusIcon className="w-5 h-5 mr-2" />
-            Create New Client
-          </button>
-        )}
+        <button
+          onClick={() => setIsCreating(true)}
+          className="w-full p-4 bp-container-compact font-bold mb-4 shadow-md flex items-center justify-center active:scale-95 transition-all bg-accent text-accent-foreground"
+        >
+          <PlusIcon className="w-5 h-5 mr-2" />
+          Create New Client
+        </button>
 
         {filteredClients.length === 0 ? (
           <div className="text-center py-10">
-            <p className="font-bold text-muted-foreground">No clients found.</p>
+            <p className="font-bold text-muted-foreground">
+              {searchTerm ? 'No clients match your search.' : 'No clients yet — create one above!'}
+            </p>
           </div>
         ) : (
           filteredClients.map(client => (
