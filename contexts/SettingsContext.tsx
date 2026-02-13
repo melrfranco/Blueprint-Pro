@@ -236,11 +236,13 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
       if (cancelled) return;
 
-      // ---- Clients (unified: sync from Square via server, then read from Supabase) ----
-      // /api/square/clients handles both admins and stylists:
-      //   - Admins: uses their own Square token
-      //   - Stylists: resolves admin's token via square_team_members
-      console.log('[Settings] Syncing clients from Square via server...');
+      // ---- Clients (fetched server-side to bypass RLS) ----
+      // /api/square/clients uses the service role key to:
+      //   1. Resolve the Square token (admin's own or via square_team_members for stylists)
+      //   2. Fetch fresh clients from Square API
+      //   3. Upsert to Supabase clients table
+      //   4. Return the client data directly (bypasses RLS)
+      console.log('[Settings] Fetching clients via /api/square/clients for user:', user.id);
       try {
         const syncRes = await fetch('/api/square/clients', {
           method: 'POST',
@@ -250,67 +252,27 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
           },
         });
         const syncJson = await syncRes.json();
-        if (syncRes.ok) {
-          console.log('[Settings] ✅ Square client sync:', syncJson.inserted, 'clients synced');
-        } else {
-          console.warn('[Settings] ⚠️ Square client sync failed:', syncJson.message);
-        }
-      } catch (e) {
-        console.warn('[Settings] ⚠️ Square client sync request failed:', e);
-      }
-
-      if (cancelled) return;
-
-      // Now load all synced clients from Supabase
-      // For stylists, also include admin's clients
-      const userRole = user.user_metadata?.role || 'admin';
-      let ownerIds = [user.id];
-
-      if (userRole === 'stylist') {
-        let adminUserId = user.user_metadata?.admin_user_id;
-        if (!adminUserId) {
-          const stylistSquareId = user.user_metadata?.stylist_id;
-          if (stylistSquareId) {
-            try {
-              const { data: tmRow } = await supabase
-                .from('square_team_members')
-                .select('supabase_user_id')
-                .eq('square_team_member_id', stylistSquareId)
-                .maybeSingle();
-              if (tmRow?.supabase_user_id) adminUserId = tmRow.supabase_user_id;
-            } catch (e) {
-              console.warn('[Settings] Failed to resolve admin_user_id:', e);
-            }
-          }
-        }
-        if (adminUserId && adminUserId !== user.id) ownerIds.push(adminUserId);
-      }
-
-      try {
-        const { data } = await supabase
-          .from('clients')
-          .select('*')
-          .in('supabase_user_id', ownerIds)
-          .order('created_at', { ascending: true });
+        console.log('[Settings] /api/square/clients response:', syncRes.status, JSON.stringify(syncJson).substring(0, 200));
 
         if (cancelled) return;
-        if (data && data.length > 0) {
-          console.log('[Settings] ✅ Loaded', data.length, 'clients from Supabase');
-          setClients(data.map((row: any) => ({
-            id: row.id,
+
+        if (syncRes.ok && syncJson.clients && syncJson.clients.length > 0) {
+          console.log('[Settings] ✅ Loaded', syncJson.clients.length, 'clients from server');
+          setClients(syncJson.clients.map((row: any) => ({
+            id: row.external_id || row.id,
             externalId: row.external_id,
-            name: row.name,
+            name: row.name || 'Client',
             email: row.email,
             phone: row.phone,
             avatarUrl: row.avatar_url,
             historicalData: [],
-            source: row.source || 'manual',
+            source: 'square',
           })));
         } else {
-          console.log('[Settings] No clients found in Supabase for:', ownerIds);
+          console.warn('[Settings] ⚠️ No clients from server:', syncJson.message || `inserted=${syncJson.inserted}`);
         }
       } catch (e) {
-        if (!cancelled) console.warn('[Settings] ⚠️ Failed to load clients from Supabase:', e);
+        if (!cancelled) console.warn('[Settings] ⚠️ /api/square/clients failed:', e);
       }
 
       if (cancelled) return;

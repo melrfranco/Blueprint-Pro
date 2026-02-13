@@ -166,7 +166,8 @@ export default async function handler(req: any, res: any) {
       }
     }
 
-    return res.status(200).json({ inserted: rows.length });
+    // Return the actual client data so the frontend can use it directly (bypasses RLS)
+    return res.status(200).json({ inserted: rows.length, clients: rows });
   } catch (e: any) {
     console.error('[CLIENT SYNC] Fatal error:', e);
     return res.status(500).json({ message: e.message });
