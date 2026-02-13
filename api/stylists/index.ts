@@ -52,6 +52,14 @@ async function handleGeneratePin(req: any, res: any) {
 
   const pin = String(Math.floor(1000 + Math.random() * 9000));
 
+  // Look up the merchant_settings UUID for this admin
+  const { data: msRow } = await supabaseAdmin
+    .from('merchant_settings')
+    .select('id')
+    .eq('supabase_user_id', authData.user.id)
+    .maybeSingle();
+  const merchantSettingsId = msRow?.id || null;
+
   const { data: existing } = await supabaseAdmin
     .from('square_team_members')
     .select('*')
@@ -65,9 +73,8 @@ async function handleGeneratePin(req: any, res: any) {
     const updateFields: any = { raw: updatedRaw, updated_at: new Date().toISOString() };
     if (name) updateFields.name = name;
     if (email) updateFields.email = email;
-    // Always ensure merchant_id is set
-    const adminMerchantId = authData.user.user_metadata?.merchant_id;
-    if (adminMerchantId && !existing.merchant_id) updateFields.merchant_id = adminMerchantId;
+    // Always ensure merchant_id is set (UUID from merchant_settings.id)
+    if (merchantSettingsId && !existing.merchant_id) updateFields.merchant_id = merchantSettingsId;
     const { error: updateError } = await supabaseAdmin
       .from('square_team_members')
       .update(updateFields)
@@ -78,7 +85,7 @@ async function handleGeneratePin(req: any, res: any) {
       .from('square_team_members')
       .insert({
         square_team_member_id: squareTeamMemberId,
-        merchant_id: authData.user.user_metadata?.merchant_id || null,
+        merchant_id: merchantSettingsId,
         name: name || null,
         email: email || null,
         raw: updatedRaw,
