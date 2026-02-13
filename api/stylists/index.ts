@@ -181,7 +181,7 @@ async function handleJoin(req: any, res: any) {
 
   const stylistName = match.name || 'Stylist';
   const stylistId = match.square_team_member_id;
-  const merchantId = match.merchant_id || null;
+  const adminUserId = match.supabase_user_id || null;
   const levelId = match.raw?.level_id || 'lvl_1';
 
   // If user already exists (e.g. from a previous invite), delete and recreate
@@ -199,7 +199,7 @@ async function handleJoin(req: any, res: any) {
       role: 'stylist',
       stylist_id: stylistId,
       stylist_name: stylistName,
-      merchant_id: merchantId,
+      admin_user_id: adminUserId,
       level_id: levelId,
       permissions: DEFAULT_PERMISSIONS,
     },

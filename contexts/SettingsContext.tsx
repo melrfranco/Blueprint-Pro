@@ -238,41 +238,34 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
       // ---- Clients ----
       const userRole = user.user_metadata?.role || 'admin';
-      let merchantId = user.user_metadata?.merchant_id;
-      const stylistSquareId = user.user_metadata?.stylist_id;
 
-      // Fallback: if stylist has no merchant_id in metadata, look it up from square_team_members
-      if (userRole === 'stylist' && !merchantId && stylistSquareId) {
-        try {
-          const { data: tmRow } = await supabase
-            .from('square_team_members')
-            .select('merchant_id')
-            .eq('square_team_member_id', stylistSquareId)
-            .maybeSingle();
-          if (tmRow?.merchant_id) {
-            merchantId = tmRow.merchant_id;
-            console.log('[Settings] Resolved merchant_id from square_team_members:', merchantId);
+      if (userRole === 'stylist') {
+        // Stylist: load clients from the admin who owns this salon
+        // admin_user_id is stored directly in stylist's user_metadata
+        let adminUserId = user.user_metadata?.admin_user_id;
+
+        // Fallback: look up admin's user ID from square_team_members
+        if (!adminUserId) {
+          const stylistSquareId = user.user_metadata?.stylist_id;
+          if (stylistSquareId) {
+            try {
+              const { data: tmRow } = await supabase
+                .from('square_team_members')
+                .select('supabase_user_id')
+                .eq('square_team_member_id', stylistSquareId)
+                .maybeSingle();
+              adminUserId = tmRow?.supabase_user_id;
+              console.log('[Settings] Resolved admin_user_id from square_team_members:', adminUserId);
+            } catch (e) {
+              console.warn('[Settings] Failed to resolve admin_user_id:', e);
+            }
           }
-        } catch (e) {
-          console.warn('[Settings] Failed to resolve merchant_id from square_team_members:', e);
         }
-      }
 
-      if (userRole === 'stylist' && merchantId) {
-        // Stylist: load clients from the admin who owns this merchant
-        console.log('[Settings] Stylist detected, loading clients for merchant:', merchantId);
+        console.log('[Settings] Stylist loading clients. admin_user_id:', adminUserId, 'own_id:', user.id);
+        const userIdsToQuery = adminUserId ? [adminUserId, user.id] : [user.id];
+
         try {
-          // Find the admin's user ID from merchant_settings
-          // merchant_id in square_team_members is the internal row ID of merchant_settings
-          const { data: ms } = await supabase
-            .from('merchant_settings')
-            .select('supabase_user_id')
-            .eq('id', merchantId)
-            .maybeSingle();
-
-          const adminUserId = ms?.supabase_user_id;
-          const userIdsToQuery = adminUserId ? [adminUserId, user.id] : [user.id];
-
           const { data } = await supabase
             .from('clients')
             .select('*')
@@ -281,7 +274,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
           if (cancelled) return;
           if (data && data.length > 0) {
-            console.log('[Settings] ✅ Loaded', data.length, 'clients for stylist (admin + own)');
+            console.log('[Settings] ✅ Loaded', data.length, 'clients for stylist');
             setClients(data.map((row: any) => ({
               id: row.id,
               externalId: row.external_id,
@@ -293,7 +286,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
               source: row.source || 'manual',
             })));
           } else {
-            console.log('[Settings] No clients found for stylist');
+            console.log('[Settings] No clients found for stylist (queried:', userIdsToQuery, ')');
           }
         } catch (e) {
           if (!cancelled) console.warn('[Settings] ⚠️ Failed to load clients for stylist:', e);
