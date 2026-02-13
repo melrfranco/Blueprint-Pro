@@ -217,21 +217,37 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       // The proxy resolves the Square token server-side from merchant_settings.
       // We don't need the token client-side. Just try and catch errors gracefully.
 
-      // ---- Services ----
-      console.log('[Settings] Fetching services from Square catalog...');
+      // ---- Services (fetched server-side to bypass RLS + resolve admin token for stylists) ----
+      console.log('[Settings] Fetching services via /api/square/services for user:', user.id);
       try {
-        const squareServices = await SquareIntegrationService.fetchCatalog();
+        const svcRes = await fetch('/api/square/services', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-Id': user.id,
+          },
+        });
+        const svcJson = await svcRes.json();
+        console.log('[Settings] /api/square/services response:', svcRes.status, 'count:', svcJson.services?.length ?? 0);
+
         if (cancelled) return;
-        if (squareServices.length > 0) {
-          console.log('[Settings] ✅ Loaded', squareServices.length, 'services from Square');
-          setServices(squareServices);
+
+        if (svcRes.ok && svcJson.services && svcJson.services.length > 0) {
+          console.log('[Settings] ✅ Loaded', svcJson.services.length, 'services from server');
+          const mapped: Service[] = svcJson.services.map((row: any) => ({
+            id: row.square_variation_id || row.square_item_id,
+            name: row.name || 'Unnamed Service',
+            variationName: row.variation_name,
+            price: row.price_cents != null ? row.price_cents / 100 : 0,
+            duration: row.duration_minutes || 60,
+            category: row.category || '',
+          }));
+          setServices(mapped);
         } else {
-          console.log('[Settings] Square returned 0 services, keeping defaults');
+          console.warn('[Settings] ⚠️ No services from server:', svcJson.message || `inserted=${svcJson.inserted}`);
         }
       } catch (e) {
-        if (!cancelled) {
-          console.warn('[Settings] ⚠️ Failed to fetch Square catalog:', e);
-        }
+        if (!cancelled) console.warn('[Settings] ⚠️ /api/square/services failed:', e);
       }
 
       if (cancelled) return;

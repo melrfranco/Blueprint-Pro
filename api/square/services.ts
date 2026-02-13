@@ -47,20 +47,53 @@ export default async function handler(req: any, res: any) {
       return res.status(401).json({ message: 'Missing auth. Provide X-User-Id or Bearer token.' });
     }
 
-    // If no token in body, get from merchant_settings
+    // Resolve Square access token and admin user ID
+    let adminUserId = supabaseUserId;
+
     if (!squareAccessToken) {
+      // 1. Try caller's own merchant_settings (admin path)
       const { data: ms } = await supabaseAdmin
         .from('merchant_settings')
         .select('square_access_token')
         .eq('supabase_user_id', supabaseUserId)
         .maybeSingle();
 
-      squareAccessToken = ms?.square_access_token;
-      console.log('[SERVICES SYNC] Token from merchant_settings:', squareAccessToken ? '✓' : '✗');
-    }
+      if (ms?.square_access_token) {
+        squareAccessToken = ms.square_access_token;
+        console.log('[SERVICES SYNC] Token from own merchant_settings ✓');
+      } else {
+        // 2. Caller is a stylist — resolve admin's token
+        const { data: userData } = await (supabaseAdmin.auth as any).admin.getUserById(supabaseUserId);
+        const stylistSquareId = userData?.user?.user_metadata?.stylist_id;
+        let resolvedAdminId = userData?.user?.user_metadata?.admin_user_id;
 
-    if (!squareAccessToken) {
-      return res.status(400).json({ message: 'Square access token not available.' });
+        if (!resolvedAdminId && stylistSquareId) {
+          const { data: tmRow } = await supabaseAdmin
+            .from('square_team_members')
+            .select('supabase_user_id')
+            .eq('square_team_member_id', stylistSquareId)
+            .maybeSingle();
+          resolvedAdminId = tmRow?.supabase_user_id;
+        }
+
+        if (resolvedAdminId) {
+          adminUserId = resolvedAdminId;
+          const { data: adminMs } = await supabaseAdmin
+            .from('merchant_settings')
+            .select('square_access_token')
+            .eq('supabase_user_id', resolvedAdminId)
+            .maybeSingle();
+
+          if (adminMs?.square_access_token) {
+            squareAccessToken = adminMs.square_access_token;
+            console.log('[SERVICES SYNC] Token from admin merchant_settings ✓ (admin:', resolvedAdminId, ')');
+          }
+        }
+      }
+
+      if (!squareAccessToken) {
+        return res.status(401).json({ message: 'Could not resolve Square access token for this user or their admin.' });
+      }
     }
 
     // Fetch catalog from Square (items + variations)
@@ -118,7 +151,7 @@ export default async function handler(req: any, res: any) {
         const priceMoney = vData.price_money;
 
         rows.push({
-          supabase_user_id: supabaseUserId,
+          supabase_user_id: adminUserId,
           square_item_id: item.id,
           square_variation_id: v.id,
           name: itemData.name || 'Unnamed Service',
@@ -146,7 +179,7 @@ export default async function handler(req: any, res: any) {
     }
 
     console.log('[SERVICES SYNC] Done. Synced', rows.length, 'services');
-    return res.status(200).json({ inserted: rows.length });
+    return res.status(200).json({ inserted: rows.length, services: rows });
   } catch (e: any) {
     console.error('[SERVICES SYNC] Fatal error:', e);
     return res.status(500).json({ message: e.message });
