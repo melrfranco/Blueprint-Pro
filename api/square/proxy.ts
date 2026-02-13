@@ -52,6 +52,7 @@ export default async function handler(req: any, res: any) {
       }
 
       if (userId) {
+        // 1. Try caller's own merchant_settings (admin path)
         const { data: ms } = await supabaseAdmin
           .from('merchant_settings')
           .select('square_access_token')
@@ -61,7 +62,36 @@ export default async function handler(req: any, res: any) {
         console.log(`[SQUARE PROXY] Supabase lookup for user ${userId}:`, { found: !!ms, hasToken: !!ms?.square_access_token });
         if (ms?.square_access_token) {
           squareAccessToken = ms.square_access_token;
-          console.log(`[SQUARE PROXY] Using token from merchant_settings`);
+          console.log(`[SQUARE PROXY] Using token from own merchant_settings`);
+        } else {
+          // 2. Caller might be a stylist — resolve admin's token via metadata/square_team_members
+          console.log(`[SQUARE PROXY] No own merchant_settings, checking stylist→admin path`);
+          const { data: userData } = await (supabaseAdmin.auth as any).admin.getUserById(userId);
+          const stylistSquareId = userData?.user?.user_metadata?.stylist_id;
+          let resolvedAdminId = userData?.user?.user_metadata?.admin_user_id;
+
+          if (!resolvedAdminId && stylistSquareId) {
+            const { data: tmRow } = await supabaseAdmin
+              .from('square_team_members')
+              .select('supabase_user_id')
+              .eq('square_team_member_id', stylistSquareId)
+              .maybeSingle();
+            resolvedAdminId = tmRow?.supabase_user_id;
+            console.log(`[SQUARE PROXY] Resolved admin from square_team_members:`, resolvedAdminId);
+          }
+
+          if (resolvedAdminId) {
+            const { data: adminMs } = await supabaseAdmin
+              .from('merchant_settings')
+              .select('square_access_token')
+              .eq('supabase_user_id', resolvedAdminId)
+              .maybeSingle();
+
+            if (adminMs?.square_access_token) {
+              squareAccessToken = adminMs.square_access_token;
+              console.log(`[SQUARE PROXY] Using token from admin merchant_settings (admin: ${resolvedAdminId})`);
+            }
+          }
         }
       } else {
         console.log(`[SQUARE PROXY] No user ID available from headers`);
