@@ -79,28 +79,28 @@
 
 .dark {
   /* Dark Mode Theme - Blueprint inspired with WCAG AA compliant contrast */
-  --background: #060D12;
+  --background: #050A0F;
   --foreground: #F5F9FC;
-  --card: #132F42;
+  --card: #1A3F55;
   --card-foreground: #FFFFFF;
-  --popover: #112D3E;
+  --popover: #1A3F55;
   --popover-foreground: #FFFFFF;
-  --primary: #5890A6;
+  --primary: #6AA4BC;
   --primary-foreground: #FFFFFF;
-  --secondary: #5890A6;
+  --secondary: #6AA4BC;
   --secondary-foreground: #FFFFFF;
-  --muted: #0E2230;
-  --muted-foreground: #D6ECF5;
-  --accent: #5890A6;
+  --muted: #112838;
+  --muted-foreground: #E0F0F8;
+  --accent: #6AA4BC;
   --accent-foreground: #FFFFFF;
   --destructive: #FF6B6B;
   --destructive-foreground: #FFFFFF;
-  --border: rgba(88, 144, 166, 0.45);
-  --input: rgba(88, 144, 166, 0.5);
-  --input-background: #1A5580;
-  --switch-background: #42708C;
-  --bottomnav: #42708C;
-  --ring: #5890A6;
+  --border: rgba(106, 164, 188, 0.6);
+  --input: rgba(106, 164, 188, 0.6);
+  --input-background: #1E4E68;
+  --switch-background: #4A7E98;
+  --bottomnav: #1A3F55;
+  --ring: #6AA4BC;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
   
@@ -123,20 +123,20 @@
   --svc-color-9: #4A8DA8;
   --svc-color-10: #E0F0F5;
   
-  --sidebar: #174A6F;
+  --sidebar: #1A3F55;
   --sidebar-foreground: #FFFFFF;
-  --sidebar-primary: #5890A6;
+  --sidebar-primary: #6AA4BC;
   --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1A3A52;
+  --sidebar-accent: #1E4A62;
   --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: rgba(88, 144, 166, 0.3);
-  --sidebar-ring: #5890A6;
+  --sidebar-border: rgba(106, 164, 188, 0.5);
+  --sidebar-ring: #6AA4BC;
   
   /* Blueprint-specific design tokens for dark mode */
-  --grid-color: rgba(88, 144, 166, 0.2);
+  --grid-color: rgba(106, 164, 188, 0.15);
   --grid-line-weight: 1px;
-  --technical-border: rgba(142, 177, 191, 0.55);
-  --blueprint-overlay: rgba(88, 144, 166, 0.1);
+  --technical-border: rgba(160, 200, 215, 0.6);
+  --blueprint-overlay: rgba(106, 164, 188, 0.08);
 }
 
 /* Card containers: subtle glass effect */
@@ -148,7 +148,7 @@
 /* Dark mode: add visible outlines to card containers only */
 .dark .bp-container-list,
 .dark .bp-container-tall {
-  outline: 1.5px solid rgba(88, 144, 166, 0.65);
+  outline: 2px solid rgba(106, 164, 188, 0.5);
 }
 
 @theme inline {
