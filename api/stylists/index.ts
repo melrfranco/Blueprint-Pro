@@ -65,6 +65,9 @@ async function handleGeneratePin(req: any, res: any) {
     const updateFields: any = { raw: updatedRaw, updated_at: new Date().toISOString() };
     if (name) updateFields.name = name;
     if (email) updateFields.email = email;
+    // Always ensure merchant_id is set
+    const adminMerchantId = authData.user.user_metadata?.merchant_id;
+    if (adminMerchantId && !existing.merchant_id) updateFields.merchant_id = adminMerchantId;
     const { error: updateError } = await supabaseAdmin
       .from('square_team_members')
       .update(updateFields)

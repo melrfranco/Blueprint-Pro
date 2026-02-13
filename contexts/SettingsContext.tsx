@@ -263,10 +263,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         console.log('[Settings] Stylist detected, loading clients for merchant:', merchantId);
         try {
           // Find the admin's user ID from merchant_settings
+          // merchant_id in square_team_members is the internal row ID of merchant_settings
           const { data: ms } = await supabase
             .from('merchant_settings')
             .select('supabase_user_id')
-            .eq('square_merchant_id', merchantId)
+            .eq('id', merchantId)
             .maybeSingle();
 
           const adminUserId = ms?.supabase_user_id;
