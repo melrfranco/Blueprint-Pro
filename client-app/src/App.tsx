@@ -27,7 +27,7 @@ const WrongAppNotice: React.FC<{ stylistAppUrl: string | null }> = ({ stylistApp
           Go to stylist app
         </a>
       ) : (
-        <p className="text-sm text-gray-500 font-semibold">
+        se<p className="text-sm text-gray-500 font-semibold">
           Ask your admin for the stylist app link.
         </p>
       )}

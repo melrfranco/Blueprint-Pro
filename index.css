@@ -26,7 +26,7 @@
   --secondary-foreground: #FFFFFF;
   --muted: #DDE6ED;
   --muted-foreground: #2B5470;
-  --accent: #3D7A94;
+  --accent: rgba(11, 53, 89, 0.7);
   --accent-foreground: #FFFFFF;
   --destructive: #C73E3A;
   --destructive-foreground: #FFFFFF;
@@ -81,26 +81,26 @@
   /* Dark Mode Theme - Blueprint inspired with WCAG AA compliant contrast */
   --background: #050A0F;
   --foreground: #F5F9FC;
-  --card: #1A3F55;
-  --card-foreground: #FFFFFF;
-  --popover: #1A3F55;
-  --popover-foreground: #FFFFFF;
-  --primary: #6AA4BC;
-  --primary-foreground: #FFFFFF;
-  --secondary: #6AA4BC;
-  --secondary-foreground: #FFFFFF;
-  --muted: #112838;
-  --muted-foreground: #E0F0F8;
-  --accent: #6AA4BC;
-  --accent-foreground: #FFFFFF;
+  --card: #b7dbea;
+  --card-foreground: #0B1A2A;
+  --popover: #b7dbea;
+  --popover-foreground: #0B1A2A;
+  --primary: #0B3559;
+  --primary-foreground: #F5F9FC;
+  --secondary: #0B3559;
+  --secondary-foreground: #F5F9FC;
+  --muted: #8FC4DA;
+  --muted-foreground: #0B2540;
+  --accent: #0B3559;
+  --accent-foreground: #F5F9FC;
   --destructive: #FF6B6B;
   --destructive-foreground: #FFFFFF;
-  --border: rgba(106, 164, 188, 0.6);
-  --input: rgba(106, 164, 188, 0.6);
-  --input-background: #1E4E68;
-  --switch-background: #4A7E98;
-  --bottomnav: #1A3F55;
-  --ring: #6AA4BC;
+  --border: rgba(26, 63, 85, 0.6);
+  --input: rgba(26, 63, 85, 0.6);
+  --input-background: #a0d0e2;
+  --switch-background: #1E4E68;
+  --bottomnav: #0B1A2A;
+  --ring: #0B3559;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
   
@@ -123,14 +123,14 @@
   --svc-color-9: #4A8DA8;
   --svc-color-10: #E0F0F5;
   
-  --sidebar: #1A3F55;
-  --sidebar-foreground: #FFFFFF;
-  --sidebar-primary: #6AA4BC;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1E4A62;
-  --sidebar-accent-foreground: #FFFFFF;
-  --sidebar-border: rgba(106, 164, 188, 0.5);
-  --sidebar-ring: #6AA4BC;
+  --sidebar: #b7dbea;
+  --sidebar-foreground: #050A0F;
+  --sidebar-primary: #1A3F55;
+  --sidebar-primary-foreground: #F5F9FC;
+  --sidebar-accent: #a0d0e2;
+  --sidebar-accent-foreground: #050A0F;
+  --sidebar-border: rgba(26, 63, 85, 0.5);
+  --sidebar-ring: #1A3F55;
   
   /* Blueprint-specific design tokens for dark mode */
   --grid-color: rgba(106, 164, 188, 0.15);
@@ -149,6 +149,18 @@
 .dark .bp-container-list,
 .dark .bp-container-tall {
   outline: 2px solid rgba(106, 164, 188, 0.5);
+}
+
+/* Dark mode: text on light card/muted surfaces must be dark for contrast.
+   Overrides --foreground locally so text-foreground resolves to dark navy
+   inside bg-card and bg-muted elements. Does NOT affect bg-primary/bg-accent. */
+.dark .bg-card,
+.dark .bg-muted {
+  --foreground: var(--card-foreground);
+  --color-foreground: var(--card-foreground);
+  --muted-foreground: #0B2540;
+  --color-muted-foreground: #0B2540;
+  color: var(--card-foreground);
 }
 
 @theme inline {

@@ -145,8 +145,51 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
     };
 
+    // Helper: fall back to mock admin when no real session
+    const fallbackToMockOrBypass = () => {
+      const savedMockUser = localStorage.getItem('mock_admin_user');
+      if (savedMockUser) {
+        try {
+          const user = JSON.parse(savedMockUser);
+          if (active) {
+            setUser(user);
+            setAuthInitialized(true);
+          }
+          return;
+        } catch (e) {
+          console.error('Failed to restore mock user session:', e);
+        }
+      }
+
+      if ((import.meta as any).env?.VITE_BYPASS_LOGIN === '1') {
+        console.log('[AuthContext] VITE_BYPASS_LOGIN=1, auto-logging in as mock admin');
+        const mockAdmin: User = {
+          id: 'admin',
+          name: 'Admin',
+          role: 'admin' as UserRole,
+          isMock: true,
+        };
+        localStorage.setItem('mock_admin_user', JSON.stringify(mockAdmin));
+        if (active) {
+          setUser(mockAdmin);
+          setAuthInitialized(true);
+        }
+        return;
+      }
+
+      if (active) setAuthInitialized(true);
+    };
+
+    // BYPASS: Skip Supabase entirely when VITE_BYPASS_LOGIN=1
+    if ((import.meta as any).env?.VITE_BYPASS_LOGIN === '1') {
+      console.log('[AuthContext] VITE_BYPASS_LOGIN=1 — skipping Supabase auth entirely');
+      fallbackToMockOrBypass();
+      return;
+    }
+
     if (!supabase) {
-      setAuthInitialized(true);
+      console.log('[AuthContext] No Supabase client');
+      fallbackToMockOrBypass();
       return;
     }
 
@@ -154,7 +197,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     supabase.auth.getSession().then(({ data, error }) => {
       if (error) {
         console.error('[AuthContext] Error getting session:', error);
-        setAuthInitialized(true);
+        fallbackToMockOrBypass();
         return;
       }
 
@@ -166,28 +209,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           hydrateFromSession(resolvedSession);
         });
       } else {
-        console.log('[AuthContext] No session found, checking for mock user');
-        // No real session - check for mock admin session in localStorage
-        const savedMockUser = localStorage.getItem('mock_admin_user');
-        if (savedMockUser) {
-          try {
-            const user = JSON.parse(savedMockUser);
-            if (active) {
-              setUser(user);
-              setAuthInitialized(true);
-            }
-          } catch (e) {
-            console.error('Failed to restore mock user session:', e);
-            setAuthInitialized(true);
-          }
-        } else {
-          console.log('[AuthContext] No session or mock user found');
-          setAuthInitialized(true);
-        }
+        console.log('[AuthContext] No session found');
+        fallbackToMockOrBypass();
       }
     }).catch(err => {
       console.error('[AuthContext] Fatal error during session hydration:', err);
-      setAuthInitialized(true);
+      fallbackToMockOrBypass();
     });
 
     // Listen for any future auth changes

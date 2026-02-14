@@ -135,7 +135,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
   const renderStylists = () => (
     <div className="space-y-4 pb-8">
       {stylists.length === 0 ? (
-        <div className="p-4 text-center text-sm font-medium bp-container-list border-4 border-dashed text-foreground bg-muted border">
+        <div className="p-4 text-center text-sm font-medium bp-container-compact border-2 border-dashed text-foreground bg-muted border">
           No stylists on your team yet. Invite one to get started.
         </div>
       ) : (
@@ -297,14 +297,16 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
     </div>
   );
 
+  const assignedLevels = levels.filter(level => stylists.some(s => s.levelId === level.id));
+
   const renderLevels = () => (
     <div className="space-y-4 pb-8">
-      {levels.length === 0 ? (
-        <div className="p-4 text-center text-sm font-medium bp-container-list border-4 border-dashed text-foreground bg-muted border">
-          No access levels yet. Create one to set up team permissions.
+      {assignedLevels.length === 0 ? (
+        <div className="p-4 text-center text-sm font-medium bp-container-compact border-2 border-dashed text-foreground bg-muted border">
+          No levels in use. Assign a level to a team member to see it here.
         </div>
       ) : (
-        levels.map((level) => (
+        assignedLevels.map((level) => (
           <div key={level.id} className="bp-container-tall border-4 border bp-card-padding-md bg-card space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
               <div>

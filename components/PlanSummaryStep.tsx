@@ -488,15 +488,15 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                     <p className="text-xl bp-stat-value text-primary-foreground">{qualifyingTier?.name || 'Standard'}</p>
                 </div>
             </div>
-            <div className="bg-card p-5 px-8 bp-container-list border shadow-sm">
+            <div className="bg-card p-5 px-8 bp-container-compact border shadow-sm">
                 <p className="bp-overline mb-1">Avg. Visit</p>
                 <p className="text-3xl bp-stat-value">{formatCurrency(plan.averageAppointmentCost)}</p>
             </div>
-            <div className="bg-card p-5 px-8 bp-container-list border shadow-sm">
+            <div className="bg-card p-5 px-8 bp-container-compact border shadow-sm">
                 <p className="bp-overline mb-1">Avg. Monthly</p>
                 <p className="text-3xl bp-stat-value">{formatCurrency(plan.averageMonthlySpend)}</p>
             </div>
-            <div className="col-span-2 bg-accent p-5 bp-container-list shadow-sm flex justify-between items-center">
+            <div className="col-span-2 bg-accent p-5 bp-container-compact shadow-sm flex justify-between items-center">
                 <span className="bp-overline text-accent-foreground">Planned Visits</span>
                 <span className="text-3xl bp-stat-value text-accent-foreground">{plan.totalYearlyAppointments}</span>
             </div>
