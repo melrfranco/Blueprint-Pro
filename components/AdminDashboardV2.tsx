@@ -154,18 +154,19 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
     }
 
     if (activeSettingsView === 'appearance') {
+      const MAX_AVATAR_SIZE = 500 * 1024; // 500 KB
+
       const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file || !user) return;
 
-        // Optimistic preview
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          updateUser({ avatarUrl: reader.result as string });
-        };
-        reader.readAsDataURL(file);
+        if (file.size > MAX_AVATAR_SIZE) {
+          alert('Image is too large. Please choose an image under 500 KB.');
+          e.target.value = '';
+          return;
+        }
 
-        // Upload to Supabase Storage
+        // Upload to Supabase Storage (no base64 optimistic preview — it bloats the JWT)
         try {
           const { supabase } = await import('../lib/supabase');
           if (!supabase) return;

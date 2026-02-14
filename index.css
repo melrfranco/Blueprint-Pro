@@ -558,7 +558,7 @@ html {
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: var(--muted-foreground);
+    color: white;
   }
 
   /* Typography - Raleway for body */

@@ -67,8 +67,14 @@ export default function SquareCallback() {
         throw new Error('Supabase client not initialized');
       }
 
-      // Clear any mock user session before setting real session
+      // Clear any stale auth tokens and mock sessions before signing in
+      // This prevents QuotaExceededError if a previous session had an oversized JWT
       localStorage.removeItem('mock_admin_user');
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('sb-') && key.endsWith('-auth-token')) {
+          localStorage.removeItem(key);
+        }
+      });
 
       console.log('[OAuth Callback] Signing in with Supabase...');
 
