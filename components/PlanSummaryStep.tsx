@@ -670,7 +670,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             {!isClient && membershipConfig.enabled && (
                 <button
                     onClick={() => setMembershipModalOpen(true)}
-                    className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all bg-accent text-accent-foreground`}
+                    className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all bg-sky-200 text-black`}
                 >
                     {isMemberOffered || isMemberActive ? <CheckCircleIcon className="w-6 h-6" /> : <PlusIcon className="w-6 h-6" />}
                     <span>{isMemberOffered ? 'INVITATION SENT' : isMemberActive ? 'MEMBERSHIP ACTIVE' : 'SEND MEMBERSHIP INVITATION'}</span>
