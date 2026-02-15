@@ -68,7 +68,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
       <h1 className="bp-page-title mb-1 text-black">Dashboard</h1>
       {user?.name && <p className="bp-subtitle mb-8 pl-4 text-black">Welcome back, {user.name.split(' ')[0]}</p>}
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="col-span-2 p-8 bg-primary text-primary-foreground bp-container-list border-4 border-primary shadow-lg hover:shadow-xl transition-shadow">
+        <div className="col-span-2 p-8 bg-card text-foreground border border-border
           <div className="flex flex-col items-center justify-center text-center h-full py-4">
             <p className="bp-section-title mb-3 text-primary-foreground">Roadmap Pipeline</p>
             <p className="text-5xl bp-stat-value text-primary-foreground">${totalPipeline.toLocaleString()}</p>
