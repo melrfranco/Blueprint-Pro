@@ -1,185 +1,766 @@
 @import "tailwindcss";
-
 @custom-variant dark (&:is(.dark *));
-
 @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Raleway:wght@100..900&display=swap');
 
 /* =========================================================
-   FOUNDATION
+   FOUNDATION PALETTE (RAW — NEVER USED DIRECTLY IN UI)
 ========================================================= */
 
 :root {
   --font-size: 16px;
-
-  /* Blueprint Core */
-  --blueprint-900: #0B3559;
-  --blueprint-700: #174A6F;
-  --blueprint-600: #42708C;
-  --blueprint-500: #5890A6;
-  --blueprint-300: #8EB1BF;
-  --blueprint-100: #DDE6ED;
-  --blueprint-50: #F5F7F9;
-
-  --white: #FFFFFF;
-  --black: #050A0F;
-
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
   --radius: 0.25rem;
+
+  /* Ink Black */
+  --color-ink-black-50: #edf1f7;
+  --color-ink-black-100: #dbe4f0;
+  --color-ink-black-200: #b8c9e0;
+  --color-ink-black-300: #94add1;
+  --color-ink-black-400: #7092c2;
+  --color-ink-black-500: #4d77b3;
+  --color-ink-black-600: #3d5f8f;
+  --color-ink-black-700: #2e476b;
+  --color-ink-black-800: #1f3047;
+  --color-ink-black-900: #0f1824;
+  --color-ink-black-950: #0b1119;
+
+  /* Deep Space Blue */
+  --color-deep-space-blue-400: #7396bf;
+  --color-deep-space-blue-500: #507caf;
+  --color-deep-space-blue-700: #304b69;
+
+  /* Yale Blue */
+  --color-yale-blue-400: #7798bb;
+  --color-yale-blue-600: #446588;
+
+  /* Blue Slate */
+  --color-blue-slate-50: #eff2f6;
+  --color-blue-slate-100: #dfe5ec;
+
+  /* Blueprint utility tokens */
+  --grid-color: rgba(15, 24, 36, 0.08);
+  --grid-line-weight: 1px;
+  --technical-border: rgba(15, 24, 36, 0.25);
+  --blueprint-overlay: rgba(80, 124, 175, 0.05);
 }
 
 /* =========================================================
-   LIGHT MODE (AA SAFE)
+   ACCESSIBLE TEXT SCALE
 ========================================================= */
 
 :root {
+  --text-strong: var(--color-ink-black-900);
+  --text-default: var(--color-ink-black-800);
+  --text-muted: var(--color-ink-black-600);
+}
 
-  /* SURFACE */
-  --background: #B5D0DA;
-  --card: #F8FAFB;
-  --popover: #F8FAFB;
-  --muted: var(--blueprint-100);
-
-  /* CONTENT */
-  --foreground: var(--blueprint-900);
-  --card-foreground: var(--blueprint-900);
-  --popover-foreground: var(--blueprint-900);
-  --muted-foreground: var(--blueprint-700);
-
-  /* ACTION */
-  --primary: var(--blueprint-900);
-  --primary-foreground: var(--white);
-
-  --secondary: #2B5470;
-  --secondary-foreground: var(--white);
-
-  --accent: var(--blueprint-500);
-  --accent-foreground: var(--white);
-
-  /* STATE */
-  --destructive: #C73E3A;
-  --destructive-foreground: var(--white);
-
-  /* BORDER */
-  --border: rgba(11, 53, 89, 0.22);
-  --input: rgba(11, 53, 89, 0.22);
-  --input-background: var(--white);
-
-  --switch-background: var(--blueprint-300);
-  --bottomnav: var(--blueprint-600);
-
-  --ring: var(--blueprint-500);
-
-  /* Charts */
-  --chart-1: var(--blueprint-900);
-  --chart-2: var(--blueprint-600);
-  --chart-3: var(--blueprint-500);
-  --chart-4: var(--blueprint-300);
-  --chart-5: #6FA3B8;
-
-  /* Service chart colors */
-  --svc-color-1: var(--blueprint-900);
-  --svc-color-2: var(--blueprint-500);
-  --svc-color-3: var(--blueprint-300);
-  --svc-color-4: var(--blueprint-600);
-  --svc-color-5: #3D7A94;
-  --svc-color-6: var(--blueprint-700);
-  --svc-color-7: #7BA3B3;
-  --svc-color-8: #A8C8D4;
-  --svc-color-9: #2C5F7F;
-  --svc-color-10: #B5D4DE;
-
-  /* Sidebar */
-  --sidebar: var(--white);
-  --sidebar-foreground: var(--blueprint-900);
-  --sidebar-primary: var(--blueprint-900);
-  --sidebar-primary-foreground: var(--white);
-  --sidebar-accent: var(--blueprint-100);
-  --sidebar-accent-foreground: var(--blueprint-900);
-  --sidebar-border: rgba(11, 53, 89, 0.22);
-  --sidebar-ring: var(--blueprint-500);
-
-  /* Blueprint utilities */
-  --grid-color: rgba(11, 53, 89, 0.12);
-  --grid-line-weight: 1px;
-  --technical-border: rgba(11, 53, 89, 0.25);
-  --blueprint-overlay: rgba(88, 144, 166, 0.05);
+.dark {
+  --text-strong: var(--color-ink-black-50);
+  --text-default: var(--color-ink-black-100);
+  --text-muted: var(--color-ink-black-300);
 }
 
 /* =========================================================
-   DARK MODE (STRUCTURALLY CORRECT)
+   ACCESSIBLE SURFACE SCALE
 ========================================================= */
 
-.dark {
-
-  /* SURFACE */
-  --background: var(--black);
-  --card: #0F1F29;
-  --popover: #0F1F29;
-  --muted: #132733;
-
-  /* CONTENT */
-  --foreground: #F5F9FC;
-  --card-foreground: #F5F9FC;
-  --popover-foreground: #F5F9FC;
-  --muted-foreground: #C5E0EB;
-
-  /* ACTION */
-  --primary: var(--blueprint-300);
-  --primary-foreground: var(--black);
-
-  --secondary: var(--blueprint-500);
-  --secondary-foreground: var(--black);
-
-  --accent: var(--blueprint-500);
-  --accent-foreground: var(--black);
-
-  /* STATE */
-  --destructive: #FF6B6B;
-  --destructive-foreground: var(--black);
-
-  /* BORDER */
-  --border: rgba(142, 177, 191, 0.28);
-  --input: rgba(142, 177, 191, 0.28);
-  --input-background: #0F1F29;
-
-  --switch-background: var(--blueprint-500);
-  --bottomnav: #0B1A2A;
-
-  --ring: var(--blueprint-300);
-
-  /* Charts */
-  --chart-1: var(--blueprint-300);
-  --chart-2: var(--blueprint-500);
-  --chart-3: var(--blueprint-600);
-  --chart-4: var(--blueprint-900);
-  --chart-5: #6FA3B8;
-
-  /* Service chart colors */
-  --svc-color-1: var(--blueprint-300);
-  --svc-color-2: #A8D4E6;
-  --svc-color-3: #C8E2EC;
-  --svc-color-4: #6FA3B8;
-  --svc-color-5: #7DBDD4;
-  --svc-color-6: #5A9AB5;
-  --svc-color-7: #B5D4DE;
-  --svc-color-8: #D4E8F0;
-  --svc-color-9: #4A8DA8;
-  --svc-color-10: #E0F0F5;
-
-  /* Sidebar */
-  --sidebar: #0F1F29;
-  --sidebar-foreground: #F5F9FC;
-  --sidebar-primary: var(--blueprint-300);
-  --sidebar-primary-foreground: var(--black);
-  --sidebar-accent: #132733;
-  --sidebar-accent-foreground: #F5F9FC;
-  --sidebar-border: rgba(142, 177, 191, 0.28);
-  --sidebar-ring: var(--blueprint-300);
-
-  /* Blueprint utilities */
-  --grid-color: rgba(106, 164, 188, 0.15);
-  --technical-border: rgba(160, 200, 215, 0.6);
-  --blueprint-overlay: rgba(106, 164, 188, 0.08);
+:root {
+  --surface-base: var(--color-blue-slate-100);
+  --surface-subtle: var(--color-blue-slate-50);
+  --surface-elevated: #ffffff;
 }
 
-/* REMOVE the old dark .bg-card override.
-   It is no longer needed and was structurally unsafe. */
+.dark {
+  --surface-base: var(--color-ink-black-950);
+  --surface-subtle: var(--color-ink-black-900);
+  --surface-elevated: var(--color-ink-black-800);
+
+  --grid-color: rgba(148, 173, 209, 0.12);
+  --technical-border: rgba(148, 173, 209, 0.3);
+  --blueprint-overlay: rgba(80, 124, 175, 0.08);
+}
+
+/* =========================================================
+   SEMANTIC TOKENS
+========================================================= */
+
+:root {
+  --background: var(--surface-base);
+  --foreground: var(--text-default);
+
+  --card: var(--surface-subtle);
+  --card-foreground: var(--text-default);
+
+  --popover: var(--surface-elevated);
+  --popover-foreground: var(--text-default);
+
+  --muted: var(--surface-subtle);
+  --muted-foreground: var(--text-muted);
+
+  --primary: var(--color-deep-space-blue-700);
+  --primary-foreground: #ffffff;
+
+  --secondary: var(--color-yale-blue-600);
+  --secondary-foreground: #ffffff;
+
+  --accent: var(--color-deep-space-blue-500);
+  --accent-foreground: #ffffff;
+
+  --destructive: #C73E3A;
+  --destructive-foreground: #ffffff;
+
+  --border: rgba(15, 24, 36, 0.15);
+  --input: rgba(15, 24, 36, 0.15);
+  --input-background: #ffffff;
+
+  --switch-background: var(--surface-subtle);
+  --bottomnav: var(--primary);
+
+  --ring: var(--color-deep-space-blue-500);
+}
+
+.dark {
+  --primary: var(--color-deep-space-blue-400);
+  --primary-foreground: var(--color-ink-black-950);
+
+  --secondary: var(--color-yale-blue-400);
+  --secondary-foreground: var(--color-ink-black-950);
+
+  --accent: var(--color-deep-space-blue-500);
+  --accent-foreground: var(--color-ink-black-950);
+
+  --destructive: #FF6B6B;
+  --destructive-foreground: var(--color-ink-black-950);
+
+  --border: rgba(148, 173, 209, 0.2);
+  --input: rgba(148, 173, 209, 0.2);
+  --input-background: var(--surface-subtle);
+
+  --switch-background: var(--surface-elevated);
+  --bottomnav: var(--surface-subtle);
+
+  --ring: var(--color-deep-space-blue-400);
+}
+
+/* =========================================================
+   TAILWIND BRIDGE (ONLY ONE)
+========================================================= */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* =========================================================
+   BASE
+========================================================= */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Comfortaa', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+}
+
+html {
+  font-size: var(--font-size);
+}
+
+/* Blueprint Grid Pattern */
+.blueprint-grid {
+  background-image: linear-gradient(var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight)), linear-gradient(90deg, var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight));
+  background-size: 20px 20px;
+}
+
+.blueprint-grid-large {
+  background-image: linear-gradient(var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight)), linear-gradient(90deg, var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight)), linear-gradient(var(--technical-border) 2px, transparent 2px), linear-gradient(90deg, var(--technical-border) 2px, transparent 2px);
+  background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+}
+
+/* Technical border utility */
+.technical-border {
+  border: 1px solid var(--technical-border);
+  position: relative;
+}
+
+.technical-border::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: var(--blueprint-overlay);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Blueprint corner decorations */
+.blueprint-corners::before,
+.blueprint-corners::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--technical-border);
+}
+
+.blueprint-corners::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid;
+  border-left: 2px solid;
+}
+
+.blueprint-corners::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid;
+  border-right: 2px solid;
+}
+
+/* Modern depth and texture utilities */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(11, 53, 89, 0.1);
+}
+
+.dark .glass-card {
+  background: rgba(11, 53, 89, 0.3);
+  border: 1px solid rgba(88, 144, 166, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.depth-1 {
+  box-shadow: 0 1px 3px rgba(11, 53, 89, 0.12), 0 1px 2px rgba(11, 53, 89, 0.08);
+}
+
+.depth-2 {
+  box-shadow: 0 4px 6px rgba(11, 53, 89, 0.12), 0 2px 4px rgba(11, 53, 89, 0.08);
+}
+
+.depth-3 {
+  box-shadow: 0 10px 15px rgba(11, 53, 89, 0.15), 0 4px 6px rgba(11, 53, 89, 0.1);
+}
+
+.depth-4 {
+  box-shadow: 0 20px 25px rgba(11, 53, 89, 0.15), 0 10px 10px rgba(11, 53, 89, 0.08);
+}
+
+.dark .depth-1 {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.dark .depth-2 {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dark .depth-3 {
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.4), 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.dark .depth-4 {
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.5), 0 10px 10px rgba(0, 0, 0, 0.3);
+}
+
+.gradient-overlay {
+  position: relative;
+}
+
+.gradient-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dark .gradient-overlay::before {
+  opacity: 0.1;
+}
+
+.texture-dots {
+  background-image: radial-gradient(circle, var(--grid-color) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine-effect::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+
+.shine-effect:hover::after {
+  transform: translateX(100%);
+}
+
+.dark .shine-effect::after {
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
+}
+
+.elevated-card {
+  transform: translateY(0);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.elevated-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(11, 53, 89, 0.18), 0 6px 12px rgba(11, 53, 89, 0.12);
+}
+
+.dark .elevated-card:hover {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4), 0 6px 12px rgba(88, 144, 166, 0.2);
+}
+
+.glow-primary {
+  box-shadow: 0 0 20px rgba(11, 53, 89, 0.3);
+}
+
+.dark .glow-primary {
+  box-shadow: 0 0 20px rgba(88, 144, 166, 0.4);
+}
+
+.glow-accent {
+  box-shadow: 0 0 20px rgba(88, 144, 166, 0.3);
+}
+
+.dark .glow-accent {
+  box-shadow: 0 0 20px rgba(142, 177, 191, 0.4);
+}
+
+/* ======================================== BLUEPRINT DESIGN SYSTEM - ALL CUSTOM CLASSES All in @layer base so Tailwind @layer utilities always wins in cascade. ======================================== */
+@layer base {
+
+  /* Container Shapes */
+  .bp-container-compact {
+    border-radius: 9999px;
+  }
+
+  .bp-container-tall {
+    border-radius: 9px;
+  }
+
+  .bp-container-list {
+    border-radius: 9px;
+  }
+
+  .bp-shape-pill {
+    border-radius: 9999px;
+  }
+
+  .bp-shape-soft {
+    border-radius: 9px;
+  }
+
+  /* Typography - Comfortaa for headings */
+  .bp-page-title {
+    font-family: "Comfortaa", sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--foreground);
+    padding-left: 0.5rem;
+  }
+
+  .bp-section-title {
+    font-family: "Comfortaa", sans-serif;
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--foreground);
+  }
+
+  .bp-card-title {
+    font-family: "Comfortaa", sans-serif;
+    font-size: 1.125rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--foreground);
+  }
+
+  .bp-stat-value {
+    font-family: "Comfortaa", sans-serif;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--foreground);
+  }
+
+  .bp-subtitle {
+    font-family: "Raleway", sans-serif;
+    font-size: 1.125rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: white;
+  }
+
+  /* Typography - Raleway for body */
+  .bp-overline {
+    font-family: "Raleway", sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted-foreground);
+  }
+
+  .bp-body {
+    font-family: "Raleway", sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--foreground);
+  }
+
+  .bp-body-sm {
+    font-family: "Raleway", sans-serif;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--foreground);
+  }
+
+  .bp-caption {
+    font-family: "Raleway", sans-serif;
+    font-size: 0.625rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--muted-foreground);
+  }
+
+  /* Page-level indent hierarchy: sub-elements indent further than page title */
+  .bp-page>.bp-overline,
+  .bp-page>.bp-subtitle,
+  .bp-page>.bp-section-title,
+  .bp-page>.bp-body,
+  .bp-page>.bp-body-sm {
+    padding-left: 1rem;
+  }
+
+  /* Sub-page title: used for h2 on settings sub-pages, smaller than bp-page-title */
+  .bp-page-subtitle {
+    font-family: "Comfortaa", sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--foreground);
+    padding-left: 0.5rem;
+  }
+
+  /* Data UI attributes for automatic styling */
+  [data-ui="field"] {
+    border-radius: 9999px;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--border);
+    background-color: var(--input-background);
+    font-family: "Raleway", sans-serif;
+  }
+
+  [data-ui="button"] {
+    border-radius: 9999px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  [data-ui="button"]:hover {
+    transform: translateY(-1px);
+  }
+
+  [data-ui="button"]:active {
+    transform: scale(0.98);
+  }
+
+  /* Color Input - fill entire container */
+  input[type="color"] {
+    -webkit-appearance: none;
+    appearance: none;
+    border: none;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  input[type="color"]::-webkit-color-swatch {
+    border: none;
+    border-radius: inherit;
+  }
+
+  input[type="color"]::-moz-color-swatch {
+    border: none;
+    border-radius: inherit;
+  }
+
+  /* Button Variants */
+  .bp-btn-primary {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    border-radius: 9999px;
+    font-weight: 700;
+  }
+
+  .bp-btn-secondary {
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+    border-radius: 9999px;
+    font-weight: 700;
+  }
+
+  .bp-btn-ghost {
+    background-color: var(--muted);
+    color: var(--foreground);
+    border-radius: 9999px;
+    font-weight: 700;
+  }
+
+  .bp-btn-disabled {
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+    border-radius: 9999px;
+    font-weight: 700;
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* Input Variants */
+  .bp-input-readonly {
+    background-color: var(--muted);
+    color: var(--muted-foreground);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+  }
+
+  .bp-input {
+    background-color: var(--input-background);
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    font-family: "Raleway", sans-serif;
+  }
+
+  /* Navigation */
+  .bp-nav-active {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .bp-nav-inactive {
+    color: var(--muted-foreground);
+    font-weight: 500;
+  }
+
+  /* Card Padding */
+  .bp-card-padding-sm {
+    padding: 0.75rem 1rem;
+  }
+
+  .bp-card-padding-md {
+    padding: 1.25rem 1.5rem;
+  }
+
+  /* Back Button */
+  .bp-back {
+    color: var(--muted-foreground);
+  }
+
+  .bp-back:hover {
+    color: var(--foreground);
+  }
+
+  /* Page Layout */
+  .bp-page {
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 12rem;
+    background-color: var(--background);
+    background-image: linear-gradient(var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight)), linear-gradient(90deg, var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight));
+    background-size: 24px 24px;
+  }
+
+  @media (min-width: 640px) {
+    .bp-page {
+      padding: 1.5rem 2rem;
+      padding-bottom: 12rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .bp-page {
+      padding: 2rem 3rem;
+      padding-bottom: 12rem;
+    }
+  }
+
+  .bp-page-header {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  /* Bottom Nav */
+  .bp-bottomnav {
+    background-color: var(--bottomnav);
+    border-top: 1px solid var(--border);
+    padding: 0.5rem 0;
+  }
+
+  /* Grid Background */
+  .bp-grid-bg {
+    background-image: linear-gradient(rgba(11, 53, 89, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(11, 53, 89, 0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+
+  /* Text Variants */
+  .bp-text {
+    color: var(--foreground);
+  }
+
+  .bp-text-secondary {
+    color: var(--muted-foreground);
+  }
+
+  .bp-title {
+    font-family: "Comfortaa", sans-serif;
+    font-weight: 700;
+    color: var(--foreground);
+  }
+
+  .bp-label {
+    color: var(--muted-foreground);
+  }
+
+  /* Toggle / Switch */
+  .toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 44px;
+    height: 24px;
+    border-radius: 9999px;
+    background-color: var(--switch-background);
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .toggle::after {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+    transform: translateX(0);
+  }
+
+  .toggle[data-state="on"] {
+    background-color: var(--primary);
+  }
+
+  .toggle[data-state="on"]::after {
+    transform: translateX(20px);
+  }
+
+  /* Save Toast */
+  .save-toast {
+    position: fixed;
+    bottom: 6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    animation: toast-in 0.3s ease-out, toast-out 0.3s ease-in 1.7s forwards;
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(1rem);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  @keyframes toast-out {
+    from {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    to {
+      opacity: 0;
+      transform: translateX(-50%) translateY(1rem);
+    }
+  }
+}
+
+/* end @layer base */
