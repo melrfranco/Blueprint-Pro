@@ -19,12 +19,6 @@ import { GOOGLE_FONTS_LIST } from '../data/fonts';
 
 import AccountSettings from './AccountSettings';
 import StylistDashboard from './StylistDashboard';
-import ManageStylist from './ManageStylist';
-import MembershipSetup from './MembershipSetup';
-import { canCustomizeBranding } from '../utils/isEnterpriseAccount';
-
-type SettingsView = 'menu' | 'branding' | 'account' | 'team' | 'memberships';
-
 export default function AdminDashboardV2({ role }: { role: UserRole }) {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [activeSettingsView, setActiveSettingsView] = useState<SettingsView>('menu');
