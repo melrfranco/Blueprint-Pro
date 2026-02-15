@@ -72,13 +72,16 @@
 }
 
 .dark {
-  --surface-base: var(--color-ink-black-950);
-  --surface-subtle: var(--color-ink-black-900);
-  --surface-elevated: var(--color-ink-black-800);
+  --surface-base: #0f172a;
+  /* slate-900 feel */
+  --surface-subtle: #111c2e;
+  /* slightly lifted */
+  --surface-elevated: #162235;
+  /* card level */
 
-  --grid-color: rgba(148, 173, 209, 0.12);
-  --technical-border: rgba(148, 173, 209, 0.3);
-  --blueprint-overlay: rgba(80, 124, 175, 0.08);
+  --grid-color: rgba(148, 173, 209, 0.08);
+  --technical-border: rgba(148, 173, 209, 0.18);
+  --blueprint-overlay: rgba(80, 124, 175, 0.06);
 }
 
 /* =========================================================
