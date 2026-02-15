@@ -121,29 +121,59 @@
   --bottomnav: var(--primary);
 
   --ring: var(--color-deep-space-blue-500);
-}.dark {
-  --primary: var(--color-deep-space-blue-400);
-  --primary-foreground: var(--color-ink-black-950);
+.dark {
 
-  --secondary: var(--color-yale-blue-400);
-  --secondary-foreground: var(--color-ink-black-950);
+  /* Background hierarchy */
+  --surface-base: #0f1c2b;        /* page background */
+  --surface-subtle: #14263a;      /* cards */
+  --surface-elevated: #1a3148;    /* modals / popovers */
 
-  --accent: var(--color-deep-space-blue-500);
-  --accent-foreground: var(--color-ink-black-950);
+  /* Text */
+  --text-strong: #ffffff;
+  --text-default: #e6edf5;
+  --text-muted: #9fb3c8;
 
-  --destructive: #FF6B6B;
-  --destructive-foreground: var(--color-ink-black-950);
+  /* Semantic mappings */
+  --background: var(--surface-base);
+  --foreground: var(--text-default);
 
-  --border: rgba(148, 173, 209, 0.2);
-  --input: rgba(148, 173, 209, 0.2);
-  --input-background: var(--surface-subtle);
+  --card: var(--surface-subtle);
+  --card-foreground: var(--text-default);
 
-  --switch-background: var(--surface-elevated);
-  --bottomnav: var(--surface-subtle);
+  --popover: var(--surface-elevated);
+  --popover-foreground: var(--text-default);
 
-  --ring: var(--color-deep-space-blue-400);
+  --muted: var(--surface-subtle);
+  --muted-foreground: var(--text-muted);
+
+  /* Brand colors */
+  --primary: #5f8fc6;
+  --primary-foreground: #0f1c2b;
+
+  --secondary: #6fa4d8;
+  --secondary-foreground: #0f1c2b;
+
+  --accent: #7db3e6;
+  --accent-foreground: #0f1c2b;
+
+  --destructive: #ff6b6b;
+  --destructive-foreground: #0f1c2b;
+
+  /* UI */
+  --border: rgba(255,255,255,0.08);
+  --input: rgba(255,255,255,0.08);
+  --input-background: #1a3148;
+
+  --switch-background: #1a3148;
+  --bottomnav: #0c1622;
+
+  --ring: #7db3e6;
+
+  /* Blueprint grid adjustments */
+  --grid-color: rgba(255,255,255,0.05);
+  --technical-border: rgba(255,255,255,0.15);
+  --blueprint-overlay: rgba(125,179,230,0.08);
 }
-
 /* =========================================================
    TAILWIND BRIDGE (ONLY ONE)
 ========================================================= */
