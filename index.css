@@ -121,9 +121,7 @@
   --bottomnav: var(--primary);
 
   --ring: var(--color-deep-space-blue-500);
-}
-
-.dark {
+}.dark {
   --primary: var(--color-deep-space-blue-400);
   --primary-foreground: var(--color-ink-black-950);
 
