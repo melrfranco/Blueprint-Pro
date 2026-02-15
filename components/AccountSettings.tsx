@@ -29,9 +29,18 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ user, onLogout, subti
     setIsChangingPassword(false);
   };
 
+  const MAX_AVATAR_SIZE = 500 * 1024; // 500 KB
+
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+
+    if (file.size > MAX_AVATAR_SIZE) {
+      alert('Image is too large. Please choose an image under 500 KB.');
+      e.target.value = '';
+      return;
+    }
+
     try {
       const { supabase } = await import('../lib/supabase');
       if (!supabase) return;
