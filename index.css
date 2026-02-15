@@ -120,7 +120,9 @@
   --switch-background: var(--surface-subtle);
   --bottomnav: var(--primary);
 
-  --ring: var(--color-deep-space-blue-500);
+    --ring: var(--color-deep-space-blue-500);
+}
+
 .dark {
 
   /* Background hierarchy */
