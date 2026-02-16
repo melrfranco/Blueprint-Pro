@@ -21,7 +21,7 @@ export default function DesignSystemShowcase() {
               </div>
             </div>
           </div>
-          
+
           {/* Navigation Tabs */}
           <nav className="flex gap-2 mt-6 overflow-x-auto">
             {[
@@ -33,11 +33,10 @@ export default function DesignSystemShowcase() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 bp-container-compact transition-all text-sm font-medium ${
-                  activeTab === tab.id
+                className={`px-4 py-2 bp-container-compact transition-all text-sm font-medium ${activeTab === tab.id
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                }`}
+                  }`}
               >
                 {tab.label}
               </button>
@@ -54,7 +53,7 @@ export default function DesignSystemShowcase() {
           <div className="relative z-10">
             <h2 className="bp-section-title mb-2">Technical Blueprint Theme</h2>
             <p className="bp-body-sm text-muted-foreground max-w-3xl">
-              A modern design system inspired by technical blueprints, featuring a carefully crafted color palette 
+              A modern design system inspired by technical blueprints, featuring a carefully crafted color palette
               of navy, steel, sky, and frost tones. Designed for both web and mobile applications.
             </p>
             <div className="flex flex-wrap gap-4 mt-4 text-sm">
@@ -113,7 +112,7 @@ function ColorPaletteSection() {
   return (
     <div className="space-y-6">
       <h2 className="bp-section-title">Color Palette</h2>
-      
+
       {/* Primary Colors */}
       <div className="space-y-4">
         <h3 className="bp-card-title">Primary Colors</h3>
@@ -208,13 +207,13 @@ function TypographySection() {
   return (
     <div className="space-y-8">
       <h2 className="bp-section-title">Typography</h2>
-      
+
       {/* Font Hierarchy */}
       <div className="space-y-6 p-6 bp-container-tall bg-card border border-border">
         <h3 className="bp-card-title">Font Hierarchy</h3>
         <p className="bp-body-sm text-muted-foreground">
-          <strong>Headings:</strong> Comfortaa font (via --font-heading variable)<br/>
-          <strong>Body/UI text:</strong> Raleway font (via --font-sans variable)<br/>
+          <strong>Headings:</strong> Comfortaa font (via --font-heading variable)<br />
+          <strong>Body/UI text:</strong> Raleway font (via --font-sans variable)<br />
           <strong>Font weights:</strong> Headings max 700, Body 400-600, Buttons 700
         </p>
       </div>
@@ -288,7 +287,7 @@ function ComponentsSection() {
   return (
     <div className="space-y-8">
       <h2 className="bp-section-title">Components</h2>
-      
+
       {/* Cards */}
       <div className="space-y-4">
         <h3 className="bp-card-title">Cards</h3>
@@ -356,9 +355,9 @@ function ComponentsSection() {
         <div className="space-y-4 max-w-md">
           <div>
             <label className="bp-overline block mb-2">Text Input (data-ui="field")</label>
-            <input 
-              type="text" 
-              placeholder="Enter text..." 
+            <input
+              type="text"
+              placeholder="Enter text..."
               className="w-full px-4 py-3 bp-container-compact border border-border bg-card"
             />
           </div>
@@ -372,8 +371,8 @@ function ComponentsSection() {
           </div>
           <div>
             <label className="bp-overline block mb-2">Text Area (bp-container-tall)</label>
-            <textarea 
-              placeholder="Multi-line text..." 
+            <textarea
+              placeholder="Multi-line text..."
               className="w-full p-4 border border-border bg-card bp-container-tall"
               rows={3}
             />
@@ -655,7 +654,7 @@ function LayoutsSection() {
           {[4, 8, 16, 24, 32, 48].map(px => (
             <div key={px} className="flex items-center gap-4">
               <span className="bp-caption w-16">{px}px</span>
-              <div className="h-4 bg-accent bp-container-compact" style={{width: `${px}px`}}></div>
+              <div className="h-4 bg-accent bp-container-compact" style={{ width: `${px}px` }}></div>
             </div>
           ))}
         </div>

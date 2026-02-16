@@ -30,7 +30,7 @@ export default function App() {
                   <p className="text-xs text-muted-foreground font-mono">v1.0.0 | Technical Specification</p>
                 </div>
               </div>
-              
+
               <button
                 onClick={toggleTheme}
                 className="relative p-2.5 rounded-full bg-muted hover:bg-accent transition-all group depth-1 hover:depth-2 shine-effect"
@@ -46,7 +46,7 @@ export default function App() {
                 </span>
               </button>
             </div>
-            
+
             {/* Navigation Tabs */}
             <nav className="flex gap-2 mt-6 overflow-x-auto">
               {[
@@ -58,11 +58,10 @@ export default function App() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all shine-effect ${
-                    activeTab === tab.id
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all shine-effect ${activeTab === tab.id
                       ? 'bg-primary text-primary-foreground depth-2 glow-primary'
                       : 'bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground depth-1'
-                  }`}
+                    }`}
                 >
                   <tab.icon className="w-4 h-4" />
                   <span className="whitespace-nowrap text-sm">{tab.label}</span>
@@ -80,8 +79,8 @@ export default function App() {
             <div className="relative z-10">
               <h2 className="mb-2">Technical Blueprint Theme</h2>
               <p className="text-muted-foreground max-w-3xl">
-                A modern design system inspired by technical blueprints, featuring a carefully crafted color palette 
-                of navy, steel, sky, and frost tones. Designed for both web and mobile applications with full 
+                A modern design system inspired by technical blueprints, featuring a carefully crafted color palette
+                of navy, steel, sky, and frost tones. Designed for both web and mobile applications with full
                 light and dark mode support.
               </p>
               <div className="flex flex-wrap gap-4 mt-4 text-sm">

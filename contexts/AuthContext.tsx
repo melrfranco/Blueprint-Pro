@@ -270,7 +270,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const updateUser = async (updates: Partial<User>) => {
     setUser(prev => prev ? { ...prev, ...updates } : prev);
-    
+
     // Persist avatar to Supabase auth metadata if it changed
     // IMPORTANT: Only persist actual URLs, never base64 data URIs — base64 bloats the JWT
     // and causes QuotaExceededError when Supabase tries to save the session to localStorage

@@ -30,22 +30,22 @@ export function TypographyShowcase() {
         <div className="glass-card rounded-lg p-6 space-y-4 depth-1">
           <div>
             <p className="mb-2">
-              <strong>Regular Paragraph:</strong> This design system is crafted for modern web and mobile applications, 
-              drawing inspiration from technical blueprints and engineering documentation. The color palette features 
+              <strong>Regular Paragraph:</strong> This design system is crafted for modern web and mobile applications,
+              drawing inspiration from technical blueprints and engineering documentation. The color palette features
               deep navy blues transitioning to lighter frost tones, creating a professional and technical aesthetic.
             </p>
             <code className="text-xs text-muted-foreground font-mono">p • base • normal • Comfortaa</code>
           </div>
           <div>
             <p className="text-muted-foreground">
-              <strong>Muted Text:</strong> Secondary information and supporting details use muted foreground colors 
+              <strong>Muted Text:</strong> Secondary information and supporting details use muted foreground colors
               to establish clear visual hierarchy while maintaining readability across both light and dark modes.
             </p>
             <code className="text-xs text-muted-foreground font-mono">text-muted-foreground • Comfortaa</code>
           </div>
           <div>
             <p className="text-sm text-muted-foreground">
-              <strong>Small Text:</strong> Fine print, captions, and metadata are rendered at a smaller size 
+              <strong>Small Text:</strong> Fine print, captions, and metadata are rendered at a smaller size
               for compact information display.
             </p>
             <code className="text-xs text-muted-foreground font-mono">text-sm • Comfortaa</code>

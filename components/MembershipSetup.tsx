@@ -24,8 +24,8 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
   const handleMembershipTierUpdate = (tierId: string, updates: Partial<MembershipTier>) => {
     updateMembershipConfig(prev => ({
       ...prev,
-      tiers: prev.tiers.map(tier => (tier.id === tierId ? { 
-        ...tier, 
+      tiers: prev.tiers.map(tier => (tier.id === tierId ? {
+        ...tier,
         ...updates,
         // Ensure minSpend is always a number
         minSpend: updates.minSpend !== undefined ? Number(updates.minSpend) || 0 : tier.minSpend
@@ -74,7 +74,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
 
   return (
     <div className="bp-page">
-      <button data-ui="button" onClick={onBack} className="mb-6 flex items-center text-sm font-semibold hover:opacity-80 transition-colors bp-back"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
+      <button data-ui="button" onClick={onBack} className="mb-6 flex items-center text-sm font-semibold hover:opacity-80 transition-colors bp-back"><ChevronLeftIcon className="w-4 h-4 mr-1" /> Back</button>
       <h2 className="bp-page-subtitle mb-8">Memberships</h2>
       <div className="space-y-6">
         <div className="bg-card bp-card-padding-md bp-container-list border-4 border shadow-sm">

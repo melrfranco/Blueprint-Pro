@@ -5,12 +5,12 @@ import { useSettings } from '../contexts/SettingsContext';
 import { usePlans } from '../contexts/PlanContext';
 import { useAuth } from '../contexts/AuthContext';
 import {
-    CheckCircleIcon,
-    GlobeIcon,
-    SettingsIcon,
-    ChevronLeftIcon,
-    SunIcon,
-    UsersIcon
+  CheckCircleIcon,
+  GlobeIcon,
+  SettingsIcon,
+  ChevronLeftIcon,
+  SunIcon,
+  UsersIcon
 } from './icons';
 import type { UserRole, GeneratedPlan } from '../types';
 import { GOOGLE_FONTS_LIST } from '../data/fonts';
@@ -52,13 +52,13 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
     });
     const lastSixMonths = [];
     const today = new Date();
-    for(let i=5; i >= 0; i--) {
+    for (let i = 5; i >= 0; i--) {
       const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
       lastSixMonths.push(d.toLocaleDateString('en-US', { year: 'numeric', month: 'short' }));
     }
     let lastValue = 0;
     return lastSixMonths.map(month => {
-      if(dataMap.has(month)) lastValue = dataMap.get(month)!;
+      if (dataMap.has(month)) lastValue = dataMap.get(month)!;
       return { name: month, value: lastValue };
     });
   }, [plans]);
@@ -68,8 +68,8 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
       <h1 className="bp-page-title mb-1 text-black">Dashboard</h1>
       {user?.name && <p className="bp-subtitle mb-8 pl-4 text-black">Welcome back, {user.name.split(' ')[0]}</p>}
       <div className="grid grid-cols-2 gap-4 mb-6">
-   <div className="col-span-2 p-8 bg-primary text-primary-foreground bp-container-list border-4 border-primary shadow-lg hover:shadow-xl transition-shadow">
-       <div className="flex flex-col items-center justify-center text-center h-full py-4">
+        <div className="col-span-2 p-8 bg-primary text-primary-foreground bp-container-list border-4 border-primary shadow-lg hover:shadow-xl transition-shadow">
+          <div className="flex flex-col items-center justify-center text-center h-full py-4">
             <p className="bp-section-title mb-3 text-primary-foreground">Roadmap Pipeline</p>
             <p className="text-5xl bp-stat-value text-primary-foreground">${totalPipeline.toLocaleString()}</p>
           </div>
@@ -90,14 +90,14 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
       <div className="bg-card p-7 bp-container-tall border border-border shadow-sm hover:shadow-md transition-shadow mb-6">
         <h3 className="bp-section-title mb-4">Pipeline Growth</h3>
         <div className="w-full h-56 p-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={pipelineGrowthData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                <XAxis dataKey="name" tick={{fontSize: 12, fill: 'var(--muted-foreground)'}} axisLine={false} tickLine={false} />
-                <YAxis tickFormatter={(val) => `$${val/1000}k`} tick={{fontSize: 12, fill: 'var(--muted-foreground)'}} axisLine={false} tickLine={false} />
-                <Area type="monotone" dataKey="value" stroke="var(--accent)" fill="var(--accent)" fillOpacity={0.3} strokeWidth={3} />
-              </AreaChart>
-            </ResponsiveContainer>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={pipelineGrowthData}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
+              <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
+              <YAxis tickFormatter={(val) => `$${val / 1000}k`} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} axisLine={false} tickLine={false} />
+              <Area type="monotone" dataKey="value" stroke="var(--accent)" fill="var(--accent)" fillOpacity={0.3} strokeWidth={3} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>
@@ -107,26 +107,26 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
     if (activeSettingsView === 'branding') {
       return (
         <div className="bp-page">
-          <button onClick={() => setActiveSettingsView('menu')} className="mb-6 flex items-center text-sm font-semibold hover:opacity-80 transition-colors bp-back"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
+          <button onClick={() => setActiveSettingsView('menu')} className="mb-6 flex items-center text-sm font-semibold hover:opacity-80 transition-colors bp-back"><ChevronLeftIcon className="w-4 h-4 mr-1" /> Back</button>
           <h2 className="bp-page-subtitle mb-8">Branding</h2>
           <div className="space-y-6">
             <div>
               <label className="block bp-overline mb-2">Salon Name</label>
-              <input type="text" value={branding.salonName} onChange={e => updateBranding({...branding, salonName: e.target.value})} className="w-full p-4 border-4 rounded-full font-semibold outline-none border text-foreground focus:border-sky"/>
+              <input type="text" value={branding.salonName} onChange={e => updateBranding({ ...branding, salonName: e.target.value })} className="w-full p-4 border-4 rounded-full font-semibold outline-none border text-foreground focus:border-sky" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block bp-overline mb-2">Primary Color</label>
-                <input type="color" value={branding.primaryColor} onChange={e => updateBranding({...branding, primaryColor: e.target.value})} className="w-full h-12 rounded-full cursor-pointer"/>
+                <input type="color" value={branding.primaryColor} onChange={e => updateBranding({ ...branding, primaryColor: e.target.value })} className="w-full h-12 rounded-full cursor-pointer" />
               </div>
               <div>
                 <label className="block bp-overline mb-2">Accent Color</label>
-                <input type="color" value={branding.accentColor} onChange={e => updateBranding({...branding, accentColor: e.target.value})} className="w-full h-12 rounded-full cursor-pointer"/>
+                <input type="color" value={branding.accentColor} onChange={e => updateBranding({ ...branding, accentColor: e.target.value })} className="w-full h-12 rounded-full cursor-pointer" />
               </div>
             </div>
             <div>
               <label className="block bp-overline mb-2">Font</label>
-              <select value={branding.font} onChange={e => updateBranding({...branding, font: e.target.value})} className="w-full p-4 border-4 rounded-full font-semibold outline-none border text-foreground">
+              <select value={branding.font} onChange={e => updateBranding({ ...branding, font: e.target.value })} className="w-full p-4 border-4 rounded-full font-semibold outline-none border text-foreground">
                 {GOOGLE_FONTS_LIST.map(f => <option key={f} value={f}>{f}</option>)}
               </select>
             </div>
@@ -139,7 +139,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
     if (activeSettingsView === 'account') {
       return (
         <div className="bp-page">
-          <button onClick={() => setActiveSettingsView('menu')} className="mb-6 flex items-center text-sm font-semibold hover:opacity-80 transition-colors bp-back"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
+          <button onClick={() => setActiveSettingsView('menu')} className="mb-6 flex items-center text-sm font-semibold hover:opacity-80 transition-colors bp-back"><ChevronLeftIcon className="w-4 h-4 mr-1" /> Back</button>
           <AccountSettings user={user} onLogout={logout} subtitle="System Controller" />
         </div>
       );
@@ -197,7 +197,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
 
       return (
         <div className="bp-page">
-          <button onClick={() => setActiveSettingsView('menu')} className="mb-6 flex items-center text-sm font-semibold hover:opacity-80 transition-colors bp-back"><ChevronLeftIcon className="w-4 h-4 mr-1"/> Back</button>
+          <button onClick={() => setActiveSettingsView('menu')} className="mb-6 flex items-center text-sm font-semibold hover:opacity-80 transition-colors bp-back"><ChevronLeftIcon className="w-4 h-4 mr-1" /> Back</button>
           <h2 className="bp-page-subtitle mb-8">Appearance</h2>
           <div className="space-y-6">
             <div className="bg-card p-8 bp-container-list border border-border shadow-sm text-center">
@@ -247,24 +247,24 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
         <h1 className="bp-page-title mb-8">Settings</h1>
         <div className="grid grid-cols-2 gap-6 mb-8">
           <button onClick={() => setActiveSettingsView('account')} className="p-8 bg-card border border-border bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
-            <SettingsIcon className="w-10 h-10 text-primary"/>
+            <SettingsIcon className="w-10 h-10 text-primary" />
             <span className="bp-overline">Account</span>
           </button>
           <button onClick={() => setActiveSettingsView('appearance')} className="p-8 bg-card border border-border bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
-            <SunIcon className="w-10 h-10 text-primary"/>
+            <SunIcon className="w-10 h-10 text-primary" />
             <span className="bp-overline">Appearance</span>
           </button>
           <button onClick={() => setActiveSettingsView('teamAccess')} className="p-8 bg-card border border-border bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
-            <UsersIcon className="w-10 h-10 text-primary"/>
+            <UsersIcon className="w-10 h-10 text-primary" />
             <span className="bp-overline">Team Access</span>
           </button>
           <button onClick={() => setActiveSettingsView('memberships')} className="p-8 bg-card border border-border bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
-            <CheckCircleIcon className="w-10 h-10 text-primary"/>
+            <CheckCircleIcon className="w-10 h-10 text-primary" />
             <span className="bp-overline">Memberships</span>
           </button>
           {canCustomizeBranding(user) && (
             <button onClick={() => setActiveSettingsView('branding')} className="p-8 bg-card border border-border bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
-              <GlobeIcon className="w-10 h-10 text-primary"/>
+              <GlobeIcon className="w-10 h-10 text-primary" />
               <span className="bp-overline">Branding</span>
             </button>
           )}

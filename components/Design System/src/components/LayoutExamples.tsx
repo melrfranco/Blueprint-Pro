@@ -1,9 +1,9 @@
-import { 
-  Menu, 
-  X, 
-  Home, 
-  FileText, 
-  Settings, 
+import {
+  Menu,
+  X,
+  Home,
+  FileText,
+  Settings,
   BarChart3,
   Bell,
   Search,
@@ -31,7 +31,7 @@ export function LayoutExamples() {
                   </div>
                   <span className="font-medium">Dashboard</span>
                 </div>
-                
+
                 <nav className="flex-1 space-y-1">
                   <a href="#" className="flex items-center gap-3 px-3 py-2 bg-sidebar-accent text-sidebar-accent-foreground rounded">
                     <Home className="w-4 h-4" />
@@ -133,7 +133,7 @@ export function LayoutExamples() {
             <div className="h-[600px] flex flex-col">
               {/* Mobile Header */}
               <header className="h-14 border-b border-border px-4 flex items-center justify-between bg-background shrink-0">
-                <button 
+                <button
                   onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
                   className="p-2 hover:bg-muted rounded-full transition-colors"
                 >
@@ -150,7 +150,7 @@ export function LayoutExamples() {
                 <div className="absolute inset-0 bg-background/95 backdrop-blur-sm z-50 p-4">
                   <div className="flex items-center justify-between mb-6">
                     <h3>Menu</h3>
-                    <button 
+                    <button
                       onClick={() => setIsMobileSidebarOpen(false)}
                       className="p-2 hover:bg-muted rounded transition-colors"
                     >

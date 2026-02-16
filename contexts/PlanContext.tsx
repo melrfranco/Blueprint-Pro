@@ -272,7 +272,7 @@ export const PlanProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (clientPlans.length === 0) return null;
         return clientPlans.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
     };
-    
+
     const getClientHistory = (clientId: string) => {
         return plans
             .filter(p => p.client.id === clientId)
@@ -282,7 +282,7 @@ export const PlanProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const getClientBookings = (clientId: string) => {
         return bookings.filter(b => b.client_id === clientId);
     };
-    
+
     const getStats = () => {
         const approvedPlans = plans.filter(p => p.status === 'active');
         const totalRevenue = approvedPlans.reduce((sum, p) => sum + p.totalCost, 0);

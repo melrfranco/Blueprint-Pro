@@ -29,13 +29,13 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   useEffect(() => {
     // Check for stored theme preference or system preference
     const storedTheme = localStorage.getItem('blueprint-theme') as Theme | null;
-    
+
     if (storedTheme) {
       setThemeState(storedTheme);
     } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
       setThemeState('dark');
     }
-    
+
     setMounted(true);
   }, []);
 
@@ -44,7 +44,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
     // Apply theme class to document
     const root = document.documentElement;
-    
+
     if (theme === 'dark') {
       root.classList.add('dark');
     } else {

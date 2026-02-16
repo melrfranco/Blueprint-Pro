@@ -4,13 +4,13 @@
 
 :root {
   --font-size: 16px;
-  
+
   /* Blueprint Color Palette - Light Mode */
   --blueprint-navy: #0B3559;
   --blueprint-steel: #42708C;
   --blueprint-sky: #5890A6;
   --blueprint-frost: #8EB1BF;
-  
+
   /* Light Mode Theme */
   --background: #F5F7F9;
   --foreground: #0B3559;
@@ -35,16 +35,16 @@
   --font-weight-medium: 500;
   --font-weight-normal: 400;
   --ring: #5890A6;
-  
+
   /* Chart colors using the palette */
   --chart-1: #0B3559;
   --chart-2: #42708C;
   --chart-3: #5890A6;
   --chart-4: #8EB1BF;
   --chart-5: #6FA3B8;
-  
+
   --radius: 0.25rem;
-  
+
   /* Sidebar */
   --sidebar: #FFFFFF;
   --sidebar-foreground: #0B3559;
@@ -54,7 +54,7 @@
   --sidebar-accent-foreground: #0B3559;
   --sidebar-border: rgba(11, 53, 89, 0.15);
   --sidebar-ring: #5890A6;
-  
+
   /* Blueprint-specific design tokens */
   --grid-color: rgba(11, 53, 89, 0.08);
   --grid-line-weight: 1px;
@@ -87,14 +87,14 @@
   --ring: #5890A6;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  
+
   /* Chart colors for dark mode */
   --chart-1: #8EB1BF;
   --chart-2: #5890A6;
   --chart-3: #42708C;
   --chart-4: #0B3559;
   --chart-5: #6FA3B8;
-  
+
   --sidebar: #174A6F;
   --sidebar-foreground: #FFFFFF;
   --sidebar-primary: #5890A6;
@@ -103,7 +103,7 @@
   --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: rgba(88, 144, 166, 0.3);
   --sidebar-ring: #5890A6;
-  
+
   /* Blueprint-specific design tokens for dark mode */
   --grid-color: rgba(88, 144, 166, 0.2);
   --grid-line-weight: 1px;
@@ -150,7 +150,7 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  
+
   /* Blueprint-specific Tailwind tokens */
   --color-blueprint-navy: var(--blueprint-navy);
   --color-blueprint-steel: var(--blueprint-steel);
@@ -231,11 +231,11 @@
       line-height: 1.5;
       font-family: 'Comfortaa', sans-serif;
     }
-    
+
     textarea {
       font-family: 'Comfortaa', sans-serif;
     }
-    
+
     p {
       font-family: 'Comfortaa', sans-serif;
     }
@@ -248,14 +248,14 @@ html {
 
 /* Blueprint Grid Pattern */
 .blueprint-grid {
-  background-image: 
+  background-image:
     linear-gradient(var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight)),
     linear-gradient(90deg, var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight));
   background-size: 20px 20px;
 }
 
 .blueprint-grid-large {
-  background-image: 
+  background-image:
     linear-gradient(var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight)),
     linear-gradient(90deg, var(--grid-color) var(--grid-line-weight), transparent var(--grid-line-weight)),
     linear-gradient(var(--technical-border) 2px, transparent 2px),
@@ -386,12 +386,10 @@ html {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.1) 50%,
-    transparent 70%
-  );
+  background: linear-gradient(45deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.1) 50%,
+      transparent 70%);
   transform: translateX(-100%);
   transition: transform 0.6s;
 }
@@ -401,12 +399,10 @@ html {
 }
 
 .dark .shine-effect::after {
-  background: linear-gradient(
-    45deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.05) 50%,
-    transparent 70%
-  );
+  background: linear-gradient(45deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.05) 50%,
+      transparent 70%);
 }
 
 .elevated-card {

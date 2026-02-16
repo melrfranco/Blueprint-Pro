@@ -191,7 +191,7 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
                 </p>
               </div>
               <div className="w-8 h-8 rounded-full flex items-center justify-center bg-muted text-muted-foreground">
-                  <PlusIcon className="w-4 h-4" />
+                <PlusIcon className="w-4 h-4" />
               </div>
             </button>
           ))

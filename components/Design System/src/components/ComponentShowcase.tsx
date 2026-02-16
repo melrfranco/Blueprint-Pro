@@ -1,9 +1,9 @@
-import { 
-  Bell, 
-  Search, 
-  Settings, 
-  User, 
-  ChevronDown, 
+import {
+  Bell,
+  Search,
+  Settings,
+  User,
+  ChevronDown,
   Check,
   X,
   AlertCircle,
