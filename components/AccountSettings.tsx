@@ -1,141 +1,220 @@
 import React, { useState } from 'react';
-import type { User, AppTextSize } from '../types';
+import type { User } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
+import { useAuth } from '../contexts/AuthContext';
 import { Toggle } from './Toggle';
-import { SettingsIcon, UsersIcon, TrashIcon } from './icons';
-import { ensureAccessibleColor } from '../utils/ensureAccessibleColor';
-
+import { SaveToast, useSaveToast } from './SaveToast';
+import ThemeToggle from './ThemeToggle';
+import { SettingsIcon, UsersIcon, TrashIcon, DocumentTextIcon, SunIcon } from './icons';
 
 interface AccountSettingsProps {
-  user: User | null;
-  onLogout: () => void;
-  subtitle: string;
+    user: User | null;
+    onLogout: () => void;
+    subtitle: string;
+    role?: 'admin' | 'stylist';
 }
 
-const AccountSettings: React.FC<AccountSettingsProps> = ({ user, onLogout, subtitle }) => {
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const { textSize, updateTextSize, pushAlertsEnabled, updatePushAlertsEnabled, branding, saveAll } = useSettings();
+const AccountSettings: React.FC<AccountSettingsProps> = ({ user, onLogout, subtitle, role = 'admin' }) => {
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const { pushAlertsEnabled, updatePushAlertsEnabled, cancellationPolicy, updateCancellationPolicy, textSize, updateTextSize, saveAll } = useSettings();
+    const { toastVisible, showToast, hideToast } = useSaveToast();
+    const { updateUser } = useAuth();
 
-  const handlePasswordChange = () => {
-    alert("Password change functionality is not yet connected to the backend.");
-    setIsChangingPassword(false);
-  };
+    const isStylist = role === 'stylist';
 
-  const isMockUser = !!user?.isMock;
+    const handlePasswordChange = () => {
+        alert('Password change functionality is not yet connected to the backend.');
+        setIsChangingPassword(false);
+    };
 
-  return (
-    <div className="p-4 flex flex-col h-full overflow-y-auto pb-48 bg-surface-subtle">
-        <h1 className="text-3xl font-black tracking-tighter px-2 pt-2 mb-8 text-navy">Account</h1>
+    const MAX_AVATAR_SIZE = 500 * 1024; // 500 KB
 
-        <div className="space-y-6 animate-fade-in px-1">
-            <div className="bg-surface p-8 rounded-[40px] border-4 border-navy shadow-2xl text-center depth-3">
-                {user?.avatarUrl ? (
-                    <img src={user.avatarUrl} className="w-24 h-24 rounded-[32px] mx-auto mb-6 border-4 border-surface-muted shadow-lg object-cover" />
-                ) : (
-                    <div className="w-24 h-24 rounded-[32px] mx-auto mb-6 flex items-center justify-center text-4xl font-black shadow-xl border-4 bg-navy text-surface-subtle border-navy">{user?.name?.[0]}</div>
-                )}
-                <h2 className="text-2xl font-black tracking-tighter leading-none mb-2 text-navy">{user?.name}</h2>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-steel">{subtitle}</p>
-            </div>
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !user) return;
 
-            <div className="bg-surface p-6 rounded-[32px] border-4 border-surface-muted shadow-sm space-y-6">
-                <div>
-                    <h3 className="font-black text-sm tracking-widest uppercase mb-4 flex items-center text-steel">
-                        <SettingsIcon className="w-4 h-4 mr-2" />
-                        App Settings
-                    </h3>
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                            <span className="text-xs font-black uppercase tracking-widest text-steel">Text Size</span>
-                            <div className="flex p-1 rounded-xl bg-surface-muted">
-                                {(['S', 'M', 'L'] as AppTextSize[]).map(sz => (
-                                    <button
-                                        data-ui="button"
-                                        key={sz}
-                                        onClick={() => {
-                                          updateTextSize(sz);
-                                          saveAll();
-                                        }}
-                                        className={`px-4 py-1.5 rounded-lg text-xs font-black ${sz === textSize ? 'bg-surface shadow text-navy' : 'text-frost'}`}
-                                    >
-                                      {sz}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-xs font-black uppercase tracking-widest text-steel">Push Alerts</span>
-                            <Toggle
-                                data-ui="toggle"
-                                checked={pushAlertsEnabled}
-                                onCheckedChange={(checked) => {
-                                  updatePushAlertsEnabled(checked);
-                                  saveAll();
-                                }}
-                            />
-                        </div>
-                    </div>
+        if (file.size > MAX_AVATAR_SIZE) {
+            alert('Image is too large. Please choose an image under 500 KB.');
+            e.target.value = '';
+            return;
+        }
+
+        try {
+            const { supabase } = await import('../lib/supabase');
+            if (!supabase) return;
+
+            const ext = file.name.split('.').pop();
+            const path = `avatars/${user.id}.${ext}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(path, file, { upsert: true });
+
+            if (uploadError) {
+                console.warn('[Avatar] Upload failed:', uploadError.message);
+                return;
+            }
+
+            const { data: urlData } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(path);
+
+            if (urlData?.publicUrl) {
+                updateUser({ avatarUrl: urlData.publicUrl });
+            }
+        } catch (err) {
+            console.warn('[Avatar] Storage upload failed:', err);
+        }
+    };
+
+    const isMockUser = !!user?.isMock;
+
+    return (
+        <div className="bp-page">
+            <h1 className="bp-page-title px-2 pt-2 mb-8">Account</h1>
+
+            <div className="space-y-6 animate-fade-in px-1">
+                <div className="bg-card p-8 bp-container-list border border-border shadow-sm text-center">
+                    <input type="file" accept="image/*" id="avatar-upload" className="hidden" onChange={handleAvatarChange} />
+                    <label htmlFor="avatar-upload" className="cursor-pointer block">
+                        {user?.avatarUrl ? (
+                            <img src={user.avatarUrl} className="w-20 h-20 rounded-full mx-auto mb-3 border-4 border-primary shadow-lg object-cover hover:opacity-80 transition-opacity" />
+                        ) : (
+                            <div className="w-20 h-20 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl font-bold shadow-xl border-4 bg-primary text-primary-foreground border-primary hover:opacity-80 transition-opacity">{user?.name?.[0]}</div>
+                        )}
+                        <span className="bp-caption text-accent">Tap to change photo</span>
+                    </label>
+                    <h2 className="bp-section-title leading-none mb-2 mt-3">{user?.name}</h2>
+                    <p className="bp-overline">{subtitle}</p>
                 </div>
 
-                <div className="pt-6 border-t-2 border-surface-muted">
-                    <h3 className="font-black text-sm tracking-widest uppercase mb-4 flex items-center text-steel">
-                        <UsersIcon className="w-4 h-4 mr-2" />
-                        Account Security
-                    </h3>
-                    <div className="space-y-4">
-                        <div>
-                            <label className="block text-[9px] font-black uppercase tracking-widest mb-1 text-steel">Email</label>
-                            {isMockUser && !user?.email ? (
-                                <div className="w-full p-3 border-2 rounded-xl font-bold text-sm italic bp-input-readonly text-steel">
-                                    Mock account — no email associated
-                                </div>
-                            ) : (
-                                <input data-ui="field" type="email" readOnly value={user?.email || ''} className="w-full p-3 rounded-xl font-bold text-sm outline-none bp-input-readonly" />
-                            )}
+                <div className="bg-card p-6 px-8 bp-container-tall border border-border shadow-sm space-y-6">
+                    <div>
+                        <h3 className="bp-overline mb-4 flex items-center">
+                            <SettingsIcon className="w-4 h-4 mr-2" />
+                            Notifications
+                        </h3>
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <span className="bp-overline">Push Alerts</span>
+                                <Toggle
+                                    data-ui="toggle"
+                                    checked={pushAlertsEnabled}
+                                    onCheckedChange={(checked) => {
+                                        updatePushAlertsEnabled(checked);
+                                        saveAll().then(showToast);
+                                    }}
+                                />
+                            </div>
                         </div>
-                        {isChangingPassword ? (
-                            <form onSubmit={(e) => { e.preventDefault(); handlePasswordChange(); }} className="space-y-3 pt-2 animate-fade-in">
-                                 <div>
-                                    <label className="block text-[9px] font-black uppercase tracking-widest mb-1 text-steel">Current Password</label>
-                                    <input data-ui="field" type="password" required className="w-full p-3 bg-surface border-2 border-surface-border rounded-xl font-bold text-sm outline-none text-navy" />
-                                </div>
-                                <div>
-                                    <label className="block text-[9px] font-black uppercase tracking-widest mb-1 text-steel">New Password</label>
-                                    <input data-ui="field" type="password" required className="w-full p-3 bg-surface border-2 border-surface-border rounded-xl font-bold text-sm outline-none text-navy" />
-                                </div>
-                                <div className="flex space-x-2 pt-2">
-                                     <button data-ui="button" type="submit" className="w-full font-black py-3 rounded-xl border-b-4 border-black/20 uppercase tracking-widest text-xs shadow-lg active:scale-95 transition-all bp-btn-secondary">Save</button>
-                                     <button data-ui="button" type="button" onClick={() => setIsChangingPassword(false)} className="w-full font-black py-3 rounded-xl border-b-4 uppercase tracking-widest text-xs shadow-lg active:scale-95 transition-all bp-btn-ghost border-surface-border">Cancel</button>
-                                </div>
-                            </form>
-                        ) : (
-                             <div>
-                                <label className="block text-[9px] font-black uppercase tracking-widest mb-1 text-steel">Password</label>
-                                {isMockUser ? (
-                                    <>
-                                        <div className="w-full text-left p-3 border-2 rounded-xl font-bold text-sm cursor-not-allowed bp-btn-disabled">
-                                            Change Password
-                                        </div>
-                                        <p className="text-xs mt-2 px-1 text-steel">This feature is disabled for the demo administrator account.</p>
-                                    </>
+                    </div>
+
+                    <div className="pt-6 border-t border-border">
+                        <h3 className="bp-overline mb-4 flex items-center">
+                            <UsersIcon className="w-4 h-4 mr-2" />
+                            Account Security
+                        </h3>
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block bp-caption mb-1">Email</label>
+                                {isMockUser && !user?.email ? (
+                                    <div className="w-full p-3 border-2 bp-container-compact font-medium text-sm italic bp-input-readonly text-foreground">
+                                        Mock account — no email associated
+                                    </div>
                                 ) : (
-                                    <button data-ui="button" onClick={() => setIsChangingPassword(true)} className="w-full text-left p-3 border-2 border-surface-border rounded-xl font-bold text-sm hover:opacity-80 transition-colors bg-surface-muted text-navy">
-                                        Change Password
-                                    </button>
+                                    <input data-ui="field" type="email" readOnly value={user?.email || ''} className="w-full p-3 font-medium text-sm outline-none bp-input-readonly" />
                                 )}
                             </div>
-                        )}
+                            {isChangingPassword ? (
+                                <form onSubmit={(e) => { e.preventDefault(); handlePasswordChange(); }} className="space-y-3 pt-2 animate-fade-in bp-card-padding-sm bp-container-list border-2 border bg-muted">
+                                    <div>
+                                        <label className="block bp-caption mb-1">Current Password</label>
+                                        <input data-ui="field" type="password" required className="w-full p-3 bg-card border-2 border font-medium text-sm outline-none text-foreground" />
+                                    </div>
+                                    <div>
+                                        <label className="block bp-overline mb-1">New Password</label>
+                                        <input data-ui="field" type="password" required className="w-full p-3 bg-card border-2 border font-medium text-sm outline-none text-foreground" />
+                                    </div>
+                                    <div className="flex space-x-2 pt-2">
+                                        <button data-ui="button" type="submit" className="w-full py-3 border-b-4 border-black/20 uppercase tracking-widest text-xs shadow-lg active:scale-95 transition-all bp-btn-secondary">Save</button>
+                                        <button data-ui="button" type="button" onClick={() => setIsChangingPassword(false)} className="w-full py-3 border-b-4 uppercase tracking-widest text-xs shadow-lg active:scale-95 transition-all bp-btn-ghost border">Cancel</button>
+                                    </div>
+                                </form>
+                            ) : (
+                                <div>
+                                    <label className="block bp-overline mb-1">Password</label>
+                                    {isMockUser ? (
+                                        <>
+                                            <div className="w-full text-left p-3 border-2 bp-container-compact font-bold text-sm cursor-not-allowed bp-btn-disabled">
+                                                Change Password
+                                            </div>
+                                            <p className="bp-caption mt-2 px-1">This feature is disabled for the demo administrator account.</p>
+                                        </>
+                                    ) : (
+                                        <button data-ui="button" onClick={() => setIsChangingPassword(true)} className="w-full text-left p-3 border-2 border font-medium text-sm hover:opacity-80 transition-colors bg-muted text-foreground">
+                                            Change Password
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <button data-ui="button" onClick={onLogout} className="w-full font-black py-5 rounded-[28px] border-b-8 border-black/20 uppercase tracking-widest text-lg shadow-xl active:scale-95 transition-all flex items-center justify-center space-x-3 bp-btn-primary">
-                <TrashIcon className="w-6 h-6" />
-                <span>SIGN OUT</span>
-            </button>
+                <div className="bg-card p-6 px-8 bp-container-tall border border-border shadow-sm space-y-6">
+                    <div>
+                        <h3 className="bp-overline mb-4 flex items-center">
+                            <SunIcon className="w-4 h-4 mr-2" />
+                            Appearance
+                        </h3>
+                        <ThemeToggle />
+                    </div>
+                    <div className="pt-4 border-t border-border">
+                        <h3 className="bp-overline mb-4">Text Size</h3>
+                        <div className="flex p-1 rounded-full bg-muted w-fit">
+                            {(['S', 'M', 'L'] as const).map(sz => (
+                                <button
+                                    data-ui="button"
+                                    key={sz}
+                                    onClick={() => {
+                                        updateTextSize(sz);
+                                        saveAll().then(showToast);
+                                    }}
+                                    className={`px-5 py-2 rounded-full text-xs font-bold transition-all ${sz === textSize ? 'bg-card shadow text-foreground' : 'text-muted-foreground'}`}
+                                >
+                                    {sz}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {!isStylist && (
+                    <div className="bg-card p-6 px-8 bp-container-tall border border-border shadow-sm space-y-4">
+                        <h3 className="bp-overline mb-2 flex items-center">
+                            <DocumentTextIcon className="w-4 h-4 mr-2" />
+                            Cancellation Policy
+                        </h3>
+                        <p className="bp-caption text-muted-foreground">This will be shown to clients when confirming a booking.</p>
+                        <textarea
+                            value={cancellationPolicy}
+                            onChange={(e) => updateCancellationPolicy(e.target.value)}
+                            onBlur={() => saveAll().then(showToast)}
+                            placeholder="e.g. Cancellations must be made at least 24 hours in advance. Late cancellations may be subject to a fee."
+                            rows={4}
+                            className="w-full p-4 bg-muted border-2 border bp-container-list font-medium text-sm outline-none resize-none text-foreground placeholder:text-muted-foreground/50"
+                        />
+                    </div>
+                )}
+
+                <button data-ui="button" onClick={onLogout} className="w-full py-5 border-b-8 border-black/20 uppercase tracking-widest text-lg shadow-xl active:scale-95 transition-all flex items-center justify-center space-x-3 bp-btn-primary">
+                    <TrashIcon className="w-6 h-6" />
+                    <span>SIGN OUT</span>
+                </button>
+            </div>
+            <SaveToast visible={toastVisible} onDone={hideToast} />
         </div>
-    </div>
-  );
+    );
 };
 
 export default AccountSettings;

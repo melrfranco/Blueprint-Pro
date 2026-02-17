@@ -1,11 +1,18 @@
 import React from 'react';
 import { useSettings } from '../contexts/SettingsContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const LoginScreen: React.FC = () => {
   const { branding } = useSettings();
+  const { login } = useAuth();
+  const bypassLogin = (import.meta as any).env.VITE_BYPASS_LOGIN === '1';
 
   const startSquareOAuth = () => {
     window.location.href = '/api/square/oauth/start';
+  };
+
+  const handleBypassLogin = async () => {
+    await login('admin');
   };
 
   return (
@@ -56,6 +63,17 @@ const LoginScreen: React.FC = () => {
               Login with Square
             </button>
           </div>
+          {bypassLogin ? (
+            <div className="mb-2">
+              <button
+                onClick={handleBypassLogin}
+                className="blueprint-button font-black"
+                type="button"
+              >
+                Bypass Login
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

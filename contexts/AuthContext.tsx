@@ -12,6 +12,7 @@ interface AuthContextType {
   user: User | null;
   login: (role: UserRole, specificId?: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateUser: (updates: Partial<User>) => void;
   isAuthenticated: boolean;
   authInitialized: boolean;
 }
@@ -212,6 +213,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setAuthInitialized(true);
   };
 
+  const updateUser = (updates: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...updates };
+      if (next.isMock) {
+        localStorage.setItem('mock_admin_user', JSON.stringify(next));
+      }
+      return next;
+    });
+  };
+
   const logout = async () => {
     if (supabase) {
       await supabase.auth.signOut();
@@ -228,6 +240,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         user,
         login,
         logout,
+        updateUser,
         isAuthenticated: !!user,
         authInitialized,
       }}

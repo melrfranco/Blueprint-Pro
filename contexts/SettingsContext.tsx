@@ -52,6 +52,7 @@ interface SettingsContextType {
   linkingConfig: ServiceLinkingConfig;
   textSize: AppTextSize;
   pushAlertsEnabled: boolean;
+  cancellationPolicy: string;
   pinnedReports: { [userId: string]: string[] };
 
   loadingTeam: boolean;
@@ -70,6 +71,7 @@ interface SettingsContextType {
 
   updateTextSize: (size: AppTextSize) => void;
   updatePushAlertsEnabled: (enabled: boolean) => void;
+  updateCancellationPolicy: (policy: string) => void;
   updatePinnedReports: (userId: string | number, reportIds: string[]) => void;
 
   createClient: (clientData: { name: string; email: string }) => Promise<Client>;
@@ -137,6 +139,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const [textSize, setTextSize] = useState<AppTextSize>('M');
   const [pushAlertsEnabled, setPushAlertsEnabled] = useState(false);
+  const [cancellationPolicy, setCancellationPolicy] = useState('');
   const [pinnedReports, setPinnedReports] = useState<{ [userId: string]: string[] }>({});
 
   const [loadingTeam, setLoadingTeam] = useState(false);
@@ -482,6 +485,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       localStorage.setItem('admin_linking_config', JSON.stringify(linkingConfig));
       localStorage.setItem('admin_text_size', String(textSize));
       localStorage.setItem('admin_push_alerts_enabled', String(pushAlertsEnabled));
+      localStorage.setItem('admin_cancellation_policy', cancellationPolicy);
       localStorage.setItem('admin_pinned_reports', JSON.stringify(pinnedReports));
     } catch (e) {
       console.error('[Settings] Failed to save locally:', e);
@@ -500,6 +504,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       linkingConfig,
       textSize,
       pushAlertsEnabled,
+      cancellationPolicy,
       pinnedReports,
       loadingTeam,
       teamError,
@@ -514,6 +519,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       updateLinkingConfig,
       updateTextSize,
       updatePushAlertsEnabled,
+      updateCancellationPolicy: setCancellationPolicy,
       updatePinnedReports,
       createClient,
       resolveClientByExternalId,
@@ -530,6 +536,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       linkingConfig,
       textSize,
       pushAlertsEnabled,
+      cancellationPolicy,
       pinnedReports,
       loadingTeam,
       teamError,
