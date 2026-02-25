@@ -36,7 +36,7 @@ const SetFrequencyStep: React.FC<SetFrequencyStepProps> = ({ selectedServices, p
     <div className="flex flex-col h-full p-4 pb-12">
       <div className="text-center p-4">
         <div className="relative w-full h-2 mb-4 rounded-full bg-muted">
-          <div className="absolute top-0 left-0 h-2 bg-primary bp-container-compact" style={{ width: '66%' }}></div>
+          <div className="absolute top-0 left-0 h-2 bg-primary bp-container-compact w-2/3"></div>
         </div>
         <h1 className="text-2xl font-bold text-foreground">Service Frequency</h1>
         <p className="text-sm text-muted-foreground">How often should these repeat?</p>

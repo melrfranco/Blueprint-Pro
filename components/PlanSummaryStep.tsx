@@ -517,7 +517,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                         setSelectedChartVisit(data.activePayload[0].payload._appointment);
                                     }
                                 }}
-                                style={{ cursor: 'pointer' }}
+                                className="cursor-pointer"
                             >
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
                                 <XAxis
@@ -554,7 +554,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                                 {appt.services.map((sv, i) => (
                                                     <div key={i} className="flex items-center justify-between gap-4 mb-1.5">
                                                         <div className="flex items-center gap-2">
-                                                            <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: SERVICE_COLORS[sv.name] || '#cbd5e1' }} />
+                                                            <div className="w-2 h-2 rounded-full flex-shrink-0 bg-accent" />
                                                             <span className="text-xs font-semibold">{sv.name}</span>
                                                         </div>
                                                         <div className="text-right text-xs">
@@ -586,7 +586,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                     <div className="mt-6 flex flex-wrap gap-3 justify-center">
                         {serviceLegend.map((name: string) => (
                             <div key={name} className="flex items-center space-x-2">
-                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: SERVICE_COLORS[name] || '#cbd5e1' }}></div>
+                                <div className="w-3 h-3 rounded-full bg-accent"></div>
                                 <span className="bp-caption text-muted-foreground">{name}</span>
                             </div>
                         ))}
@@ -606,7 +606,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                 {selectedChartVisit.services.map((service, i) => (
                                     <div key={i} className="flex items-center justify-between p-4 bg-muted bp-container-list">
                                         <div className="flex items-center space-x-3">
-                                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: SERVICE_COLORS[service.name] || '#cbd5e1' }}></div>
+                                            <div className="w-3 h-3 rounded-full bg-accent"></div>
                                             <div>
                                                 <p className="bp-card-title">{service.name}</p>
                                                 <p className="bp-caption text-muted-foreground">{service.duration} min</p>
@@ -670,8 +670,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                     {!isClient && membershipConfig.enabled && (
                         <button
                             onClick={() => setMembershipModalOpen(true)}
-                            className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all text-black`}
-                            style={{ backgroundColor: 'rgba(183, 219, 234, 1)' }}
+                            className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all text-black bg-sky-100`}
                         >
                             {isMemberOffered || isMemberActive ? <CheckCircleIcon className="w-6 h-6" /> : <PlusIcon className="w-6 h-6" />}
                             <span>{isMemberOffered ? 'INVITATION SENT' : isMemberActive ? 'MEMBERSHIP ACTIVE' : 'SEND MEMBERSHIP INVITATION'}</span>
@@ -788,7 +787,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                         <div className="p-6 overflow-y-auto flex-grow">
                             <div className="mb-6 p-5 bp-container-list border-2 text-center bg-muted border">
                                 <p className="bp-caption uppercase tracking-widest mb-1 text-muted-foreground">Your Membership Level</p>
-                                <p className="text-2xl font-bold" style={{ color: qualifyingTier?.color || 'var(--accent)' }}>{qualifyingTier?.name || 'Standard'}</p>
+                                <p className="text-2xl font-bold text-accent">{qualifyingTier?.name || 'Standard'}</p>
                             </div>
 
                             <div className="mb-6 p-5 bp-container-list border-2 text-center bg-muted border">

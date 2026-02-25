@@ -654,7 +654,7 @@ function LayoutsSection() {
           {[4, 8, 16, 24, 32, 48].map(px => (
             <div key={px} className="flex items-center gap-4">
               <span className="bp-caption w-16">{px}px</span>
-              <div className="h-4 bg-accent bp-container-compact" style={{ width: `${px}px` }}></div>
+              <div className={`h-4 bg-accent bp-container-compact ${px === 4 ? 'w-1' : px === 8 ? 'w-2' : px === 16 ? 'w-4' : px === 24 ? 'w-6' : px === 32 ? 'w-8' : 'w-12'}`}></div>
             </div>
           ))}
         </div>

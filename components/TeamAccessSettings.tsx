@@ -231,7 +231,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
                       <p className="text-xs text-muted-foreground">{stylist.email || 'No email on file'}</p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="px-3 py-1.5 bp-container-compact text-xs font-bold text-primary-foreground" style={{ backgroundColor: levelColor }}>
+                      <div className="px-3 py-1.5 bp-container-compact text-xs font-bold bg-secondary text-secondary-foreground">
                         {levels.find(l => l.id === stylist.levelId)?.name || 'Unknown'}
                       </div>
                       <button

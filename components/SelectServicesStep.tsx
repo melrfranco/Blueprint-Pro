@@ -143,7 +143,7 @@ const SelectServicesStep: React.FC<SelectServicesStepProps> = ({ availableServic
                 ))}
             </div>
 
-            <div className="sticky bottom-0 p-5 bg-card border-t-8 border-primary z-40 pb-28 flex-shrink-0" style={{ boxShadow: '0 -20px 50px rgba(11, 53, 89, 0.2)' }}>
+            <div className="sticky bottom-0 p-5 bg-card border-t-8 border-primary z-40 pb-28 flex-shrink-0 shadow-lg">
                 <button
                     onClick={handleNext}
                     disabled={selectedIds.size === 0}
