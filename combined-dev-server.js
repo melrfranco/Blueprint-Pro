@@ -15,6 +15,8 @@ const createCombinedServer = async () => {
   let vite;
   try {
     vite = await createViteServer({
+      root: __dirname,
+      configFile: path.join(__dirname, 'vite.config.ts'),
       server: {
         middlewareMode: true,
         allowedHosts: 'all',
