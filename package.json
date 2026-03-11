@@ -5,8 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@9.15.4",
   "scripts": {
-    "dev": "vite --port 5173 --host",
-    "dev:combined": "node combined-dev-server.js",
+    "dev": "node combined-dev-server.js",
     "build": "vite build",
     "preview": "vite preview"
   },

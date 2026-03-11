@@ -15,11 +15,9 @@ const createCombinedServer = async () => {
   let vite;
   try {
     vite = await createViteServer({
-      root: __dirname,
-      configFile: path.join(__dirname, 'vite.config.ts'),
       server: {
         middlewareMode: true,
-        allowedHosts: 'all',
+        allowedHosts: true,
       }
     });
     console.log('✓ Vite server initialized');
@@ -181,12 +179,12 @@ const createCombinedServer = async () => {
     }
   });
 
-  let port = 5173;
+  let port = 3000;
 
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
-      port = 5174;
-      console.log(`Port 5173 in use, trying 5174...`);
+      port = 3001;
+      console.log(`Port 3000 in use, trying 3001...`);
       setTimeout(() => server.listen(port, '0.0.0.0'), 1000);
     } else {
       throw err;
