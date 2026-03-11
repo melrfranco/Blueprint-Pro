@@ -447,11 +447,15 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
           const squareBooking = squareResponse.booking;
           if (squareBooking) {
               await saveBooking({
-                  planId: plan.id!,
-                  squareBookingId: squareBooking.id,
-                  startAt: squareBooking.startAt,
+                  client_id: plan.client.id as string,
+                  stylist_id: stylistIdToBookFor || '',
+                  start_time: squareBooking.startAt || slotTime,
                   status: squareBooking.status || 'ACCEPTED',
-                  services: selectedVisit!.services.map(s => s.name),
+                  services: selectedVisit!.services.map(s => ({
+                      variation_id: s.id,
+                      name: s.name,
+                  })),
+                  source: 'square',
               });
           }
 

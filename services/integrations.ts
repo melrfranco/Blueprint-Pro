@@ -1,5 +1,4 @@
 import type { Service, Stylist } from '../types';
-import { ALL_SERVICES } from '../data/mockData';
 
 // This interface defines what standard data we expect from ANY booking provider
 // (Vagaro, MindBody, Phorest, etc.)

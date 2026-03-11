@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import type { UserRole } from './types';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 
 import AdminDashboard from './components/AdminDashboardV2';

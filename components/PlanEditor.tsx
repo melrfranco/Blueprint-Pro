@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
+import type { GeneratedPlan } from '../types';
 
-const PlanEditor = ({ plan }) => {
+interface PlanEditorProps {
+  plan: GeneratedPlan;
+}
+
+const PlanEditor: React.FC<PlanEditorProps> = ({ plan }) => {
   const [loading, setLoading] = useState(false);
 
   return (

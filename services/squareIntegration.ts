@@ -1,4 +1,4 @@
-import { Service, Stylist, Client, PlanAppointment } from '../types';
+import { Service, Stylist, Client } from '../types';
 import { supabase } from '../lib/supabase';
 
 // Square API Types (Simplified)
@@ -17,7 +17,11 @@ async function squareApiFetch<T>(path: string, options: { method?: string, body?
     const { method = 'GET', body } = options;
 
     // Get the current Supabase session to pass auth to the proxy
-    const { data: { session } } = await supabase.auth.getSession();
+    let session = null;
+    if (supabase) {
+        const { data } = await supabase.auth.getSession();
+        session = data?.session;
+    }
 
     // Route all Square API calls through the server proxy to avoid CORS issues
     const headers: any = {
@@ -27,7 +31,7 @@ async function squareApiFetch<T>(path: string, options: { method?: string, body?
     };
 
     // If we have a Supabase session, use it; otherwise the proxy will fall back to stored token
-    if (session?.access_token) {
+    if (session && session.access_token) {
         headers['Authorization'] = `Bearer ${session.access_token}`;
     }
 

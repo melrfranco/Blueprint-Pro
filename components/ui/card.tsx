@@ -8,7 +8,6 @@ function cn(...classes: (string | undefined | false | null)[]) {
 }
 
 function Card({ className, ...props }: React.ComponentProps<"div">) {
-  console.log("Card component rendered with className:", className);
   return (
     <div
       data-slot="card"

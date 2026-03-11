@@ -74,6 +74,11 @@ export async function syncSquareTeamMembers(
   }));
 
   // Non-blocking: if Supabase write fails, log and return rows fetched from Square
+  if (!supabase) {
+    console.warn('[Square Team Sync] Supabase not initialized');
+    return rows;
+  }
+
   const { error } = await supabase
     .from('square_team_members')
     .upsert(rows as any, { onConflict: 'square_team_member_id' });
