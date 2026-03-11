@@ -17,6 +17,7 @@ const createCombinedServer = async () => {
     vite = await createViteServer({
       server: {
         middlewareMode: true,
+        allowedHosts: 'all',
       }
     });
     console.log('✓ Vite server initialized');
