@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, __dirname, '');
     return {
       server: {
-        port: 3000,
+        port: 5173,
         host: '0.0.0.0',
         allowedHosts: 'all',
       },
