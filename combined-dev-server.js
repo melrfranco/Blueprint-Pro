@@ -17,7 +17,9 @@ const createCombinedServer = async () => {
     vite = await createViteServer({
       server: {
         middlewareMode: true,
-      }
+        hmr: false,
+      },
+      appType: 'spa',
     });
     console.log('✓ Vite server initialized');
   } catch (err) {
