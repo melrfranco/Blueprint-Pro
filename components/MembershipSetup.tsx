@@ -39,7 +39,7 @@ export default function MembershipSetup({ onBack }: MembershipSetupProps) {
       name: 'New Tier',
       minSpend: 0,
       perks: [],
-      color: '#0B3559',
+      color: '',
     };
     updateMembershipConfig(prev => ({
       ...prev,

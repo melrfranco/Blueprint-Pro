@@ -61,7 +61,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
     const nextLevel: StylistLevel = {
       id: `lvl_${Date.now()}`,
       name: 'New Tier',
-      color: '#0B3559',
+      color: '',
       order: levels.length + 1,
       defaultPermissions: fallbackPermissions,
     };
@@ -141,7 +141,7 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
       ) : (
         stylists.map((stylist) => {
           const isEditing = editingStylist?.id === stylist.id;
-          const levelColor = levels.find(l => l.id === stylist.levelId)?.color || '#0B3559';
+          const levelColor = levels.find(l => l.id === stylist.levelId)?.color || '';
 
           return (
             <div key={stylist.id} className="bp-container-tall border-4 border bp-card-padding-md bg-card">

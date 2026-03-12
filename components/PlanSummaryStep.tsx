@@ -576,7 +576,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                         key={name}
                                         dataKey={name}
                                         stackId="a"
-                                        fill={SERVICE_COLORS[name] || '#cbd5e1'}
+                                        fill={SERVICE_COLORS[name] || 'var(--muted)'}
                                         radius={[0, 0, 0, 0]}
                                     />
                                 ))}

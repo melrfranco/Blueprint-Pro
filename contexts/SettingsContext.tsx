@@ -23,12 +23,12 @@ import { supabase } from '../lib/supabase';
 import { canCustomizeBranding } from '../utils/isEnterpriseAccount';
 import { SquareIntegrationService } from '../services/squareIntegration';
 
-// Blueprint default branding - uses Blueprint Design System v1.0.0 palette
+// Blueprint default branding - colors now handled by CSS variables/shadcn theme
 export const BLUEPRINT_DEFAULT_BRANDING: BrandingSettings = {
   salonName: 'Blueprint',
-  primaryColor: '#0B3559', /* Blueprint Navy */
-  secondaryColor: '#42708C', /* Blueprint Steel */
-  accentColor: '#5890A6', /* Blueprint Sky */
+  primaryColor: '', 
+  secondaryColor: '', 
+  accentColor: '', 
   font: 'Comfortaa',
   logoUrl: 'https://cdn.builder.io/api/v1/image/assets%2F8d6a989189ff4d9e8633804d5d0dbd86%2Fa72b6d70b1bc42b2991e3c072f2b3588?format=webp&width=800&height=1200',
 };
