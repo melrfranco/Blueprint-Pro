@@ -7,8 +7,11 @@ export default defineConfig(({ mode }) => {
     return {
       server: {
         host: '0.0.0.0',
-        allowedHosts: 'all',
+        allowedHosts: true,
         strictPort: false,
+        hmr: {
+          server: null,
+        },
       },
       plugins: [react()],
       define: {
