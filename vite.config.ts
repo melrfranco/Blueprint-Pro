@@ -8,12 +8,10 @@ export default defineConfig(({ mode }) => {
       server: {
         host: '0.0.0.0',
         allowedHosts: true,
-        strictPort: false,
-        hmr: false,
-        ws: false,
-        watch: {
-          usePolling: true,
-        },
+      },
+      preview: {
+        host: '0.0.0.0',
+        allowedHosts: true,
       },
       plugins: [react()],
       define: {
