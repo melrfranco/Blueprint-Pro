@@ -18,6 +18,7 @@ const createCombinedServer = async () => {
       server: {
         middlewareMode: true,
         hmr: false,
+        allowedHosts: 'all',
       },
       appType: 'spa',
     });
