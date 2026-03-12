@@ -15,19 +15,9 @@ const createCombinedServer = async () => {
   let vite;
   try {
     vite = await createViteServer({
-      configFile: false,
       server: {
         middlewareMode: true,
         hmr: false,
-        ws: false,
-        allowedHosts: 'all',
-      },
-      appType: 'spa',
-      plugins: [(await import('@vitejs/plugin-react')).default()],
-      resolve: {
-        alias: {
-          '@': path.resolve(__dirname, './src'),
-        },
       },
     });
     console.log('✓ Vite server initialized');
@@ -196,20 +186,34 @@ const createCombinedServer = async () => {
   });
 
   let port = 3000;
+  const portAttempts = [3000, 3001, 3002, 3003, 5173, 5174];
+  let attemptIndex = 0;
+
+  const tryListen = () => {
+    if (attemptIndex >= portAttempts.length) {
+      console.error('No available ports found');
+      process.exit(1);
+    }
+
+    port = portAttempts[attemptIndex];
+    attemptIndex++;
+
+    server.listen(port, '0.0.0.0', () => {
+      console.log(`\n⚡ Combined dev server running at http://localhost:${port}/\n`);
+    });
+  };
 
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
-      port = 3001;
-      console.log(`Port 3000 in use, trying 3001...`);
-      setTimeout(() => server.listen(port, '0.0.0.0'), 1000);
+      console.log(`Port ${port} in use, trying next port...`);
+      server.close();
+      tryListen();
     } else {
       throw err;
     }
   });
 
-  server.listen(port, '0.0.0.0', () => {
-    console.log(`\n⚡ Combined dev server running at http://localhost:${port}/\n`);
-  });
+  tryListen();
 };
 
 createCombinedServer().catch((err) => {
