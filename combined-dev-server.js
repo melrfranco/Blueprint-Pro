@@ -15,12 +15,20 @@ const createCombinedServer = async () => {
   let vite;
   try {
     vite = await createViteServer({
+      configFile: false,
       server: {
         middlewareMode: true,
         hmr: false,
+        ws: false,
         allowedHosts: 'all',
       },
       appType: 'spa',
+      plugins: [(await import('@vitejs/plugin-react')).default()],
+      resolve: {
+        alias: {
+          '@': path.resolve(__dirname, './src'),
+        },
+      },
     });
     console.log('✓ Vite server initialized');
   } catch (err) {
