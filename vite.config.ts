@@ -7,16 +7,8 @@ export default defineConfig(({ mode }) => {
     return {
       server: {
         host: '0.0.0.0',
-        port: 5173,
-        strictPort: false,
         allowedHosts: true,
-        hmr: {
-          port: 5174,
-        },
-      },
-      preview: {
-        host: '0.0.0.0',
-        allowedHosts: true,
+        hmr: false,
       },
       plugins: [react()],
       define: {
