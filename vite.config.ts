@@ -9,8 +9,9 @@ export default defineConfig(({ mode }) => {
         host: '0.0.0.0',
         allowedHosts: true,
         strictPort: false,
-        hmr: {
-          server: null,
+        hmr: false,
+        watch: {
+          usePolling: true,
         },
       },
       plugins: [react()],
