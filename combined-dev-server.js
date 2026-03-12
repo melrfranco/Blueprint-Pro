@@ -17,7 +17,12 @@ const createCombinedServer = async () => {
     vite = await createViteServer({
       server: {
         middlewareMode: true,
-        hmr: false,
+        hmr: {
+          protocol: 'ws',
+          host: 'localhost',
+          port: 24678,
+          timeout: 60000,
+        },
       },
     });
     console.log('✓ Vite server initialized');

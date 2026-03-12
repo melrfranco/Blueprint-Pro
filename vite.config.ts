@@ -9,7 +9,12 @@ export default defineConfig(({ mode }) => {
         host: '0.0.0.0',
         allowedHosts: 'all',
         strictPort: false,
-        hmr: false,
+        hmr: {
+          protocol: 'ws',
+          host: 'localhost',
+          port: 24678,
+          timeout: 60000,
+        },
       },
       plugins: [react()],
       define: {
