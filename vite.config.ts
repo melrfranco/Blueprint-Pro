@@ -10,6 +10,7 @@ export default defineConfig(({ mode }) => {
         allowedHosts: true,
         strictPort: false,
         hmr: false,
+        ws: false,
         watch: {
           usePolling: true,
         },
