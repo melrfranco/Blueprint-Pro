@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { useTheme } from '../contexts/ThemeContext';
 
 const LoginScreen: React.FC = () => {
+  const { setTheme } = useTheme();
   const [showStylistLogin, setShowStylistLogin] = useState(false);
+
+  useEffect(() => {
+    setTheme('light');
+  }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);

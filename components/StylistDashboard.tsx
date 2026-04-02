@@ -55,7 +55,7 @@ export default function StylistDashboard() {
   const renderDashboard = () => (
     <div className="bp-page">
       <h1 className="bp-page-title">My Dashboard</h1>
-      <p className="bp-subtitle pl-4 mb-8">{user?.name || 'Stylist'}</p>
+      <p className="bp-subtitle">{user?.name || 'Stylist'}</p>
 
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">

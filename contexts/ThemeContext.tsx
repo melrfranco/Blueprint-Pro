@@ -32,9 +32,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
     if (storedTheme) {
       setThemeState(storedTheme);
-    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setThemeState('dark');
     }
+    // No OS preference detection — light mode is the app default
 
     setMounted(true);
   }, []);

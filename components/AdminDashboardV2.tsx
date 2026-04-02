@@ -66,7 +66,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
   const renderDashboard = () => (
     <div className="bp-page">
       <h1 className="bp-page-title">Dashboard</h1>
-      {user?.name && <p className="bp-subtitle mb-8 pl-4">Welcome back, {user.name.split(' ')[0]}</p>}
+      {user?.name && <p className="bp-subtitle">Welcome back, {user.name.split(' ')[0]}</p>}
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="col-span-2 p-8 bg-primary text-primary-foreground bp-container-list border-4 border-primary shadow-lg hover:shadow-xl transition-shadow">
           <div className="flex flex-col items-center justify-center text-center h-full py-4">
@@ -244,7 +244,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
 
     return (
       <div className="bp-page">
-        <h1 className="bp-page-title mb-8">Settings</h1>
+        <h1 className="bp-page-title">Settings</h1>
         <div className="grid grid-cols-2 gap-6 mb-8">
           <button onClick={() => setActiveSettingsView('account')} className="p-8 bg-card border border-border bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
             <SettingsIcon className="w-10 h-10 text-primary" />
@@ -275,9 +275,9 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
 
   const renderPlans = () => (
     <div className="bp-page">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="bp-page-title">Plans</h1>
-        <button onClick={() => setIsCreatingPlan(true)} className="px-8 py-3 rounded-full text-sm active:scale-95 transition-transform shadow-lg hover:shadow-xl bp-btn-primary">+ NEW PLAN</button>
+      <h1 className="bp-page-title">Plans</h1>
+      <div className="flex justify-end mb-6">
+        <button onClick={() => setIsCreatingPlan(true)} className="px-8 py-3 text-sm active:scale-95 transition-transform shadow-lg hover:shadow-xl bp-btn-primary">+ NEW PLAN</button>
       </div>
       <div className="space-y-4">
         {plans.length === 0 ? (
