@@ -59,15 +59,15 @@ export default function StylistDashboard() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="bg-card p-4 bp-container-list border border-border shadow-sm text-center elevated-card">
+        <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
           <p className="text-2xl bp-stat-value text-foreground">{activePlans}</p>
           <p className="bp-caption mt-1">Active Plans</p>
         </div>
-        <div className="bg-card p-4 bp-container-list border border-border shadow-sm text-center elevated-card">
+        <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
           <p className="text-2xl bp-stat-value text-foreground">{totalClients}</p>
           <p className="bp-caption mt-1">Clients</p>
         </div>
-        <div className="bg-card p-4 bp-container-list border border-border shadow-sm text-center elevated-card">
+        <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
           <p className="text-2xl bp-stat-value text-foreground">{formatCurrency(totalRevenue)}</p>
           <p className="bp-caption mt-1">Pipeline</p>
         </div>
@@ -77,13 +77,13 @@ export default function StylistDashboard() {
       <div className="mb-6">
         <h2 className="bp-section-title mb-4 pl-4">Upcoming Appointments</h2>
         {upcomingAppointments.length === 0 ? (
-          <div className="bg-card p-6 bp-container-list border border-border shadow-sm text-center elevated-card">
+          <div className="bg-card p-6 bp-container-list shadow-sm text-center elevated-card">
             <p className="bp-body-sm text-muted-foreground">No upcoming appointments</p>
           </div>
         ) : (
           <div className="space-y-3">
             {upcomingAppointments.map((appt, i) => (
-              <div key={i} className="bg-card p-4 bp-container-list border border-border shadow-sm flex items-center justify-between elevated-card">
+              <div key={i} className="bg-card p-4 bp-container-list shadow-sm flex items-center justify-between elevated-card">
                 <div>
                   <p className="font-bold text-sm text-foreground">{appt.clientName}</p>
                   <p className="bp-caption mt-0.5">
@@ -115,7 +115,7 @@ export default function StylistDashboard() {
       <div>
         <h2 className="bp-section-title mb-4 pl-4">My Plans</h2>
         {myPlans.length === 0 ? (
-          <div className="bg-card p-6 bp-container-list border border-border shadow-sm text-center elevated-card">
+          <div className="bg-card p-6 bp-container-list shadow-sm text-center elevated-card">
             <p className="bp-body-sm text-muted-foreground">No plans yet — create your first one!</p>
           </div>
         ) : (
@@ -124,7 +124,7 @@ export default function StylistDashboard() {
               <button
                 key={plan.id}
                 onClick={() => setEditingPlan(plan)}
-                className="w-full text-left p-4 bg-card bp-container-list border border-border shadow-sm flex items-center justify-between active:scale-95 transition-all elevated-card"
+                className="w-full text-left p-4 bg-card bp-container-list shadow-sm flex items-center justify-between active:scale-95 transition-all elevated-card"
               >
                 <div>
                   <p className="font-bold text-sm text-foreground">{plan.client?.name || 'Client'}</p>
@@ -158,7 +158,7 @@ export default function StylistDashboard() {
 
       <div className="space-y-4">
         {myPlans.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-card border border-border bp-container-list shadow-sm">
+          <div className="flex flex-col items-center justify-center py-20 bg-card bp-container-list shadow-sm elevated-card">
             <p className="bp-section-title mb-2">No plans yet</p>
             <p className="bp-overline">Create your first plan above!</p>
           </div>
@@ -167,7 +167,7 @@ export default function StylistDashboard() {
             <button
               key={plan.id}
               onClick={() => setEditingPlan(plan)}
-              className="w-full text-left bp-card-padding-md bg-card border border-border bp-container-list shadow-sm hover:shadow-md active:scale-95 transition-all elevated-card"
+              className="w-full text-left bp-card-padding-md bg-card bp-container-list shadow-sm hover:shadow-md active:scale-95 transition-all elevated-card"
             >
               <div className="flex justify-between items-start mb-3">
                 <h3 className="bp-card-title">{plan.client?.name || 'Unnamed Client'}</h3>

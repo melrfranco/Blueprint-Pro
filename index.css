@@ -564,7 +564,7 @@
     font-size: 1.125rem;
     font-weight: 700;
     letter-spacing: -0.01em;
-    color: var(--foreground);
+    color: var(--secondary);
   }
 
   .bp-card-title {
@@ -581,7 +581,7 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--muted-foreground);
+    color: var(--secondary);
   }
 
   .bp-subtitle {

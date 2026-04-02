@@ -74,20 +74,20 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
             <p className="text-5xl bp-stat-value text-primary-foreground">${totalPipeline.toLocaleString()}</p>
           </div>
         </div>
-        <div className="bg-card p-6 bp-container-list border border-border shadow-sm hover:shadow-md transition-all elevated-card">
+        <div className="bg-card p-6 bp-container-list shadow-sm hover:shadow-md transition-all elevated-card">
           <div className="flex flex-col items-center justify-center text-center">
             <p className="bp-overline mb-3">Active Plans</p>
             <p className="text-4xl bp-stat-value">{stats.activePlansCount}</p>
           </div>
         </div>
-        <div className="bg-card p-6 bp-container-list border border-border shadow-sm hover:shadow-md transition-all elevated-card">
+        <div className="bg-card p-6 bp-container-list shadow-sm hover:shadow-md transition-all elevated-card">
           <div className="flex flex-col items-center justify-center text-center">
             <p className="bp-overline mb-3">Total Clients</p>
             <p className="text-4xl bp-stat-value">{clients.length}</p>
           </div>
         </div>
       </div>
-      <div className="bg-card p-7 bp-container-tall border border-border shadow-sm hover:shadow-md transition-shadow mb-6">
+      <div className="bg-card p-7 bp-container-tall shadow-sm hover:shadow-md transition-shadow mb-6 elevated-card">
         <h3 className="bp-section-title mb-4">Pipeline Growth</h3>
         <div className="w-full h-56 p-2">
           <ResponsiveContainer width="100%" height="100%">
@@ -246,24 +246,24 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
       <div className="bp-page">
         <h1 className="bp-page-title">Settings</h1>
         <div className="grid grid-cols-2 gap-6 mb-8">
-          <button onClick={() => setActiveSettingsView('account')} className="p-8 bg-card border border-border bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
+          <button onClick={() => setActiveSettingsView('account')} className="p-8 bg-card bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
             <SettingsIcon className="w-10 h-10 text-primary" />
             <span className="bp-overline">Account</span>
           </button>
-          <button onClick={() => setActiveSettingsView('appearance')} className="p-8 bg-card border border-border bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
+          <button onClick={() => setActiveSettingsView('appearance')} className="p-8 bg-card bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
             <SunIcon className="w-10 h-10 text-primary" />
             <span className="bp-overline">Appearance</span>
           </button>
-          <button onClick={() => setActiveSettingsView('teamAccess')} className="p-8 bg-card border border-border bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
+          <button onClick={() => setActiveSettingsView('teamAccess')} className="p-8 bg-card bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
             <UsersIcon className="w-10 h-10 text-primary" />
             <span className="bp-overline">Team Access</span>
           </button>
-          <button onClick={() => setActiveSettingsView('memberships')} className="p-8 bg-card border border-border bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
+          <button onClick={() => setActiveSettingsView('memberships')} className="p-8 bg-card bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
             <CheckCircleIcon className="w-10 h-10 text-primary" />
             <span className="bp-overline">Memberships</span>
           </button>
           {canCustomizeBranding(user) && (
-            <button onClick={() => setActiveSettingsView('branding')} className="p-8 bg-card border border-border bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
+            <button onClick={() => setActiveSettingsView('branding')} className="p-8 bg-card bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
               <GlobeIcon className="w-10 h-10 text-primary" />
               <span className="bp-overline">Branding</span>
             </button>
@@ -281,7 +281,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
       </div>
       <div className="space-y-4">
         {plans.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-card border border-border bp-container-list shadow-sm">
+          <div className="flex flex-col items-center justify-center py-20 bg-card bp-container-list shadow-sm elevated-card">
             <p className="bp-section-title mb-2">No plans yet</p>
             <p className="bp-overline">Create your first plan to get started</p>
           </div>
@@ -290,7 +290,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
             <button
               key={plan.id}
               onClick={() => setEditingPlan(plan)}
-              className="w-full text-left bp-card-padding-md bg-card border border-border bp-container-list shadow-sm hover:shadow-md active:scale-95 transition-all elevated-card"
+              className="w-full text-left bp-card-padding-md bg-card bp-container-list shadow-sm hover:shadow-md active:scale-95 transition-all elevated-card"
             >
               <div className="flex justify-between items-start mb-3">
                 <h3 className="bp-card-title">{plan.client?.name || 'Unnamed Client'}</h3>
