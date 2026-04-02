@@ -70,42 +70,46 @@
 }
 
 .dark {
-  --background: oklch(0.12 0.022 252);
-  --foreground: oklch(0.96 0.008 240);
+  /* Navy ↔ White swap: dark navy takes the background/surface role,
+     near-white takes the primary/accent role. Same palette as light mode. */
+  --background: oklch(0.14 0.06 251);
+  --foreground: oklch(0.94 0.008 238);
 
-  --card: oklch(0.17 0.015 244);
-  --card-foreground: oklch(0.93 0.015 244);
+  --card: oklch(0.21 0.07 251);
+  --card-foreground: oklch(0.94 0.008 238);
 
-  --popover: oklch(0.17 0.015 244);
-  --popover-foreground: oklch(0.93 0.015 244);
+  --popover: oklch(0.21 0.07 251);
+  --popover-foreground: oklch(0.94 0.008 238);
 
-  --primary: oklch(0.72 0.10 248);
-  --primary-foreground: oklch(0.10 0.012 248);
+  /* Near-white becomes the primary — the exact swap of light mode */
+  --primary: oklch(0.93 0.008 235);
+  --primary-foreground: oklch(0.16 0.08 251);
 
-  --secondary: oklch(0.62 0.07 242);
-  --secondary-foreground: oklch(0.10 0.012 248);
+  --secondary: oklch(0.76 0.03 238);
+  --secondary-foreground: oklch(0.14 0.06 251);
 
-  --muted: oklch(0.14 0.015 246);
-  --muted-foreground: oklch(0.76 0.025 242);
+  --muted: oklch(0.18 0.06 251);
+  --muted-foreground: oklch(0.78 0.02 240);
 
-  --accent: oklch(0.35 0.05 234);
-  --accent-foreground: oklch(0.93 0.015 244);
+  --accent: oklch(0.65 0.06 242);
+  --accent-foreground: oklch(0.94 0.008 238);
 
   --destructive: oklch(0.63 0.2 28);
   --destructive-foreground: oklch(0.98 0.004 240);
 
-  --border: oklch(0.36 0.045 244);
-  --input: oklch(0.23 0.03 244);
-  --ring: oklch(0.72 0.10 248);
-  --card-border: color-mix(in oklab, var(--primary) 45%, var(--card));
+  --border: oklch(0.30 0.08 251);
+  --input: oklch(0.22 0.07 251);
+  --ring: oklch(0.88 0.04 238);
+  --card-border: color-mix(in oklab, var(--primary) 38%, var(--card));
 
-  --panel: oklch(0.19 0.02 246);
-  --panel-foreground: oklch(0.93 0.015 244);
-  --panel-border: oklch(0.60 0.09 244);
-  --panel-inner-border: oklch(0.34 0.04 244);
+  --panel: oklch(0.18 0.07 251);
+  --panel-foreground: oklch(0.94 0.008 238);
+  --panel-border: oklch(0.62 0.05 240);
+  --panel-inner-border: oklch(0.32 0.08 251);
 
-  --grid-line: color-mix(in oklab, var(--primary) 20%, transparent);
-  --grid-line-strong: color-mix(in oklab, var(--primary) 32%, transparent);
+  /* Light grid lines on dark navy = real blueprint look */
+  --grid-line: color-mix(in oklab, var(--primary) 10%, transparent);
+  --grid-line-strong: color-mix(in oklab, var(--primary) 18%, transparent);
 
   --shell-shadow:
     0 0 0 1px color-mix(in oklab, var(--primary) 18%, transparent),
@@ -727,19 +731,19 @@
   }
 
   :is(.dark) .bp-bottomnav {
-    background: oklch(0.18 0.03 240);
-    border-top: 1px solid oklch(0.38 0.055 232);
+    background: oklch(0.18 0.07 251);
+    border-top: 1px solid oklch(0.28 0.08 251);
     box-shadow:
       0 -4px 24px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
 
   :is(.dark) .bp-bottomnav button {
-    color: oklch(0.92 0.015 236);
+    color: oklch(0.88 0.012 238);
   }
 
   :is(.dark) .bp-bottomnav button:not([aria-current='page']) {
-    opacity: 0.65;
+    opacity: 0.55;
   }
 
   /* page header bar */
