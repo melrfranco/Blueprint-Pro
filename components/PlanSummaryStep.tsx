@@ -444,12 +444,10 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
     return (
         <div className="flex flex-col h-full bg-background relative">
-            <div className="flex-grow p-4 overflow-y-auto text-foreground">
-                <div className="mb-6 flex justify-between items-end border-b pb-4 border-border">
-                    <div>
-                        <h1 className="bp-page-title leading-none mb-1">Blueprint Summary</h1>
-                        <p className="bp-subtitle pl-4">{plan.client.name}</p>
-                    </div>
+            <div className="flex-grow p-5 overflow-y-auto text-foreground">
+                <h1 className="bp-page-title">Blueprint Summary</h1>
+                <p className="bp-subtitle">{plan.client.name}</p>
+                <div className="flex justify-end mb-6">
                     <span className={`bp-overline px-4 py-1.5 bp-container-compact border-2 shadow-sm ${isPlanActive ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted text-foreground border-foreground/40'}`}>
                         {isPlanActive ? 'PUBLISHED' : 'DRAFT'}
                     </span>
@@ -586,7 +584,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                     <div className="mt-6 flex flex-wrap gap-3 justify-center">
                         {serviceLegend.map((name: string) => (
                             <div key={name} className="flex items-center space-x-2">
-                                <div className="w-3 h-3 rounded-full bg-accent"></div>
+                                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: SERVICE_COLORS[name] || 'var(--accent)' }}></div>
                                 <span className="bp-caption text-muted-foreground">{name}</span>
                             </div>
                         ))}
@@ -670,7 +668,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                     {!isClient && membershipConfig.enabled && (
                         <button
                             onClick={() => setMembershipModalOpen(true)}
-                            className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all text-black bg-sky-100`}
+                            className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all border-2 border-secondary bg-secondary text-secondary-foreground`}
                         >
                             {isMemberOffered || isMemberActive ? <CheckCircleIcon className="w-6 h-6" /> : <PlusIcon className="w-6 h-6" />}
                             <span>{isMemberOffered ? 'INVITATION SENT' : isMemberActive ? 'MEMBERSHIP ACTIVE' : 'SEND MEMBERSHIP INVITATION'}</span>
