@@ -38,20 +38,20 @@ const LoginScreen: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      <Card className="relative mx-auto w-full max-w-3xl overflow-hidden rounded-[2rem] border-[5px] border-primary bg-card shadow-[0_0_0_1px_rgba(67,104,138,0.18),0_20px_60px_rgba(8,37,71,0.12)]">
-        <div className="pointer-events-none absolute inset-4 rounded-[1.5rem] border border-border/80" />
+      <Card className="relative mx-auto w-full max-w-3xl bp-shell">
+        <div className="pointer-events-none absolute inset-0.75rem rounded-[1.35rem] border border-[color:var(--panel-inner-border)]" style={{ opacity: 0.9 }} />
 
         <CardContent className="px-6 py-8 sm:px-10 sm:py-12">
           <div className="mx-auto flex max-w-md flex-col items-center text-center">
             <header className="mb-10">
               <h1
-                className="text-primary text-5xl font-black uppercase leading-none tracking-tight sm:text-7xl"
+                className="bp-title text-5xl sm:text-7xl text-primary"
                 aria-label="BLUEPRINT Salon Software"
               >
                 BLUEPRINT
               </h1>
 
-              <p className="mt-2 text-2xl font-light tracking-tight text-foreground/85 sm:text-3xl">
+              <p className="mt-2 text-2xl sm:text-3xl font-light tracking-tight text-foreground/85">
                 Salon Software
               </p>
             </header>
@@ -59,14 +59,13 @@ const LoginScreen: React.FC = () => {
             <div className="w-full space-y-6" role="group" aria-label="Authentication options">
               <div className="flex items-center gap-4">
                 <Separator className="flex-1" />
-                <span className="text-muted-foreground text-xs font-bold uppercase tracking-[0.28em]">
+                <span className="bp-label">
                   Admin Access
                 </span>
                 <Separator className="flex-1" />
               </div>
 
               <Button
-                className="h-14 w-full"
                 onClick={startSquareOAuth}
                 aria-label="Log in with Square for admin access"
               >
@@ -75,7 +74,7 @@ const LoginScreen: React.FC = () => {
 
               <div className="flex items-center gap-4 pt-2">
                 <Separator className="flex-1" />
-                <span className="text-muted-foreground text-xs font-bold uppercase tracking-[0.28em]">
+                <span className="bp-label">
                   Team Access
                 </span>
                 <Separator className="flex-1" />
@@ -85,7 +84,6 @@ const LoginScreen: React.FC = () => {
                 <div className="space-y-3">
                   <Button
                     variant="secondary"
-                    className="h-14 w-full"
                     onClick={() => setShowStylistLogin(true)}
                     aria-label="Stylist login"
                   >
@@ -108,7 +106,7 @@ const LoginScreen: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Email"
-                    className="w-full h-14 px-4 rounded-full border-2 font-medium outline-none bg-input-background text-foreground focus:border-ring transition-all text-sm"
+                    className="bp-field"
                     required
                   />
                   <input
@@ -116,7 +114,7 @@ const LoginScreen: React.FC = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
-                    className="w-full h-14 px-4 rounded-full border-2 font-medium outline-none bg-input-background text-foreground focus:border-ring transition-all text-sm"
+                    className="bp-field"
                     required
                   />
                   {error && (
@@ -126,7 +124,6 @@ const LoginScreen: React.FC = () => {
                     variant="secondary"
                     type="submit"
                     disabled={loading}
-                    className="h-14 w-full"
                   >
                     {loading ? 'Signing in...' : 'Sign In'}
                   </Button>

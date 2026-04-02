@@ -8,14 +8,17 @@ function cn(...classes: (string | undefined | false | null)[]) {
 }
 
 function Card({ className, ...props }: React.ComponentProps<"div">) {
-  console.log("Card component rendered with className:", className);
   return (
     <div
       data-slot="card"
       className={cn(
-        "bg-card text-card-foreground flex flex-col gap-6 bp-container-tall border border-border shadow-sm",
+        "relative overflow-hidden rounded-[2rem] border-4 bg-card text-card-foreground",
         className,
       )}
+      style={{
+        borderColor: 'var(--panel-border)',
+        boxShadow: 'var(--shell-shadow)',
+      }}
       {...props}
     />
   );
