@@ -471,6 +471,180 @@
     background: color-mix(in oklab, var(--panel-border) 20%, transparent);
   }
 
+  /* ── Shape system ── */
+  .bp-container-compact {
+    border-radius: 9999px;
+  }
+
+  .bp-container-tall {
+    border-radius: 1.125rem;
+  }
+
+  .bp-container-list {
+    border-radius: 1.125rem;
+  }
+
+  /* ── Typography tokens ── */
+  .bp-page-title {
+    font-family: var(--font-heading);
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: var(--foreground);
+    display: inline-block;
+    padding: 0.15em 0.4em 0.15em 0;
+  }
+
+  .bp-page-subtitle {
+    font-family: var(--font-heading);
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+    color: var(--foreground);
+  }
+
+  .bp-section-title {
+    font-family: var(--font-heading);
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--foreground);
+  }
+
+  .bp-card-title {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--foreground);
+  }
+
+  .bp-overline {
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  .bp-subtitle {
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+
+  .bp-body-sm {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--muted-foreground);
+  }
+
+  .bp-caption {
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--muted-foreground);
+  }
+
+  /* ── Card padding variants ── */
+  .bp-card-padding-sm {
+    padding: 0.75rem 1rem;
+  }
+
+  .bp-card-padding-md {
+    padding: 1.25rem 1.25rem;
+  }
+
+  .bp-card-padding-lg {
+    padding: 1.75rem 1.75rem;
+  }
+
+  /* ── Elevated card ── */
+  .elevated-card {
+    box-shadow:
+      0 2px 8px rgba(11, 53, 89, 0.07),
+      0 1px 2px rgba(11, 53, 89, 0.05);
+    transition: box-shadow 0.15s ease, transform 0.1s ease;
+  }
+
+  .elevated-card:hover {
+    box-shadow:
+      0 6px 20px rgba(11, 53, 89, 0.1),
+      0 2px 4px rgba(11, 53, 89, 0.07);
+    transform: translateY(-1px);
+  }
+
+  /* ── Primary action button ── */
+  .bp-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in oklab, var(--primary) 70%, black);
+    background: linear-gradient(
+      to bottom,
+      color-mix(in oklab, var(--primary) 92%, white),
+      var(--primary)
+    );
+    color: var(--primary-foreground);
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    min-height: 3rem;
+    padding: 0.5rem 1.5rem;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.18),
+      0 6px 18px rgba(11, 53, 89, 0.16);
+    transition: filter 0.15s ease, transform 0.1s ease;
+    cursor: pointer;
+  }
+
+  .bp-btn-primary:hover {
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+  }
+
+  .bp-btn-primary:active {
+    transform: translateY(0);
+    filter: brightness(0.97);
+  }
+
+  .bp-btn-primary:disabled {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+
+  /* ── Back navigation button ── */
+  .bp-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary);
+    background: color-mix(in oklab, var(--primary) 8%, transparent);
+    border: 1px solid color-mix(in oklab, var(--primary) 20%, transparent);
+    border-radius: 9999px;
+    padding: 0.375rem 0.875rem;
+    transition: background 0.15s ease;
+  }
+
+  .bp-back:hover {
+    background: color-mix(in oklab, var(--primary) 14%, transparent);
+  }
+
   /* page content wrapper - universal margins */
   .bp-content {
     @apply px-5 py-5 sm:px-8 sm:py-6;
