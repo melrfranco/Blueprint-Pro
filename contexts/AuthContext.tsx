@@ -161,31 +161,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         }
       }
 
-      if ((import.meta as any).env?.VITE_BYPASS_LOGIN === '1') {
-        console.log('[AuthContext] VITE_BYPASS_LOGIN=1, auto-logging in as mock admin');
-        const mockAdmin: User = {
-          id: 'admin',
-          name: 'Admin',
-          role: 'admin' as UserRole,
-          isMock: true,
-        };
-        localStorage.setItem('mock_admin_user', JSON.stringify(mockAdmin));
-        if (active) {
-          setUser(mockAdmin);
-          setAuthInitialized(true);
-        }
-        return;
-      }
 
       if (active) setAuthInitialized(true);
     };
 
-    // BYPASS: Skip Supabase entirely when VITE_BYPASS_LOGIN=1
-    if ((import.meta as any).env?.VITE_BYPASS_LOGIN === '1') {
-      console.log('[AuthContext] VITE_BYPASS_LOGIN=1 — skipping Supabase auth entirely');
-      fallbackToMockOrBypass();
-      return;
-    }
 
     if (!supabase) {
       console.log('[AuthContext] No Supabase client');
