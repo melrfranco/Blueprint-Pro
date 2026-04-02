@@ -54,7 +54,7 @@ export default function StylistDashboard() {
 
   const renderDashboard = () => (
     <div className="bp-page">
-      <h1 className="bp-page-title mb-1">My Dashboard</h1>
+      <h1 className="bp-page-title">My Dashboard</h1>
       <p className="bp-subtitle pl-4 mb-8">{user?.name || 'Stylist'}</p>
 
       {/* Quick Stats */}
@@ -146,7 +146,7 @@ export default function StylistDashboard() {
 
   const renderPlans = () => (
     <div className="bp-page">
-      <h1 className="bp-page-title mb-8">My Plans</h1>
+      <h1 className="bp-page-title">My Plans</h1>
 
       <button
         data-ui="button"
