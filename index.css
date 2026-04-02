@@ -72,10 +72,10 @@
   --background: oklch(0.13 0.02 252);
   --foreground: oklch(0.95 0.01 240);
 
-  --card: oklch(0.16 0.02 252);
+  --card: oklch(0.22 0.028 240);
   --card-foreground: oklch(0.95 0.01 240);
 
-  --popover: oklch(0.16 0.02 252);
+  --popover: oklch(0.22 0.028 240);
   --popover-foreground: oklch(0.95 0.01 240);
 
   --primary: oklch(0.68 0.07 228);
@@ -493,7 +493,11 @@
     line-height: 1.1;
     color: var(--foreground);
     display: inline-block;
-    padding: 0.15em 0.4em 0.15em 0;
+    padding: 0.3em 1rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 6px rgba(11, 53, 89, 0.07);
   }
 
   .bp-page-subtitle {
@@ -623,6 +627,19 @@
   .bp-btn-primary:disabled {
     pointer-events: none;
     opacity: 0.5;
+  }
+
+  /* ── Bottom nav button text override (ensures contrast when primary bg is light in dark mode) ── */
+  .bp-bottomnav button {
+    color: var(--primary-foreground);
+  }
+
+  .bp-bottomnav button:not([aria-current='page']) {
+    opacity: 0.72;
+  }
+
+  .bp-bottomnav button[aria-current='page'] {
+    opacity: 1;
   }
 
   /* ── Back navigation button ── */
