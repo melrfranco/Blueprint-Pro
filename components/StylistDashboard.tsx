@@ -317,7 +317,7 @@ export default function StylistDashboard() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background pb-24">
+    <div className="flex flex-col h-full bg-background">
       {renderActiveTab()}
       <BottomNav activeTab={activeTab} onChange={handleTabChange} />
     </div>

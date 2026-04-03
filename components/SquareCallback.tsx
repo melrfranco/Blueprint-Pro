@@ -202,9 +202,6 @@ export default function SquareCallback() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-background">
-      <div className="relative w-full max-w-xs h-2 bg-muted mb-4 bp-container-compact overflow-hidden">
-        <div className="absolute top-0 left-0 h-2 bg-secondary bp-container-compact animate-pulse w-full"></div>
-      </div>
       <div className="w-24 h-24 border-4 border-secondary border-t-transparent rounded-full animate-spin mb-8"></div>
       <h2 className="bp-section-title mb-2">Connecting Square</h2>
       <p className="bp-body text-muted-foreground">Setting up your account...</p>

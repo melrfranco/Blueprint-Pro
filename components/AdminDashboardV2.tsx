@@ -78,6 +78,21 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
     });
   }, [plans]);
 
+  const plansByMonth = useMemo(() => {
+    const counts = new Map<string, number>();
+    plans.forEach(plan => {
+      const d = new Date(plan.createdAt);
+      const key = d.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+      counts.set(key, (counts.get(key) || 0) + 1);
+    });
+    const today = new Date();
+    return Array.from({ length: 6 }, (_, i) => {
+      const d = new Date(today.getFullYear(), today.getMonth() - (5 - i), 1);
+      const key = d.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+      return { name: key, count: counts.get(key) || 0 };
+    });
+  }, [plans]);
+
   const hasPinnedCustomization = user?.id ? pinnedReports[String(user.id)] !== undefined : false;
 
   const renderDashboard = () => (
@@ -91,17 +106,25 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
             <p className="text-5xl bp-stat-value text-primary-foreground">${totalPipeline.toLocaleString()}</p>
           </div>
         </div>
-        <div className="bg-card p-6 bp-container-list shadow-sm hover:shadow-md transition-all elevated-card">
-          <div className="flex flex-col items-center justify-center text-center">
-            <p className="bp-overline mb-3">Active Plans</p>
-            <p className="text-4xl bp-stat-value">{stats.activePlansCount}</p>
-          </div>
+        <div className="bg-card p-4 bp-container-list shadow-sm hover:shadow-md transition-all elevated-card">
+          <p className="bp-overline mb-1 text-center">Active Plans</p>
+          <p className="text-4xl bp-stat-value text-center mb-1">{stats.activePlansCount}</p>
+          <ResponsiveContainer width="100%" height={36}>
+            <AreaChart data={plansByMonth} margin={{ top: 2, right: 4, left: 4, bottom: 0 }}>
+              <Area type="monotone" dataKey="count" stroke="var(--accent)" fill="var(--accent)" fillOpacity={0.35} strokeWidth={2} dot={false} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
-        <div className="bg-card p-6 bp-container-list shadow-sm hover:shadow-md transition-all elevated-card">
-          <div className="flex flex-col items-center justify-center text-center">
-            <p className="bp-overline mb-3">Total Clients</p>
-            <p className="text-4xl bp-stat-value">{clients.length}</p>
+        <div className="bg-card p-4 bp-container-list shadow-sm hover:shadow-md transition-all elevated-card">
+          <p className="bp-overline mb-1 text-center">Total Clients</p>
+          <p className="text-4xl bp-stat-value text-center mb-2">{clients.length}</p>
+          <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+            <div
+              className="h-2 rounded-full bg-accent transition-all"
+              style={{ width: `${Math.min(100, (clients.length / Math.max(clients.length, 50)) * 100)}%` }}
+            />
           </div>
+          <p className="bp-caption text-center mt-1">{clients.length >= 50 ? 'Full roster' : `${50 - clients.length} to next milestone`}</p>
         </div>
       </div>
       <div className="bg-card p-7 bp-container-tall shadow-sm hover:shadow-md transition-shadow mb-6 elevated-card">
@@ -411,7 +434,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background pb-24">
+    <div className="flex flex-col h-full bg-background">
       {renderActiveTab()}
       <BottomNav activeTab={activeTab} onChange={handleTabChange} />
       <SaveToast visible={toastVisible} onDone={hideToast} />
