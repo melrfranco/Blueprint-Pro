@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import type { Service } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
 import { useAuth } from '../contexts/AuthContext';
-import { PlusIcon, CheckCircleIcon } from './icons';
+import { PlusIcon, CheckCircleIcon, ChevronLeftIcon } from './icons';
 
 interface SelectServicesStepProps {
     availableServices: Service[];
@@ -77,7 +77,11 @@ const SelectServicesStep: React.FC<SelectServicesStepProps> = ({ availableServic
 
     return (
         <div className="flex flex-col h-full relative">
-            <div className="p-4 flex-shrink-0 bg-card z-10 border-b-4 border-primary">
+            <div className="p-4 flex-shrink-0 bg-card z-10 border-b-4 border-primary relative">
+                <button onClick={onBack} className="absolute top-4 left-4 flex items-center gap-1 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+                    <ChevronLeftIcon className="w-4 h-4" />
+                    Back
+                </button>
                 <h1 className="bp-page-title text-center mb-4">Service Selection</h1>
                 <div className="relative">
                     <input
@@ -143,16 +147,13 @@ const SelectServicesStep: React.FC<SelectServicesStepProps> = ({ availableServic
                 ))}
             </div>
 
-            <div className="sticky bottom-0 p-5 bg-card border-t-8 border-primary z-40 pb-28 flex-shrink-0 shadow-lg">
+            <div className="sticky bottom-0 p-5 bg-card border-t-8 border-primary z-40 pb-6 flex-shrink-0 shadow-lg">
                 <button
                     onClick={handleNext}
                     disabled={selectedIds.size === 0}
-                    className="w-full bg-primary text-primary-foreground font-bold py-5 px-4 bp-container-compact shadow-2xl active:scale-95 transition-all disabled:opacity-40 disabled:shadow-none mb-4 text-xl border-b-8 border-black/20"
+                    className="w-full bg-primary text-primary-foreground font-bold py-5 px-4 bp-container-compact shadow-2xl active:scale-95 transition-all disabled:opacity-40 disabled:shadow-none text-xl border-b-8 border-black/20"
                 >
                     CONFIRM ({selectedIds.size})
-                </button>
-                <button onClick={onBack} className="w-full font-semibold py-2 uppercase text-xs tracking-[0.2em] opacity-40 hover:opacity-100 transition-opacity text-foreground">
-                    Return to Client
                 </button>
             </div>
         </div>

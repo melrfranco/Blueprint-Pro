@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Service, PlanDetails, Client } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
+import { ChevronLeftIcon } from './icons';
 
 interface SetDatesStepProps {
   selectedServices: Service[];
@@ -54,13 +55,19 @@ const SetDatesStep: React.FC<SetDatesStepProps> = ({ selectedServices, planDetai
 
 
   return (
-    <div className="flex flex-col h-full p-4 pb-12">
-      <div className="text-center p-4">
+    <div className="flex flex-col h-full">
+      <div className="pt-3 pl-3 flex-shrink-0">
+        <button onClick={onBack} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+          <ChevronLeftIcon className="w-4 h-4" />
+          Back
+        </button>
+      </div>
+      <div className="text-center px-4 pb-4">
         <div className="relative w-full h-2 mb-4 rounded-full bg-muted"><div className="absolute top-0 left-0 h-2 bg-secondary bp-container-compact w-1/3"></div></div>
         <h1 className="text-2xl font-bold text-foreground">First Service Date</h1>
       </div>
 
-      <div className="flex-grow overflow-y-auto p-4 space-y-6">
+      <div className="flex-grow overflow-y-auto px-4 pb-4 space-y-6">
         {selectedServices.map(service => (
           <div key={service.id} className="p-4 bp-container-tall border border shadow-sm bg-muted">
             <h3 className="font-bold text-lg mb-3 text-foreground">{service.name}</h3>
@@ -118,9 +125,8 @@ const SetDatesStep: React.FC<SetDatesStepProps> = ({ selectedServices, planDetai
         ))}
       </div>
 
-      <div className="p-4 mt-auto space-y-3 bg-card border-t border">
+      <div className="p-4 mt-auto bg-card border-t border">
         <button onClick={() => onNext(localDetails)} disabled={isNextDisabled} className="w-full font-bold py-4 px-4 bp-container-compact shadow-lg transition-transform transform hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed bg-primary text-primary-foreground">Next Step</button>
-        <button onClick={onBack} className="w-full bg-transparent font-bold py-2 px-4 text-muted-foreground">Back</button>
       </div>
     </div>
   );

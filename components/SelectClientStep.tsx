@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import type { Client } from '../types';
-import { PlusIcon, UsersIcon, RefreshIcon } from './icons';
+import { PlusIcon, UsersIcon, RefreshIcon, ChevronLeftIcon } from './icons';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 
@@ -75,7 +75,13 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
 
   if (isCreating) {
     return (
-      <div className="flex flex-col h-full p-4 pb-12 bg-card">
+      <div className="flex flex-col h-full bg-card">
+        <div className="pt-3 pl-3 flex-shrink-0">
+          <button onClick={() => setIsCreating(false)} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+            <ChevronLeftIcon className="w-4 h-4" />
+            Back
+          </button>
+        </div>
         <div className="text-center p-4">
           <h1 className="text-2xl font-bold mb-1 text-foreground">
             Create New Client
@@ -112,7 +118,7 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
           {createError && (
             <p className="text-red-500 text-sm font-medium">{createError}</p>
           )}
-          <div className="pt-4 space-y-2">
+          <div className="pt-4">
             <button
               type="submit"
               disabled={isSubmitting}
@@ -124,13 +130,6 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
                 'Save and Continue'
               )}
             </button>
-            <button
-              type="button"
-              onClick={() => setIsCreating(false)}
-              className="w-full font-bold py-2 text-muted-foreground"
-            >
-              Cancel
-            </button>
           </div>
         </form>
       </div>
@@ -138,8 +137,12 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
   }
 
   return (
-    <div className="flex flex-col h-full pb-12">
-      <div className="p-4 bg-card border-b border">
+    <div className="flex flex-col h-full">
+      <div className="p-4 bg-card border-b border relative">
+        <button onClick={onBack} className="absolute top-4 left-4 flex items-center gap-1 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+          <ChevronLeftIcon className="w-4 h-4" />
+          Back
+        </button>
         <h1 className="text-2xl font-bold text-center mb-2 tracking-tighter text-foreground">
           Select Client
         </h1>
@@ -198,14 +201,6 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
         )}
       </div>
 
-      <div className="p-4 bg-card border-t border">
-        <button
-          onClick={onBack}
-          className="w-full font-bold py-3 bp-container-compact transition-colors bg-muted text-muted-foreground"
-        >
-          Cancel
-        </button>
-      </div>
     </div>
   );
 };

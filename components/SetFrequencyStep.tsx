@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Service, PlanDetails } from '../types';
 import { useSettings } from '../contexts/SettingsContext';
+import { ChevronLeftIcon } from './icons';
 
 interface SetFrequencyStepProps {
   selectedServices: Service[];
@@ -33,8 +34,14 @@ const SetFrequencyStep: React.FC<SetFrequencyStepProps> = ({ selectedServices, p
   const isNextDisabled = selectedServices.some(service => !localDetails[service.id]?.frequency);
 
   return (
-    <div className="flex flex-col h-full p-4 pb-12">
-      <div className="text-center p-4">
+    <div className="flex flex-col h-full">
+      <div className="pt-3 pl-3 flex-shrink-0">
+        <button onClick={onBack} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+          <ChevronLeftIcon className="w-4 h-4" />
+          Back
+        </button>
+      </div>
+      <div className="text-center px-4 pb-4">
         <div className="relative w-full h-2 mb-4 rounded-full bg-muted">
           <div className="absolute top-0 left-0 h-2 bg-primary bp-container-compact w-2/3"></div>
         </div>
@@ -42,7 +49,7 @@ const SetFrequencyStep: React.FC<SetFrequencyStepProps> = ({ selectedServices, p
         <p className="text-sm text-muted-foreground">How often should these repeat?</p>
       </div>
 
-      <div className="flex-grow overflow-y-auto p-4 space-y-4">
+      <div className="flex-grow overflow-y-auto px-4 pb-4 space-y-4">
         {selectedServices.map(service => (
           <div key={service.id} className="p-4 bp-container-list border border bg-muted">
             <div className="flex justify-between items-baseline">
@@ -64,19 +71,13 @@ const SetFrequencyStep: React.FC<SetFrequencyStepProps> = ({ selectedServices, p
         ))}
       </div>
 
-      <div className="p-4 mt-auto space-y-2">
+      <div className="p-4 mt-auto bg-card border-t border">
         <button
           onClick={() => onNext(localDetails)}
           disabled={isNextDisabled}
           className="w-full font-bold py-3 px-4 bp-container-compact shadow-lg transition-transform transform hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed bg-primary text-primary-foreground"
         >
           Create Maintenance Roadmap
-        </button>
-        <button
-          onClick={onBack}
-          className="w-full bg-transparent font-semibold py-2 px-4 text-muted-foreground"
-        >
-          Back
         </button>
       </div>
     </div>
