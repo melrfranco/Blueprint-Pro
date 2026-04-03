@@ -3,18 +3,22 @@ import BottomNav, { Tab } from './BottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { usePlans } from '../contexts/PlanContext';
-import { CalendarIcon, SettingsIcon, ChevronRightIcon } from './icons';
+import { CalendarIcon, SettingsIcon, ChevronRightIcon, LayoutDashboardIcon } from './icons';
 import AccountSettings from './AccountSettings';
 import PlanWizard from './PlanWizard';
+import ReportsPanel from './ReportsPanel';
+import DashboardCustomization from './DashboardCustomization';
+import { computeReportMetrics, getWidgetValue, DASHBOARD_WIDGETS, DEFAULT_PINNED_STYLIST } from '../utils/reportMetrics';
 import type { GeneratedPlan } from '../types';
 
 export default function StylistDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
   const [editingPlan, setEditingPlan] = useState<GeneratedPlan | null>(null);
   const [isCreatingPlan, setIsCreatingPlan] = useState(false);
+  const [settingsView, setSettingsView] = useState<'menu' | 'account' | 'dashboardCustomization'>('menu');
 
   const { user, logout } = useAuth();
-  const { services: allServices } = useSettings();
+  const { services: allServices, clients, pinnedReports, updatePinnedReports, saveAll } = useSettings();
   const { plans, bookings } = usePlans();
 
   const stylistId = user?.stylistData?.id || user?.id;
@@ -52,26 +56,65 @@ export default function StylistDashboard() {
 
   const formatCurrency = (n: number) => `$${n.toLocaleString()}`;
 
+  const metrics = useMemo(
+    () => computeReportMetrics(myPlans, bookings as any, clients.length),
+    [myPlans, bookings, clients.length]
+  );
+
+  const pinnedWidgetIds = useMemo(() => {
+    const ids = user?.id ? (pinnedReports[String(user.id)] ?? DEFAULT_PINNED_STYLIST) : DEFAULT_PINNED_STYLIST;
+    return ids.filter(id => DASHBOARD_WIDGETS.find(w => w.id === id && w.roles.includes('stylist')));
+  }, [pinnedReports, user?.id]);
+
   const renderDashboard = () => (
     <div className="bp-page">
       <h1 className="bp-page-title">My Dashboard</h1>
       <p className="bp-subtitle">{user?.name || 'Stylist'}</p>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
-          <p className="text-2xl bp-stat-value text-foreground">{activePlans}</p>
-          <p className="bp-caption mt-1">Active Plans</p>
-        </div>
-        <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
-          <p className="text-2xl bp-stat-value text-foreground">{totalClients}</p>
-          <p className="bp-caption mt-1">Clients</p>
-        </div>
-        <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
-          <p className="text-2xl bp-stat-value text-foreground">{formatCurrency(totalRevenue)}</p>
-          <p className="bp-caption mt-1">Pipeline</p>
+      {/* Hero pipeline card */}
+      <div className="p-8 bg-primary text-primary-foreground bp-container-list border-4 border-primary shadow-lg mb-4">
+        <div className="flex flex-col items-center justify-center text-center py-2">
+          <p className="bp-section-title mb-2 text-primary-foreground">My Pipeline</p>
+          <p className="text-5xl bp-stat-value text-primary-foreground">{formatCurrency(totalRevenue)}</p>
         </div>
       </div>
+
+      {/* Pinned metric cards */}
+      {pinnedWidgetIds.length > 0 ? (
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {pinnedWidgetIds.map((id, idx) => {
+            const widget = DASHBOARD_WIDGETS.find(w => w.id === id);
+            if (!widget) return null;
+            const { value, sub } = getWidgetValue(id, metrics);
+            const isWide = pinnedWidgetIds.length % 2 !== 0 && idx === pinnedWidgetIds.length - 1;
+            return (
+              <div
+                key={id}
+                className={`bg-card p-4 bp-container-list shadow-sm text-center elevated-card ${isWide ? 'col-span-2' : ''}`}
+              >
+                <p className="text-2xl bp-stat-value text-foreground">{value}</p>
+                <p className="bp-caption mt-1">{widget.title}</p>
+                {sub && <p className="bp-caption text-muted-foreground">{sub}</p>}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
+            <p className="text-2xl bp-stat-value text-foreground">{activePlans}</p>
+            <p className="bp-caption mt-1">Active Plans</p>
+          </div>
+          <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
+            <p className="text-2xl bp-stat-value text-foreground">{totalClients}</p>
+            <p className="bp-caption mt-1">Clients</p>
+          </div>
+          <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
+            <p className="text-2xl bp-stat-value text-foreground">{formatCurrency(totalRevenue)}</p>
+            <p className="bp-caption mt-1">Pipeline</p>
+          </div>
+        </div>
+      )}
 
       {/* Upcoming Appointments */}
       <div className="mb-6">
@@ -184,9 +227,61 @@ export default function StylistDashboard() {
     </div>
   );
 
-  const renderSettings = () => (
-    <AccountSettings user={user} onLogout={logout} subtitle="Team Member" role="stylist" />
-  );
+  const renderSettings = () => {
+    if (settingsView === 'account') {
+      return (
+        <div className="bp-page">
+          <button
+            onClick={() => setSettingsView('menu')}
+            className="mb-6 flex items-center text-sm font-semibold hover:opacity-80 transition-colors bp-back"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+          </button>
+          <AccountSettings user={user} onLogout={logout} subtitle="Team Member" role="stylist" />
+        </div>
+      );
+    }
+
+    if (settingsView === 'dashboardCustomization') {
+      return (
+        <DashboardCustomization
+          role="stylist"
+          userId={user?.id ?? ''}
+          pinnedReports={pinnedReports}
+          onUpdatePinned={(ids) => {
+            updatePinnedReports(user?.id ?? '', ids);
+            saveAll();
+          }}
+          onBack={() => setSettingsView('menu')}
+        />
+      );
+    }
+
+    return (
+      <div className="bp-page">
+        <h1 className="bp-page-title">Settings</h1>
+        <div className="grid grid-cols-2 gap-6 mb-8">
+          <button
+            onClick={() => setSettingsView('account')}
+            className="p-8 bg-card bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card"
+          >
+            <SettingsIcon className="w-10 h-10 text-primary" />
+            <span className="bp-overline">Account</span>
+          </button>
+          <button
+            onClick={() => setSettingsView('dashboardCustomization')}
+            className="p-8 bg-card bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card"
+          >
+            <LayoutDashboardIcon className="w-10 h-10 text-primary" />
+            <span className="bp-overline">Dashboard</span>
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   const renderActiveTab = () => {
     if (isCreatingPlan || editingPlan) {
@@ -210,6 +305,7 @@ export default function StylistDashboard() {
     switch (activeTab) {
       case 'dashboard': return renderDashboard();
       case 'plans': return renderPlans();
+      case 'reports': return <ReportsPanel role="stylist" metrics={metrics} />;
       case 'settings': return renderSettings();
       default: return renderDashboard();
     }
@@ -219,6 +315,7 @@ export default function StylistDashboard() {
     setActiveTab(tab);
     setEditingPlan(null);
     setIsCreatingPlan(false);
+    if (tab === 'settings') setSettingsView('menu');
   };
 
   return (

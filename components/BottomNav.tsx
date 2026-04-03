@@ -1,7 +1,7 @@
 import React from 'react';
-import { HomeIcon, DocumentTextIcon, SettingsIcon } from './icons';
+import { HomeIcon, DocumentTextIcon, SettingsIcon, BarChart2Icon } from './icons';
 
-export type Tab = 'dashboard' | 'plans' | 'settings';
+export type Tab = 'dashboard' | 'plans' | 'reports' | 'settings';
 
 interface BottomNavProps {
   activeTab: string;
@@ -11,6 +11,7 @@ interface BottomNavProps {
 const NAV_ITEMS: { key: Tab; label: string; icon: any }[] = [
   { key: 'dashboard', label: 'Home', icon: HomeIcon },
   { key: 'plans', label: 'Plans', icon: DocumentTextIcon },
+  { key: 'reports', label: 'Reports', icon: BarChart2Icon },
   { key: 'settings', label: 'Settings', icon: SettingsIcon },
 ];
 

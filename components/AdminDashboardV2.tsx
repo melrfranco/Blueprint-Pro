@@ -10,8 +10,12 @@ import {
   SettingsIcon,
   ChevronLeftIcon,
   SunIcon,
-  UsersIcon
+  UsersIcon,
+  LayoutDashboardIcon,
 } from './icons';
+import ReportsPanel from './ReportsPanel';
+import DashboardCustomization from './DashboardCustomization';
+import { computeReportMetrics, getWidgetValue, DASHBOARD_WIDGETS, DEFAULT_PINNED_ADMIN } from '../utils/reportMetrics';
 import type { UserRole, GeneratedPlan } from '../types';
 import { GOOGLE_FONTS_LIST } from '../data/fonts';
 import AccountSettings from './AccountSettings';
@@ -24,7 +28,7 @@ import { canCustomizeBranding } from '../utils/isEnterpriseAccount';
 
 export default function AdminDashboardV2({ role }: { role: UserRole }) {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
-  const [activeSettingsView, setActiveSettingsView] = useState<'menu' | 'branding' | 'account' | 'memberships' | 'teamAccess' | 'appearance'>('menu');
+  const [activeSettingsView, setActiveSettingsView] = useState<'menu' | 'branding' | 'account' | 'memberships' | 'teamAccess' | 'appearance' | 'dashboardCustomization'>('menu');
   const [editingPlan, setEditingPlan] = useState<GeneratedPlan | null>(null);
   const [isCreatingPlan, setIsCreatingPlan] = useState(false);
 
@@ -32,14 +36,25 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
     branding, updateBranding,
     clients,
     textSize, updateTextSize,
+    pinnedReports, updatePinnedReports,
     saveAll
   } = useSettings();
   const { toastVisible, showToast, hideToast } = useSaveToast();
-  const { plans, getStats } = usePlans();
+  const { plans, bookings, getStats } = usePlans();
   const { user, updateUser, logout } = useAuth();
 
   const stats = getStats();
   const totalPipeline = plans.filter(p => p.status === 'active' || p.status === 'draft').reduce((sum, p) => sum + p.totalCost, 0);
+
+  const metrics = useMemo(
+    () => computeReportMetrics(plans, bookings as any, clients.length),
+    [plans, bookings, clients.length]
+  );
+
+  const pinnedWidgetIds = useMemo(() => {
+    const ids = user?.id ? (pinnedReports[String(user.id)] ?? DEFAULT_PINNED_ADMIN) : DEFAULT_PINNED_ADMIN;
+    return ids.filter(id => DASHBOARD_WIDGETS.find(w => w.id === id && w.roles.includes('admin')));
+  }, [pinnedReports, user?.id]);
 
   const pipelineGrowthData = useMemo(() => {
     const sortedPlans = [...plans].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -67,26 +82,49 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
     <div className="bp-page">
       <h1 className="bp-page-title">Dashboard</h1>
       {user?.name && <p className="bp-subtitle">Welcome back, {user.name.split(' ')[0]}</p>}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="col-span-2 p-8 bg-primary text-primary-foreground bp-container-list border-4 border-primary shadow-lg hover:shadow-xl transition-shadow">
-          <div className="flex flex-col items-center justify-center text-center h-full py-4">
-            <p className="bp-section-title mb-3 text-primary-foreground">Roadmap Pipeline</p>
-            <p className="text-5xl bp-stat-value text-primary-foreground">${totalPipeline.toLocaleString()}</p>
-          </div>
-        </div>
-        <div className="bg-card p-6 bp-container-list shadow-sm hover:shadow-md transition-all elevated-card">
-          <div className="flex flex-col items-center justify-center text-center">
-            <p className="bp-overline mb-3">Active Plans</p>
-            <p className="text-4xl bp-stat-value">{stats.activePlansCount}</p>
-          </div>
-        </div>
-        <div className="bg-card p-6 bp-container-list shadow-sm hover:shadow-md transition-all elevated-card">
-          <div className="flex flex-col items-center justify-center text-center">
-            <p className="bp-overline mb-3">Total Clients</p>
-            <p className="text-4xl bp-stat-value">{clients.length}</p>
-          </div>
+
+      {/* Hero pipeline card — always visible */}
+      <div className="col-span-2 p-8 bg-primary text-primary-foreground bp-container-list border-4 border-primary shadow-lg hover:shadow-xl transition-shadow mb-4">
+        <div className="flex flex-col items-center justify-center text-center h-full py-4">
+          <p className="bp-section-title mb-3 text-primary-foreground">Roadmap Pipeline</p>
+          <p className="text-5xl bp-stat-value text-primary-foreground">${totalPipeline.toLocaleString()}</p>
         </div>
       </div>
+
+      {/* Pinned metric cards */}
+      {pinnedWidgetIds.length > 0 ? (
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          {pinnedWidgetIds.map((id, idx) => {
+            const widget = DASHBOARD_WIDGETS.find(w => w.id === id);
+            if (!widget) return null;
+            const { value, sub } = getWidgetValue(id, metrics);
+            const isWide = pinnedWidgetIds.length % 2 !== 0 && idx === pinnedWidgetIds.length - 1;
+            return (
+              <div
+                key={id}
+                className={`bg-card p-6 bp-container-list shadow-sm hover:shadow-md transition-all elevated-card ${isWide ? 'col-span-2' : ''}`}
+              >
+                <p className="bp-overline mb-2">{widget.title}</p>
+                <p className="text-3xl bp-stat-value text-foreground">{value}</p>
+                {sub && <p className="bp-caption mt-1 text-muted-foreground">{sub}</p>}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-card p-6 bp-container-list shadow-sm hover:shadow-md transition-all elevated-card">
+            <p className="bp-overline mb-3">Active Plans</p>
+            <p className="text-4xl bp-stat-value text-foreground">{stats.activePlansCount}</p>
+          </div>
+          <div className="bg-card p-6 bp-container-list shadow-sm hover:shadow-md transition-all elevated-card">
+            <p className="bp-overline mb-3">Total Clients</p>
+            <p className="text-4xl bp-stat-value text-foreground">{clients.length}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Pipeline growth chart */}
       <div className="bg-card p-7 bp-container-tall shadow-sm hover:shadow-md transition-shadow mb-6 elevated-card">
         <h3 className="bp-section-title mb-4">Pipeline Growth</h3>
         <div className="w-full h-56 p-2">
@@ -101,6 +139,10 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
         </div>
       </div>
     </div>
+  );
+
+  const renderReports = () => (
+    <ReportsPanel role="admin" metrics={metrics} />
   );
 
   const renderSettings = () => {
@@ -151,6 +193,21 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
 
     if (activeSettingsView === 'teamAccess') {
       return <TeamAccessSettings onBack={() => setActiveSettingsView('menu')} />;
+    }
+
+    if (activeSettingsView === 'dashboardCustomization') {
+      return (
+        <DashboardCustomization
+          role="admin"
+          userId={user?.id ?? ''}
+          pinnedReports={pinnedReports}
+          onUpdatePinned={(ids) => {
+            updatePinnedReports(user?.id ?? '', ids);
+            saveAll();
+          }}
+          onBack={() => setActiveSettingsView('menu')}
+        />
+      );
     }
 
     if (activeSettingsView === 'appearance') {
@@ -268,6 +325,10 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
               <span className="bp-overline">Branding</span>
             </button>
           )}
+          <button onClick={() => setActiveSettingsView('dashboardCustomization')} className="p-8 bg-card bp-container-list flex flex-col items-center justify-center space-y-3 hover:shadow-md transition-all shadow-sm elevated-card">
+            <LayoutDashboardIcon className="w-10 h-10 text-primary" />
+            <span className="bp-overline">Dashboard</span>
+          </button>
         </div>
       </div>
     );
@@ -330,6 +391,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
     switch (activeTab) {
       case 'dashboard': return renderDashboard();
       case 'plans': return renderPlans();
+      case 'reports': return renderReports();
       case 'settings': return renderSettings();
       default: return renderDashboard();
     }
@@ -338,6 +400,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab);
     setEditingPlan(null);
+    setIsCreatingPlan(false);
     if (tab === 'settings') {
       setActiveSettingsView('menu');
     }
