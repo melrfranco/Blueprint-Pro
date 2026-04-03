@@ -434,7 +434,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-background bp-app-shell">
       {renderActiveTab()}
       <BottomNav activeTab={activeTab} onChange={handleTabChange} />
       <SaveToast visible={toastVisible} onDone={hideToast} />

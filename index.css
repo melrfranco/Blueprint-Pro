@@ -734,6 +734,11 @@
     background: color-mix(in oklab, var(--primary) 14%, transparent);
   }
 
+  /* app shell wrapper — constrains h-full children above fixed nav, respects iOS safe area */
+  .bp-app-shell {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px));
+  }
+
   /* page content wrapper - universal margins */
   .bp-content {
     @apply px-5 py-5 sm:px-8 sm:py-6;

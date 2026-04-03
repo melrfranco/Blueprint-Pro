@@ -444,6 +444,14 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
     return (
         <div className="flex flex-col h-full bg-background relative">
+            {onEditPlan && (
+                <div className="pt-3 pl-3 flex-shrink-0">
+                    <button onClick={onEditPlan} className="flex items-center gap-1 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+                        <ChevronLeftIcon className="w-4 h-4" />
+                        Back
+                    </button>
+                </div>
+            )}
             <div className="flex-grow p-5 overflow-y-auto text-foreground">
                 <h1 className="bp-page-title">Blueprint Summary</h1>
                 <p className="bp-subtitle">{plan.client.name}</p>
