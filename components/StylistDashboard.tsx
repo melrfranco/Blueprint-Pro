@@ -66,55 +66,28 @@ export default function StylistDashboard() {
     return ids.filter(id => DASHBOARD_WIDGETS.find(w => w.id === id && w.roles.includes('stylist')));
   }, [pinnedReports, user?.id]);
 
+  const hasPinnedCustomization = user?.id ? pinnedReports[String(user.id)] !== undefined : false;
+
   const renderDashboard = () => (
     <div className="bp-page">
       <h1 className="bp-page-title">My Dashboard</h1>
       <p className="bp-subtitle">{user?.name || 'Stylist'}</p>
 
-      {/* Hero pipeline card */}
-      <div className="p-8 bg-primary text-primary-foreground bp-container-list border-4 border-primary shadow-lg mb-4">
-        <div className="flex flex-col items-center justify-center text-center py-2">
-          <p className="bp-section-title mb-2 text-primary-foreground">My Pipeline</p>
-          <p className="text-5xl bp-stat-value text-primary-foreground">{formatCurrency(totalRevenue)}</p>
+      {/* Quick Stats — original layout preserved */}
+      <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
+          <p className="text-2xl bp-stat-value text-foreground">{activePlans}</p>
+          <p className="bp-caption mt-1">Active Plans</p>
+        </div>
+        <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
+          <p className="text-2xl bp-stat-value text-foreground">{totalClients}</p>
+          <p className="bp-caption mt-1">Clients</p>
+        </div>
+        <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
+          <p className="text-2xl bp-stat-value text-foreground">{formatCurrency(totalRevenue)}</p>
+          <p className="bp-caption mt-1">Pipeline</p>
         </div>
       </div>
-
-      {/* Pinned metric cards */}
-      {pinnedWidgetIds.length > 0 ? (
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {pinnedWidgetIds.map((id, idx) => {
-            const widget = DASHBOARD_WIDGETS.find(w => w.id === id);
-            if (!widget) return null;
-            const { value, sub } = getWidgetValue(id, metrics);
-            const isWide = pinnedWidgetIds.length % 2 !== 0 && idx === pinnedWidgetIds.length - 1;
-            return (
-              <div
-                key={id}
-                className={`bg-card p-4 bp-container-list shadow-sm text-center elevated-card ${isWide ? 'col-span-2' : ''}`}
-              >
-                <p className="text-2xl bp-stat-value text-foreground">{value}</p>
-                <p className="bp-caption mt-1">{widget.title}</p>
-                {sub && <p className="bp-caption text-muted-foreground">{sub}</p>}
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
-            <p className="text-2xl bp-stat-value text-foreground">{activePlans}</p>
-            <p className="bp-caption mt-1">Active Plans</p>
-          </div>
-          <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
-            <p className="text-2xl bp-stat-value text-foreground">{totalClients}</p>
-            <p className="bp-caption mt-1">Clients</p>
-          </div>
-          <div className="bg-card p-4 bp-container-list shadow-sm text-center elevated-card">
-            <p className="text-2xl bp-stat-value text-foreground">{formatCurrency(totalRevenue)}</p>
-            <p className="bp-caption mt-1">Pipeline</p>
-          </div>
-        </div>
-      )}
 
       {/* Upcoming Appointments */}
       <div className="mb-6">
@@ -184,6 +157,31 @@ export default function StylistDashboard() {
           </div>
         )}
       </div>
+
+      {/* Pinned metrics — only rendered after user explicitly customizes via Settings → Dashboard */}
+      {hasPinnedCustomization && pinnedWidgetIds.length > 0 && (
+        <div className="mt-6">
+          <h2 className="bp-section-title mb-4 pl-4">My Metrics</h2>
+          <div className="grid grid-cols-2 gap-3">
+            {pinnedWidgetIds.map((id, idx) => {
+              const widget = DASHBOARD_WIDGETS.find(w => w.id === id);
+              if (!widget) return null;
+              const { value, sub } = getWidgetValue(id, metrics);
+              const isWide = pinnedWidgetIds.length % 2 !== 0 && idx === pinnedWidgetIds.length - 1;
+              return (
+                <div
+                  key={id}
+                  className={`bg-card p-4 bp-container-list shadow-sm text-center elevated-card ${isWide ? 'col-span-2' : ''}`}
+                >
+                  <p className="text-2xl bp-stat-value text-foreground">{value}</p>
+                  <p className="bp-caption mt-1">{widget.title}</p>
+                  {sub && <p className="bp-caption text-muted-foreground">{sub}</p>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 
