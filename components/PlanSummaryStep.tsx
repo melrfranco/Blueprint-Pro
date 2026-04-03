@@ -58,7 +58,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
     const [availableDates, setAvailableDates] = useState<Set<string>>(new Set());
     const [calendarMonth, setCalendarMonth] = useState(new Date());
 
-    const isPlanActive = plan.status === 'active';
+    const [locallyPublished, setLocallyPublished] = useState(plan.status === 'active');
+    const isPlanActive = locallyPublished;
     const isMemberOffered = plan.membershipStatus === 'offered';
     const isMemberActive = plan.membershipStatus === 'active';
 
@@ -152,10 +153,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
     const handlePublish = async () => {
         setIsPublishing(true);
         try {
-            const updated = await savePlan({ ...plan, status: 'active' });
-            if (onEditPlan) {
-                onEditPlan();
-            }
+            await savePlan({ ...plan, status: 'active' });
+            setLocallyPublished(true);
         } catch (e) {
             console.error("Publishing failed:", e);
         } finally {
