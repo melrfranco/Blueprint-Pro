@@ -150,6 +150,28 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
     const formatCurrency = (val: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val || 0);
 
+    const toWords = (str: string): Set<string> =>
+        new Set(str.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean));
+
+    const resolveSquareService = (catalog: Service[], planService: { id: string; name: string }): Service | undefined => {
+        const byId = catalog.find(s => s.id === planService.id);
+        if (byId) return byId;
+        const byExact = catalog.find(s => s.name === planService.name);
+        if (byExact) return byExact;
+        const byInsensitive = catalog.find(s => s.name.toLowerCase() === planService.name.toLowerCase());
+        if (byInsensitive) return byInsensitive;
+        const planWords = toWords(planService.name);
+        const byWordSubset = catalog.find(s => {
+            const cWords = toWords(s.name);
+            return cWords.size > 0 && [...cWords].every(w => planWords.has(w));
+        });
+        if (byWordSubset) {
+            console.log('[BOOKING] word-overlap match:', planService.name, '->', byWordSubset.name);
+            return byWordSubset;
+        }
+        return undefined;
+    };
+
     const handlePublish = async () => {
         setIsPublishing(true);
         try {
@@ -272,38 +294,13 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             console.log('[BOOKING] Looking for service ID', serviceVariationId, '- found:', !!existingService);
 
             if (!existingService) {
-                console.log('[BOOKING] Trying to find by name:', serviceToBook.name);
-                const planName = serviceToBook.name.toLowerCase();
-                let squareService = squareCatalog.find(s => s.name === serviceToBook.name);
-
+                const squareService = resolveSquareService(squareCatalog, serviceToBook);
                 if (!squareService) {
-                    squareService = squareCatalog.find(s => s.name.toLowerCase() === planName);
-                    if (squareService) {
-                        console.log('[BOOKING] Found by case-insensitive match:', serviceToBook.name, '->', squareService.name);
-                    }
-                }
-
-                if (!squareService) {
-                    squareService = squareCatalog.find(s => planName.includes(s.name.toLowerCase()));
-                    if (squareService) {
-                        console.log('[BOOKING] Found by substring match (plan name contains Square name):', serviceToBook.name, '->', squareService.name);
-                    }
-                }
-
-                if (!squareService) {
-                    squareService = squareCatalog.find(s => s.name.toLowerCase().includes(planName));
-                    if (squareService) {
-                        console.log('[BOOKING] Found by reverse substring match (Square name contains plan name):', serviceToBook.name, '->', squareService.name);
-                    }
-                }
-
-                console.log('[BOOKING] Found by name:', !!squareService);
-                if (!squareService || !squareService.id) {
                     const availableServices = squareCatalog.map(s => s.name).join(', ');
                     throw new Error(`Service "${serviceToBook.name}" not found in your Square catalog. Available: ${availableServices}`);
                 }
                 serviceVariationId = squareService.id;
-                console.log('[BOOKING] Mapped service to Square by name:', { name: serviceToBook.name, plannedId: serviceToBook.id, squareId: serviceVariationId });
+                console.log('[BOOKING] Resolved service:', serviceToBook.name, '->', squareService.name, squareService.id);
             }
 
             const searchStart = new Date(visit.date);
@@ -387,30 +384,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             const squareCatalog = await SquareIntegrationService.fetchCatalog();
 
             const squareServices = mockServices.map(ms => {
-                const existing = squareCatalog.find(s => s.id === ms.id);
-                if (existing) {
-                    return existing;
-                }
-                const msName = ms.name.toLowerCase();
-                let found = squareCatalog.find(s => s.name === ms.name);
-
-                if (!found) {
-                    found = squareCatalog.find(s => s.name.toLowerCase() === msName);
-                }
-
-                if (!found) {
-                    found = squareCatalog.find(s => msName.includes(s.name.toLowerCase()));
-                    if (found) console.log('[BOOKING] executeBooking: substring match', ms.name, '->', found.name);
-                }
-
-                if (!found) {
-                    found = squareCatalog.find(s => s.name.toLowerCase().includes(msName));
-                    if (found) console.log('[BOOKING] executeBooking: reverse substring match', ms.name, '->', found.name);
-                }
-
-                if (!found) {
-                    throw new Error(`Service "${ms.name}" not found in your Square catalog.`);
-                }
+                const found = resolveSquareService(squareCatalog, ms);
+                if (!found) throw new Error(`Service "${ms.name}" not found in your Square catalog.`);
                 return found;
             });
 
