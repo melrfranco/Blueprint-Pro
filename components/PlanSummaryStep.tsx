@@ -52,6 +52,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
     const [selectedSlotTime, setSelectedSlotTime] = useState<string | null>(null);
     const [slotTeamMemberMap, setSlotTeamMemberMap] = useState<Record<string, string>>({});
     const [selectedSlotTeamMemberId, setSelectedSlotTeamMemberId] = useState<string | null>(null);
+    const [loadingVisitIndex, setLoadingVisitIndex] = useState<number | null>(null);
 
     const [remapCatalog, setRemapCatalog] = useState<Service[]>([]);
     const [remapItems, setRemapItems] = useState<Array<{ planService: { id: string; name: string } }>>([]);
@@ -403,12 +404,18 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
         }
     };
 
-    const handleVisitSelected = async (visit: PlanAppointment) => {
+    const handleVisitSelected = async (visit: PlanAppointment, index: number) => {
+        if (loadingVisitIndex !== null) return;
+        setLoadingVisitIndex(index);
         setSelectedVisit(visit);
         setBookingDate(visit.date);
         setCalendarMonth(visit.date);
-        const resolved = await fetchAvailabilityForCalendar(visit, remapChoices);
-        if (resolved) setBookingStep('select-date');
+        try {
+            const resolved = await fetchAvailabilityForCalendar(visit, remapChoices);
+            if (resolved) setBookingStep('select-date');
+        } finally {
+            setLoadingVisitIndex(null);
+        }
     };
 
     const fetchSlotsForDate = async (date: Date, choiceOverrides: Record<string, string> = {}) => {
@@ -784,7 +791,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                                 setBookingStep('select-visit');
                                                 setBookingSuccess(false);
                                                 setFetchError(null);
-                                                handleVisitSelected(visit);
+                                                handleVisitSelected(visit, 0);
                                             }}
                                             className="flex-1 py-3 bp-container-compact font-bold shadow-lg flex items-center justify-center space-x-2 active:scale-95 transition-all bg-primary text-primary-foreground"
                                         >
@@ -1045,13 +1052,13 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                                     return `${h > 0 ? `${h}h ` : ''}${m > 0 ? `${m}m` : ''}`.trim() || '0m';
                                                 };
                                                 return (
-                                                    <button key={i} onClick={() => handleVisitSelected(visit)} className="w-full p-5 border-4 bp-container-list text-left flex flex-col group active:scale-95 transition-all hover:border-accent elevated-card border">
+                                                    <button key={i} onClick={() => handleVisitSelected(visit, i)} disabled={loadingVisitIndex !== null} className="w-full p-5 border-4 bp-container-list text-left flex flex-col group active:scale-95 transition-all hover:border-accent elevated-card border disabled:opacity-60">
                                                         <div className="flex justify-between items-center w-full">
                                                             <div>
                                                                 <p className="bp-caption uppercase tracking-widest mb-1 text-muted-foreground">Upcoming Visit</p>
                                                                 <p className="text-xl font-bold group-hover:text-accent">{visit.date.toLocaleDateString([], { month: 'long', day: 'numeric' })}</p>
                                                             </div>
-                                                            <ChevronRightIcon className="w-6 h-6 text-muted-foreground" />
+                                                            {loadingVisitIndex === i ? <RefreshIcon className="w-6 h-6 text-accent animate-spin" /> : <ChevronRightIcon className="w-6 h-6 text-muted-foreground" />}
                                                         </div>
 
                                                         <div className="border-t mt-4 pt-4 space-y-2 border-border">
@@ -1130,7 +1137,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                                 </div>
 
                                                 <button
-                                                    onClick={() => bookingDate && fetchSlotsForDate(bookingDate)}
+                                                    onClick={() => bookingDate && fetchSlotsForDate(bookingDate, remapChoices)}
                                                     disabled={!bookingDate || isFetchingSlots}
                                                     className={`w-full font-bold py-5 bp-container-compact shadow-xl transition-all active:scale-95 border-b-8 border-black/20 disabled:opacity-40 ${bookingDate ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
                                                 >
