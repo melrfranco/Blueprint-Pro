@@ -273,13 +273,27 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
             if (!existingService) {
                 console.log('[BOOKING] Trying to find by name:', serviceToBook.name);
+                const planName = serviceToBook.name.toLowerCase();
                 let squareService = squareCatalog.find(s => s.name === serviceToBook.name);
 
                 if (!squareService) {
-                    const searchName = serviceToBook.name.toLowerCase();
-                    squareService = squareCatalog.find(s => s.name.toLowerCase() === searchName);
+                    squareService = squareCatalog.find(s => s.name.toLowerCase() === planName);
                     if (squareService) {
-                        console.log('[BOOKING] Found by case-insensitive name match:', serviceToBook.name, '->', squareService.name);
+                        console.log('[BOOKING] Found by case-insensitive match:', serviceToBook.name, '->', squareService.name);
+                    }
+                }
+
+                if (!squareService) {
+                    squareService = squareCatalog.find(s => planName.includes(s.name.toLowerCase()));
+                    if (squareService) {
+                        console.log('[BOOKING] Found by substring match (plan name contains Square name):', serviceToBook.name, '->', squareService.name);
+                    }
+                }
+
+                if (!squareService) {
+                    squareService = squareCatalog.find(s => s.name.toLowerCase().includes(planName));
+                    if (squareService) {
+                        console.log('[BOOKING] Found by reverse substring match (Square name contains plan name):', serviceToBook.name, '->', squareService.name);
                     }
                 }
 
@@ -377,11 +391,21 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 if (existing) {
                     return existing;
                 }
+                const msName = ms.name.toLowerCase();
                 let found = squareCatalog.find(s => s.name === ms.name);
 
                 if (!found) {
-                    const searchName = ms.name.toLowerCase();
-                    found = squareCatalog.find(s => s.name.toLowerCase() === searchName);
+                    found = squareCatalog.find(s => s.name.toLowerCase() === msName);
+                }
+
+                if (!found) {
+                    found = squareCatalog.find(s => msName.includes(s.name.toLowerCase()));
+                    if (found) console.log('[BOOKING] executeBooking: substring match', ms.name, '->', found.name);
+                }
+
+                if (!found) {
+                    found = squareCatalog.find(s => s.name.toLowerCase().includes(msName));
+                    if (found) console.log('[BOOKING] executeBooking: reverse substring match', ms.name, '->', found.name);
                 }
 
                 if (!found) {

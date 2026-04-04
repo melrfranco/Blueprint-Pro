@@ -252,7 +252,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
                 id: row.square_variation_id || row.square_item_id,
                 name: row.name || 'Unnamed Service',
                 variationName: row.variation_name,
-                price: row.price_cents != null ? row.price_cents / 100 : 0,
+                cost: row.price_cents != null ? row.price_cents / 100 : 0,
                 duration: row.duration_minutes || 60,
                 category: row.category || '',
               })));
@@ -332,7 +332,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
             id: row.square_variation_id || row.square_item_id,
             name: row.name || 'Unnamed Service',
             variationName: row.variation_name,
-            price: row.price_cents != null ? row.price_cents / 100 : 0,
+            cost: row.price_cents != null ? row.price_cents / 100 : 0,
             duration: row.duration_minutes || 60,
             category: row.category || '',
           }));
