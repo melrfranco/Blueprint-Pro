@@ -55,7 +55,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
     const [remapItems, setRemapItems] = useState<Array<{ planService: { id: string; name: string } }>>([]);
     const [remapChoices, setRemapChoices] = useState<Record<string, string>>({});
     const [replaceInAllPlans, setReplaceInAllPlans] = useState<Record<string, boolean>>({});
-    const [pendingBookingAction, setPendingBookingAction] = useState<null | { type: 'availability'; visit: PlanAppointment } | { type: 'book'; slotTime: string }>(null);
+    const [pendingBookingAction, setPendingBookingAction] = useState<null | { type: 'availability'; visit: PlanAppointment } | { type: 'book'; slotTime: string } | { type: 'slots'; date: Date }>(null);
     const [isApplyingRemap, setIsApplyingRemap] = useState(false);
 
     const { membershipConfig, integration, services: allServices, stylists: allStylists, cancellationPolicy } = useSettings();
@@ -223,8 +223,10 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             if (pendingBookingAction.type === 'availability') {
                 const resolved = await fetchAvailabilityForCalendar(pendingBookingAction.visit, currentChoices);
                 if (resolved) setBookingStep('select-date');
-            } else {
+            } else if (pendingBookingAction.type === 'book') {
                 await executeBooking(pendingBookingAction.slotTime, currentChoices);
+            } else if (pendingBookingAction.type === 'slots') {
+                await fetchSlotsForDate(pendingBookingAction.date, currentChoices);
             }
         } catch (e: any) {
             setFetchError(e.message);
@@ -400,6 +402,52 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
         setCalendarMonth(visit.date);
         const resolved = await fetchAvailabilityForCalendar(visit, {});
         if (resolved) setBookingStep('select-date');
+    };
+
+    const fetchSlotsForDate = async (date: Date, choiceOverrides: Record<string, string> = {}) => {
+        if (!date || !selectedVisit) return;
+        setIsFetchingSlots(true);
+        setFetchError(null);
+        try {
+            const loc = await SquareIntegrationService.fetchLocation();
+            let stylistId = isClient ? plan.stylistId : (user?.stylistData?.id || allStylists[0]?.id);
+            if (stylistId && !String(stylistId).startsWith('TM')) {
+                const validStylist = allStylists.find(s => String(s.id).startsWith('TM'));
+                if (validStylist) stylistId = validStylist.id;
+            }
+            if (!stylistId) throw new Error('No team member selected or found.');
+            const serviceToBook = selectedVisit.services[0];
+            if (!serviceToBook) throw new Error('No service selected for this visit.');
+            const squareCatalog = await SquareIntegrationService.fetchCatalog();
+            let serviceVariationId = serviceToBook.id;
+            const existingService = squareCatalog.find(s => s.id === serviceVariationId);
+            if (!existingService) {
+                const squareService = resolveSquareService(squareCatalog, serviceToBook, choiceOverrides);
+                if (!squareService) {
+                    setRemapItems([{ planService: serviceToBook }]);
+                    setRemapCatalog(squareCatalog);
+                    setPendingBookingAction({ type: 'slots', date });
+                    return;
+                }
+                serviceVariationId = squareService.id;
+            }
+            const searchStart = new Date(date);
+            searchStart.setDate(searchStart.getDate() - 3);
+            const now = new Date();
+            if (searchStart < now) searchStart.setTime(now.getTime());
+            const slots = await SquareIntegrationService.findAvailableSlots({
+                locationId: loc.id,
+                startAt: SquareIntegrationService.formatDate(searchStart, loc.timezone),
+                teamMemberId: stylistId,
+                serviceVariationId
+            });
+            setAvailableSlots(slots);
+            setBookingStep('select-period');
+        } catch (e: any) {
+            setFetchError(e.message);
+        } finally {
+            setIsFetchingSlots(false);
+        }
     };
 
     const confirmPeriodAndFetch = (period: TimePeriod) => {
@@ -1062,46 +1110,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                                 </div>
 
                                                 <button
-                                                    onClick={async () => {
-                                                        if (!bookingDate || !selectedVisit) return;
-                                                        setIsFetchingSlots(true);
-                                                        setFetchError(null);
-                                                        try {
-                                                            const loc = await SquareIntegrationService.fetchLocation();
-                                                            let stylistId = isClient ? plan.stylistId : (user?.stylistData?.id || allStylists[0]?.id);
-                                                            if (stylistId && !String(stylistId).startsWith('TM')) {
-                                                                const validStylist = allStylists.find(s => String(s.id).startsWith('TM'));
-                                                                if (validStylist) stylistId = validStylist.id;
-                                                            }
-                                                            if (!stylistId) throw new Error("No team member selected or found.");
-                                                            const serviceToBook = selectedVisit.services[0];
-                                                            if (!serviceToBook) throw new Error("No service selected for this visit.");
-                                                            const squareCatalog = await SquareIntegrationService.fetchCatalog();
-                                                            let serviceVariationId = serviceToBook.id;
-                                                            const existingService = squareCatalog.find(s => s.id === serviceVariationId);
-                                                            if (!existingService) {
-                                                                let squareService = squareCatalog.find(s => s.name === serviceToBook.name) || squareCatalog.find(s => s.name.toLowerCase() === serviceToBook.name.toLowerCase());
-                                                                if (!squareService?.id) throw new Error(`Service "${serviceToBook.name}" not found in Square catalog.`);
-                                                                serviceVariationId = squareService.id;
-                                                            }
-                                                            const searchStart = new Date(bookingDate);
-                                                            searchStart.setDate(searchStart.getDate() - 3);
-                                                            const now = new Date();
-                                                            if (searchStart < now) searchStart.setTime(now.getTime());
-                                                            const slots = await SquareIntegrationService.findAvailableSlots({
-                                                                locationId: loc.id,
-                                                                startAt: SquareIntegrationService.formatDate(searchStart, loc.timezone),
-                                                                teamMemberId: stylistId,
-                                                                serviceVariationId
-                                                            });
-                                                            setAvailableSlots(slots);
-                                                            setBookingStep('select-period');
-                                                        } catch (e: any) {
-                                                            setFetchError(e.message);
-                                                        } finally {
-                                                            setIsFetchingSlots(false);
-                                                        }
-                                                    }}
+                                                    onClick={() => bookingDate && fetchSlotsForDate(bookingDate)}
                                                     disabled={!bookingDate || isFetchingSlots}
                                                     className={`w-full font-bold py-5 bp-container-compact shadow-xl transition-all active:scale-95 border-b-8 border-black/20 disabled:opacity-40 ${bookingDate ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
                                                 >
