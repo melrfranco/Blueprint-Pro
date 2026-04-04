@@ -389,7 +389,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             setAvailableDates(dates);
             return true;
         } catch (e: any) {
-            setFetchError(e.message);
+            console.error('[BOOKING] fetchAvailabilityForCalendar error:', e);
+            setFetchError(e?.message || String(e) || 'Failed to fetch availability. Please try again.');
             return false;
         } finally {
             setIsFetchingSlots(false);
@@ -444,7 +445,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             setAvailableSlots(slots);
             setBookingStep('select-period');
         } catch (e: any) {
-            setFetchError(e.message);
+            console.error('[BOOKING] fetchSlotsForDate error:', e);
+            setFetchError(e?.message || String(e) || 'Failed to fetch available slots. Please try again.');
         } finally {
             setIsFetchingSlots(false);
         }
@@ -545,7 +547,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
             setBookingSuccess(true);
         } catch (e: any) {
-            setFetchError(e.message);
+            console.error('[BOOKING] executeBooking error:', e);
+            setFetchError(e?.message || String(e) || 'Booking failed. Please try again.');
         } finally {
             setIsBooking(false);
         }
