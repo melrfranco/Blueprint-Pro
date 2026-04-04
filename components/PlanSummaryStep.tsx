@@ -219,21 +219,24 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 }
             }
             const currentChoices = { ...remapChoices };
+            const action = pendingBookingAction;
             setRemapItems([]);
             setRemapCatalog([]);
-            if (pendingBookingAction.type === 'availability') {
-                const resolved = await fetchAvailabilityForCalendar(pendingBookingAction.visit, currentChoices);
-                if (resolved) setBookingStep('select-date');
-            } else if (pendingBookingAction.type === 'book') {
-                await executeBooking(pendingBookingAction.slotTime, currentChoices, selectedSlotTeamMemberId);
-            } else if (pendingBookingAction.type === 'slots') {
-                await fetchSlotsForDate(pendingBookingAction.date, currentChoices);
+            if (action.type === 'availability') {
+                const resolved = await fetchAvailabilityForCalendar(action.visit, currentChoices);
+                if (resolved) { setBookingStep('select-date'); setPendingBookingAction(null); }
+            } else if (action.type === 'book') {
+                await executeBooking(action.slotTime, currentChoices, selectedSlotTeamMemberId);
+                setPendingBookingAction(null);
+            } else if (action.type === 'slots') {
+                await fetchSlotsForDate(action.date, currentChoices);
+                setPendingBookingAction(null);
             }
         } catch (e: any) {
-            setFetchError(e.message);
+            setFetchError(e?.message || String(e) || 'An error occurred. Please try again.');
+            setPendingBookingAction(null);
         } finally {
             setIsApplyingRemap(false);
-            setPendingBookingAction(null);
         }
     };
 
@@ -404,7 +407,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
         setSelectedVisit(visit);
         setBookingDate(visit.date);
         setCalendarMonth(visit.date);
-        const resolved = await fetchAvailabilityForCalendar(visit, {});
+        const resolved = await fetchAvailabilityForCalendar(visit, remapChoices);
         if (resolved) setBookingStep('select-date');
     };
 
