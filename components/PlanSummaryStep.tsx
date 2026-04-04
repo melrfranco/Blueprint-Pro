@@ -51,8 +51,15 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
     const [selectedChartVisit, setSelectedChartVisit] = useState<PlanAppointment | null>(null);
     const [selectedSlotTime, setSelectedSlotTime] = useState<string | null>(null);
 
+    const [remapCatalog, setRemapCatalog] = useState<Service[]>([]);
+    const [remapItems, setRemapItems] = useState<Array<{ planService: { id: string; name: string } }>>([]);
+    const [remapChoices, setRemapChoices] = useState<Record<string, string>>({});
+    const [replaceInAllPlans, setReplaceInAllPlans] = useState<Record<string, boolean>>({});
+    const [pendingBookingAction, setPendingBookingAction] = useState<null | { type: 'availability'; visit: PlanAppointment } | { type: 'book'; slotTime: string }>(null);
+    const [isApplyingRemap, setIsApplyingRemap] = useState(false);
+
     const { membershipConfig, integration, services: allServices, stylists: allStylists, cancellationPolicy } = useSettings();
-    const { savePlan, saveBooking } = usePlans();
+    const { savePlan, saveBooking, plans: allPlans } = usePlans();
     const { user } = useAuth();
 
     const [availableDates, setAvailableDates] = useState<Set<string>>(new Set());
@@ -153,7 +160,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
     const toWords = (str: string): Set<string> =>
         new Set(str.toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean));
 
-    const resolveSquareService = (catalog: Service[], planService: { id: string; name: string }): Service | undefined => {
+    const resolveSquareService = (catalog: Service[], planService: { id: string; name: string }, choices: Record<string, string> = {}): Service | undefined => {
         const byId = catalog.find(s => s.id === planService.id);
         if (byId) return byId;
         const byExact = catalog.find(s => s.name === planService.name);
@@ -169,7 +176,62 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             console.log('[BOOKING] word-overlap match:', planService.name, '->', byWordSubset.name);
             return byWordSubset;
         }
+        const remapId = choices[planService.name];
+        if (remapId) {
+            const remapped = catalog.find(s => s.id === remapId);
+            if (remapped) {
+                console.log('[BOOKING] remap choice applied:', planService.name, '->', remapped.name);
+                return remapped;
+            }
+        }
         return undefined;
+    };
+
+    const applyRemapAndContinue = async () => {
+        if (!pendingBookingAction) return;
+        setIsApplyingRemap(true);
+        try {
+            for (const item of remapItems) {
+                if (!replaceInAllPlans[item.planService.name]) continue;
+                const choiceId = remapChoices[item.planService.name];
+                const newService = remapCatalog.find(s => s.id === choiceId);
+                if (!newService) continue;
+                const plansToUpdate = role === 'admin'
+                    ? allPlans
+                    : allPlans.filter(p => p.stylistId === user?.stylistData?.id);
+                for (const p of plansToUpdate) {
+                    const hasService = p.appointments.some(a =>
+                        a.services.some(s => s.name === item.planService.name)
+                    );
+                    if (!hasService) continue;
+                    await savePlan({
+                        ...p,
+                        appointments: p.appointments.map(a => ({
+                            ...a,
+                            services: a.services.map(s =>
+                                s.name === item.planService.name
+                                    ? { ...s, id: newService.id, name: newService.name, cost: newService.cost || s.cost }
+                                    : s
+                            )
+                        }))
+                    });
+                }
+            }
+            const currentChoices = { ...remapChoices };
+            setRemapItems([]);
+            setRemapCatalog([]);
+            if (pendingBookingAction.type === 'availability') {
+                const resolved = await fetchAvailabilityForCalendar(pendingBookingAction.visit, currentChoices);
+                if (resolved) setBookingStep('select-date');
+            } else {
+                await executeBooking(pendingBookingAction.slotTime, currentChoices);
+            }
+        } catch (e: any) {
+            setFetchError(e.message);
+        } finally {
+            setIsApplyingRemap(false);
+            setPendingBookingAction(null);
+        }
     };
 
     const handlePublish = async () => {
@@ -242,7 +304,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
         setFetchError(null);
     };
 
-    const fetchAvailabilityForCalendar = async (visit: PlanAppointment) => {
+    const fetchAvailabilityForCalendar = async (visit: PlanAppointment, choiceOverrides: Record<string, string> = {}): Promise<boolean> => {
         setIsFetchingSlots(true);
         setFetchError(null);
         try {
@@ -294,10 +356,12 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             console.log('[BOOKING] Looking for service ID', serviceVariationId, '- found:', !!existingService);
 
             if (!existingService) {
-                const squareService = resolveSquareService(squareCatalog, serviceToBook);
+                const squareService = resolveSquareService(squareCatalog, serviceToBook, choiceOverrides);
                 if (!squareService) {
-                    const availableServices = squareCatalog.map(s => s.name).join(', ');
-                    throw new Error(`Service "${serviceToBook.name}" not found in your Square catalog. Available: ${availableServices}`);
+                    setRemapItems([{ planService: serviceToBook }]);
+                    setRemapCatalog(squareCatalog);
+                    setPendingBookingAction({ type: 'availability', visit });
+                    return false;
                 }
                 serviceVariationId = squareService.id;
                 console.log('[BOOKING] Resolved service:', serviceToBook.name, '->', squareService.name, squareService.id);
@@ -321,19 +385,21 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 dates.add(d.toISOString().split('T')[0]);
             });
             setAvailableDates(dates);
+            return true;
         } catch (e: any) {
             setFetchError(e.message);
+            return false;
         } finally {
             setIsFetchingSlots(false);
         }
     };
 
-    const handleVisitSelected = (visit: PlanAppointment) => {
+    const handleVisitSelected = async (visit: PlanAppointment) => {
         setSelectedVisit(visit);
         setBookingDate(visit.date);
         setCalendarMonth(visit.date);
-        fetchAvailabilityForCalendar(visit);
-        setBookingStep('select-date');
+        const resolved = await fetchAvailabilityForCalendar(visit, {});
+        if (resolved) setBookingStep('select-date');
     };
 
     const confirmPeriodAndFetch = (period: TimePeriod) => {
@@ -372,7 +438,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
         return groups;
     }, [filteredSlots]);
 
-    const executeBooking = async (slotTime: string) => {
+    const executeBooking = async (slotTime: string, choiceOverrides: Record<string, string> = {}) => {
         setIsBooking(true);
         setFetchError(null);
         try {
@@ -383,11 +449,18 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
             const squareCatalog = await SquareIntegrationService.fetchCatalog();
 
-            const squareServices = mockServices.map(ms => {
-                const found = resolveSquareService(squareCatalog, ms);
-                if (!found) throw new Error(`Service "${ms.name}" not found in your Square catalog.`);
-                return found;
-            });
+            const squareServices: Service[] = [];
+            const unresolved: Array<{ planService: { id: string; name: string } }> = [];
+            for (const ms of mockServices) {
+                const found = resolveSquareService(squareCatalog, ms, choiceOverrides);
+                if (found) { squareServices.push(found); } else { unresolved.push({ planService: ms }); }
+            }
+            if (unresolved.length > 0) {
+                setRemapItems(unresolved);
+                setRemapCatalog(squareCatalog);
+                setPendingBookingAction({ type: 'book', slotTime });
+                return;
+            }
 
             let stylistIdToBookFor = isClient ? plan.stylistId : (user?.stylistData?.id || allStylists[0]?.id);
 
@@ -1178,6 +1251,77 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                         {bookingStep === 'confirm' && !bookingSuccess && (
                             <button onClick={() => setBookingModalOpen(false)} className="w-full p-6 font-bold uppercase tracking-widest bp-caption border-t-4 hover:opacity-70 transition-colors text-muted-foreground border">Cancel</button>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {remapItems.length > 0 && (
+                <div className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[60] p-0 sm:p-4">
+                    <div className="bg-card w-full sm:max-w-lg bp-container-tall shadow-2xl border border-border overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="bg-primary p-6 flex-shrink-0">
+                            <p className="bp-overline text-primary-foreground mb-1">Service No Longer Available in Square</p>
+                            <p className="bp-section-title text-primary-foreground">Update Required to Book</p>
+                        </div>
+                        <div className="p-6 space-y-5 overflow-y-auto flex-grow">
+                            <p className="bp-body-sm text-muted-foreground leading-relaxed">
+                                One or more services in this plan no longer exist in your Square catalog — they may have been renamed or deleted. Select a replacement below to continue booking.
+                            </p>
+                            {remapItems.map(item => (
+                                <div key={item.planService.name} className="space-y-4 p-4 bg-muted bp-container-list border border-border">
+                                    <div>
+                                        <p className="bp-overline mb-0.5">Plan service (not found in Square)</p>
+                                        <p className="bp-card-title text-foreground">{item.planService.name}</p>
+                                    </div>
+                                    <div>
+                                        <label className="bp-overline block mb-2">Replace with</label>
+                                        <select
+                                            className="w-full p-3 bg-card border border-border bp-container-compact text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary"
+                                            value={remapChoices[item.planService.name] || ''}
+                                            onChange={e => setRemapChoices(prev => ({ ...prev, [item.planService.name]: e.target.value }))}
+                                        >
+                                            <option value="">— Select a Square service —</option>
+                                            {remapCatalog.map(s => (
+                                                <option key={s.id} value={s.id}>{s.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <label className="flex items-start gap-3 cursor-pointer select-none">
+                                        <input
+                                            type="checkbox"
+                                            checked={!!replaceInAllPlans[item.planService.name]}
+                                            onChange={e => setReplaceInAllPlans(prev => ({ ...prev, [item.planService.name]: e.target.checked }))}
+                                            className="mt-0.5 w-4 h-4 flex-shrink-0 accent-primary"
+                                        />
+                                        <span className="bp-body-sm leading-snug">
+                                            {role === 'admin'
+                                                ? 'Also replace this service in all plans across the salon'
+                                                : 'Also replace this service in all of my client plans'}
+                                        </span>
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="p-6 pt-4 flex gap-3 flex-shrink-0 border-t border-border">
+                            <button
+                                onClick={() => {
+                                    setRemapItems([]);
+                                    setRemapCatalog([]);
+                                    setPendingBookingAction(null);
+                                    setRemapChoices({});
+                                    setReplaceInAllPlans({});
+                                }}
+                                className="flex-1 py-3 bp-container-compact font-bold text-sm border border-border text-foreground bg-card active:scale-95 transition-all"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={applyRemapAndContinue}
+                                disabled={isApplyingRemap || remapItems.some(item => !remapChoices[item.planService.name])}
+                                className="flex-[2] py-3 bp-container-compact font-bold text-sm bg-primary text-primary-foreground active:scale-95 transition-all disabled:opacity-40"
+                            >
+                                {isApplyingRemap ? 'Updating...' : 'Continue Booking'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
