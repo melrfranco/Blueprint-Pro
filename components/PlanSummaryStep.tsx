@@ -169,15 +169,6 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
         if (byExact) return byExact;
         const byInsensitive = catalog.find(s => s.name.toLowerCase() === planService.name.toLowerCase());
         if (byInsensitive) return byInsensitive;
-        const planWords = toWords(planService.name);
-        const byWordSubset = catalog.find(s => {
-            const cWords = toWords(s.name);
-            return cWords.size > 0 && [...cWords].every(w => planWords.has(w));
-        });
-        if (byWordSubset) {
-            console.log('[BOOKING] word-overlap match:', planService.name, '->', byWordSubset.name);
-            return byWordSubset;
-        }
         const remapId = choices[planService.name];
         if (remapId) {
             const remapped = catalog.find(s => s.id === remapId);
@@ -187,6 +178,14 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             }
         }
         return undefined;
+    };
+
+    const wordOverlapSuggestion = (catalog: Service[], planService: { id: string; name: string }): Service | undefined => {
+        const planWords = toWords(planService.name);
+        return catalog.find(s => {
+            const cWords = toWords(s.name);
+            return cWords.size > 0 && [...cWords].every(w => planWords.has(w));
+        });
     };
 
     const applyRemapAndContinue = async () => {
@@ -362,6 +361,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             if (!existingService) {
                 const squareService = resolveSquareService(squareCatalog, serviceToBook, choiceOverrides);
                 if (!squareService) {
+                    const suggestion = wordOverlapSuggestion(squareCatalog, serviceToBook);
+                    if (suggestion) setRemapChoices(prev => ({ ...prev, [serviceToBook.name]: suggestion.id }));
                     setRemapItems([{ planService: serviceToBook }]);
                     setRemapCatalog(squareCatalog);
                     setPendingBookingAction({ type: 'availability', visit });
@@ -427,6 +428,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             if (!existingService) {
                 const squareService = resolveSquareService(squareCatalog, serviceToBook, choiceOverrides);
                 if (!squareService) {
+                    const suggestion = wordOverlapSuggestion(squareCatalog, serviceToBook);
+                    if (suggestion) setRemapChoices(prev => ({ ...prev, [serviceToBook.name]: suggestion.id }));
                     setRemapItems([{ planService: serviceToBook }]);
                     setRemapCatalog(squareCatalog);
                     setPendingBookingAction({ type: 'slots', date });
@@ -511,6 +514,12 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 if (found) { squareServices.push(found); } else { unresolved.push({ planService: ms }); }
             }
             if (unresolved.length > 0) {
+                const suggestions: Record<string, string> = {};
+                unresolved.forEach(u => {
+                    const s = wordOverlapSuggestion(squareCatalog, u.planService);
+                    if (s) suggestions[u.planService.name] = s.id;
+                });
+                setRemapChoices(prev => ({ ...prev, ...suggestions }));
                 setRemapItems(unresolved);
                 setRemapCatalog(squareCatalog);
                 setPendingBookingAction({ type: 'book', slotTime });
