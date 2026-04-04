@@ -314,21 +314,11 @@ export const SquareIntegrationService = {
       if (!customerId) throw new Error("Customer ID is required for booking.");
 
       let resolvedTeamMemberId = teamMemberId;
+      const isInvalidFormat = !teamMemberId || teamMemberId.startsWith('TM-') || teamMemberId === 'admin';
 
-      // Always validate against Square's authoritative bookable profiles list.
-      // /v2/team-members returns ALL team members; only profiles here can be booked.
-      const profilesData: any = await squareApiFetch('/v2/bookings/team-member-booking-profiles?bookable_only=true&limit=100');
-      const bookableProfiles: any[] = profilesData.team_member_booking_profiles || [];
-      const bookableIds = new Set(bookableProfiles.map((p: any) => p.team_member_id));
-      console.log('[BOOKING] Bookable team member IDs:', [...bookableIds]);
-
-      if (resolvedTeamMemberId && bookableIds.has(resolvedTeamMemberId)) {
-          console.log('[BOOKING] Confirmed bookable team member:', resolvedTeamMemberId);
-      } else {
-          console.warn('[BOOKING] Team member not bookable, finding alternative. Provided:', resolvedTeamMemberId);
-          let found = false;
-
-          // Prefer owner_team_member_id from merchant_settings if it's bookable
+      if (isInvalidFormat) {
+          // Try owner_team_member_id from merchant_settings
+          let foundFromDb = false;
           try {
               const { data: { session } } = await supabase.auth.getSession();
               if (session?.user?.id) {
@@ -337,26 +327,26 @@ export const SquareIntegrationService = {
                       .select('owner_team_member_id')
                       .eq('supabase_user_id', session.user.id)
                       .maybeSingle();
-                  if (ms?.owner_team_member_id && bookableIds.has(ms.owner_team_member_id)) {
+                  if (ms?.owner_team_member_id) {
                       resolvedTeamMemberId = ms.owner_team_member_id;
-                      found = true;
-                      console.log('[BOOKING] Using bookable owner_team_member_id:', resolvedTeamMemberId);
+                      foundFromDb = true;
+                      console.log('[BOOKING] Using owner_team_member_id:', resolvedTeamMemberId);
                   }
               }
           } catch (dbErr) {
               console.warn('[BOOKING] merchant_settings lookup failed:', dbErr);
           }
 
-          // Fall back to first bookable profile
-          if (!found) {
-              if (bookableProfiles.length === 0) {
-                  throw new Error("No team members are set up for bookings in your Square account. Please go to Square Dashboard → Team → Team Members and enable bookings for at least one team member.");
+          if (!foundFromDb) {
+              const teamMembers = await SquareIntegrationService.fetchTeam();
+              if (!teamMembers || teamMembers.length === 0) {
+                  throw new Error("No bookable team members found in Square to assign this appointment to.");
               }
-              resolvedTeamMemberId = bookableProfiles[0].team_member_id;
-              console.log('[BOOKING] Using first bookable team member:', resolvedTeamMemberId);
+              resolvedTeamMemberId = teamMembers[0].id;
+              console.log('[BOOKING] Using first team member from Square API:', resolvedTeamMemberId);
           }
       }
-      
+
       const serviceVersionMap = new Map<string, number>();
       services.forEach(s => {
           if (s.id && s.version) {
@@ -364,19 +354,32 @@ export const SquareIntegrationService = {
           }
       });
 
-      const body = {
+      const buildSegments = (withTeamMember: boolean) =>
+          services.map(service => ({
+              ...(withTeamMember && resolvedTeamMemberId ? { team_member_id: resolvedTeamMemberId } : {}),
+              service_variation_id: service.id,
+              service_variation_version: serviceVersionMap.get(service.id) || undefined
+          }));
+
+      const buildBody = (withTeamMember: boolean) => ({
           booking: {
               location_id: locationId,
               start_at: startAt,
               customer_id: customerId,
-              appointment_segments: services.map(service => ({
-                  team_member_id: resolvedTeamMemberId,
-                  service_variation_id: service.id,
-                  service_variation_version: serviceVersionMap.get(service.id) || undefined
-              }))
+              appointment_segments: buildSegments(withTeamMember)
           }
-      };
+      });
 
-      return await squareApiFetch('/v2/bookings', { method: 'POST', body });
+      try {
+          console.log('[BOOKING] Attempting with team_member_id:', resolvedTeamMemberId);
+          return await squareApiFetch('/v2/bookings', { method: 'POST', body: buildBody(true) });
+      } catch (firstErr: any) {
+          // If Square rejects the team member ID specifically, retry without it (Square auto-assigns)
+          if (firstErr.message?.includes('team_member_id') && firstErr.message?.includes('not valid')) {
+              console.warn('[BOOKING] Team member rejected by Square, retrying without team_member_id');
+              return await squareApiFetch('/v2/bookings', { method: 'POST', body: buildBody(false) });
+          }
+          throw firstErr;
+      }
   },
 };
