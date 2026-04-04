@@ -250,7 +250,7 @@ export const SquareIntegrationService = {
       startAt: string,
       teamMemberId: string,
       serviceVariationId: string
-  }): Promise<string[]> => {
+  }): Promise<{ startAt: string; teamMemberId: string | null }[]> => {
       const startDate = new Date(params.startAt);
       if (isNaN(startDate.getTime())) throw new Error("Invalid start time passed to Square.");
 
@@ -279,10 +279,10 @@ export const SquareIntegrationService = {
       };
 
       const data: any = await squareApiFetch('/v2/bookings/availability/search', { method: 'POST', body });
-      const slots = (data.availabilities || [])
-          .map((a: any) => a.start_at);
-
-      return slots;
+      return (data.availabilities || []).map((a: any) => ({
+          startAt: a.start_at,
+          teamMemberId: a.appointment_segments?.[0]?.team_member_id ?? null
+      }));
   },
 
   fetchAllBookings: async (locationId: string): Promise<any[]> => {
@@ -326,13 +326,14 @@ export const SquareIntegrationService = {
               start_at: startAt,
               customer_id: customerId,
               appointment_segments: services.map(service => ({
+                  ...(teamMemberId ? { team_member_id: teamMemberId } : {}),
                   service_variation_id: service.id,
                   service_variation_version: serviceVersionMap.get(service.id) || undefined
               }))
           }
       };
 
-      console.log('[BOOKING] Creating booking (Square auto-assigns team member)');
+      console.log('[BOOKING] Creating booking with team_member_id:', teamMemberId || '(auto-assign)');
       return await squareApiFetch('/v2/bookings', { method: 'POST', body });
   },
 };

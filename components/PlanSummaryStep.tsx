@@ -50,6 +50,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
     const [isViewingMembershipDetails, setIsViewingMembershipDetails] = useState(false);
     const [selectedChartVisit, setSelectedChartVisit] = useState<PlanAppointment | null>(null);
     const [selectedSlotTime, setSelectedSlotTime] = useState<string | null>(null);
+    const [slotTeamMemberMap, setSlotTeamMemberMap] = useState<Record<string, string>>({});
+    const [selectedSlotTeamMemberId, setSelectedSlotTeamMemberId] = useState<string | null>(null);
 
     const [remapCatalog, setRemapCatalog] = useState<Service[]>([]);
     const [remapItems, setRemapItems] = useState<Array<{ planService: { id: string; name: string } }>>([]);
@@ -224,7 +226,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 const resolved = await fetchAvailabilityForCalendar(pendingBookingAction.visit, currentChoices);
                 if (resolved) setBookingStep('select-date');
             } else if (pendingBookingAction.type === 'book') {
-                await executeBooking(pendingBookingAction.slotTime, currentChoices);
+                await executeBooking(pendingBookingAction.slotTime, currentChoices, selectedSlotTeamMemberId);
             } else if (pendingBookingAction.type === 'slots') {
                 await fetchSlotsForDate(pendingBookingAction.date, currentChoices);
             }
@@ -383,7 +385,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
             const dates = new Set<string>();
             slots.forEach(s => {
-                const d = new Date(s);
+                const d = new Date(s.startAt);
                 dates.add(d.toISOString().split('T')[0]);
             });
             setAvailableDates(dates);
@@ -442,7 +444,10 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 teamMemberId: stylistId,
                 serviceVariationId
             });
-            setAvailableSlots(slots);
+            const map: Record<string, string> = {};
+            slots.forEach(s => { if (s.teamMemberId) map[s.startAt] = s.teamMemberId; });
+            setSlotTeamMemberMap(map);
+            setAvailableSlots(slots.map(s => s.startAt));
             setBookingStep('select-period');
         } catch (e: any) {
             console.error('[BOOKING] fetchSlotsForDate error:', e);
@@ -488,7 +493,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
         return groups;
     }, [filteredSlots]);
 
-    const executeBooking = async (slotTime: string, choiceOverrides: Record<string, string> = {}) => {
+    const executeBooking = async (slotTime: string, choiceOverrides: Record<string, string> = {}, bookingTeamMemberId?: string | null) => {
         setIsBooking(true);
         setFetchError(null);
         try {
@@ -530,7 +535,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 locationId: loc.id,
                 startAt: slotTime,
                 customerId,
-                teamMemberId: stylistIdToBookFor,
+                teamMemberId: bookingTeamMemberId || stylistIdToBookFor,
                 services: squareServices
             });
 
@@ -1168,7 +1173,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                                     <h3 className="bp-caption uppercase mb-3 tracking-widest border-b-2 pb-2 text-muted-foreground border">{day}</h3>
                                                     <div className="grid grid-cols-2 gap-2">
                                                         {(slots as string[]).map((s, i) => (
-                                                            <button key={i} onClick={() => { setSelectedSlotTime(s); setBookingStep('confirm'); }} disabled={isBooking} className="p-4 border-4 bp-container-list text-center hover:border-accent active:scale-95 transition-all elevated-card border text-foreground">
+                                                            <button key={i}
+                                                                onClick={() => { setSelectedSlotTime(s); setSelectedSlotTeamMemberId(slotTeamMemberMap[s] || null); setBookingStep('confirm'); }} disabled={isBooking} className="p-4 border-4 bp-container-list text-center hover:border-accent active:scale-95 transition-all elevated-card border text-foreground">
                                                                 <span className="font-bold text-base">{new Date(s).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                                             </button>
                                                         ))}
@@ -1240,7 +1246,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                             )}
 
                                             <button
-                                                onClick={() => executeBooking(selectedSlotTime)}
+                                                onClick={() => executeBooking(selectedSlotTime, {}, selectedSlotTeamMemberId)}
                                                 disabled={isBooking}
                                                 className="w-full font-bold py-5 bp-container-compact shadow-xl flex items-center justify-center space-x-3 active:scale-95 transition-all border-b-8 border-black/20 disabled:opacity-50 bg-accent text-accent-foreground"
                                             >
