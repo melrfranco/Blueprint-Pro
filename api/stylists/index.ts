@@ -182,7 +182,9 @@ async function handleJoin(req: any, res: any) {
   const stylistName = match.name || 'Stylist';
   const stylistId = match.square_team_member_id;
   const adminUserId = match.supabase_user_id || null;
-  const levelId = match.raw?.level_id || 'lvl_1';
+  const levelId = match.level_id || match.raw?.level_id || 'lvl_1';
+  const permissionOverrides = match.permissions || {};
+  const resolvedPermissions = { ...DEFAULT_PERMISSIONS, ...permissionOverrides };
 
   // If user already exists (e.g. from a previous invite), delete and recreate
   const { data: existingUsers } = await (supabaseAdmin.auth as any).admin.listUsers();
@@ -201,7 +203,7 @@ async function handleJoin(req: any, res: any) {
       stylist_name: stylistName,
       admin_user_id: adminUserId,
       level_id: levelId,
-      permissions: DEFAULT_PERMISSIONS,
+      permissions: resolvedPermissions,
     },
   });
 
