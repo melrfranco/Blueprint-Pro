@@ -3,7 +3,7 @@ import BottomNav, { Tab } from './BottomNav';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { usePlans } from '../contexts/PlanContext';
-import { CalendarIcon, SettingsIcon, ChevronRightIcon, LayoutDashboardIcon } from './icons';
+import { CalendarIcon, SettingsIcon, ChevronRightIcon, LayoutDashboardIcon, SunIcon } from './icons';
 import AccountSettings from './AccountSettings';
 import PlanWizard from './PlanWizard';
 import ReportsPanel from './ReportsPanel';
@@ -102,10 +102,25 @@ export default function StylistDashboard() {
 
   const hasPinnedCustomization = user?.id ? pinnedReports[String(user.id)] !== undefined : false;
 
-  const renderDashboard = () => (
+  const renderDashboard = () => {
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    const firstName = (user?.name || 'Stylist').split(' ')[0];
+    const levelName = levels.find(l => l.id === user?.stylistData?.levelId)?.name;
+
+    return (
     <div className="bp-page">
-      <h1 className="bp-page-title">My Dashboard</h1>
-      <p className="bp-subtitle">{user?.name || 'Stylist'}</p>
+      {/* Welcome header — inline card, no negative-margin clipping */}
+      <div className="flex items-center justify-between mb-6 p-5 bg-primary text-primary-foreground bp-container-tall shadow-md">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <SunIcon className="w-4 h-4 opacity-70" />
+            <p className="text-xs font-bold uppercase tracking-widest opacity-70">{greeting}</p>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight">{firstName}</h1>
+          {levelName && <p className="text-xs opacity-60 uppercase tracking-widest mt-1">{levelName}</p>}
+        </div>
+      </div>
 
       {/* Quick Stats — original layout preserved */}
       <div className="grid grid-cols-3 gap-3 mb-6">
@@ -217,11 +232,12 @@ export default function StylistDashboard() {
         </div>
       )}
     </div>
-  );
+    );
+  };
 
   const renderPlans = () => (
     <div className="bp-page">
-      <h1 className="bp-page-title">My Plans</h1>
+      <h2 className="bp-page-subtitle mb-6">My Plans</h2>
 
       <button
         data-ui="button"
@@ -294,7 +310,7 @@ export default function StylistDashboard() {
 
     return (
       <div className="bp-page">
-        <h1 className="bp-page-title">Settings</h1>
+        <h2 className="bp-page-subtitle mb-6">Settings</h2>
         <div className="grid grid-cols-2 gap-6 mb-8">
           <button
             onClick={() => setSettingsView('account')}
