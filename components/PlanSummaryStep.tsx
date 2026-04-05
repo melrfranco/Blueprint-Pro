@@ -1293,7 +1293,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
             )}
 
             {remapItems.length > 0 && (
-                <div className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[60] p-0 sm:p-4">
+                <div className="fixed inset-0 bg-black/60 flex items-end sm:items-center justify-center z-[110] p-0 sm:p-4">
                     <div className="bg-card w-full sm:max-w-lg bp-container-tall shadow-2xl border border-border overflow-hidden flex flex-col max-h-[90vh]">
                         <div className="bg-primary p-6 flex-shrink-0">
                             <p className="bp-overline text-primary-foreground mb-1">Service No Longer Available in Square</p>
