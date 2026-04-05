@@ -74,9 +74,15 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
     const isMemberActive = plan.membershipStatus === 'active';
 
     const isClient = user?.role === 'client';
-    const canBook = user?.role === 'admin' || isClient;
-    const canViewClientContact = user?.role === 'admin' || isClient;
-    const isContactRestricted = !isClient && !canViewClientContact;
+    const isStylist = user?.role === 'stylist';
+    const currentStylistRecord = allStylists.find(s => s.id === user?.stylistData?.id);
+    const stylistPerms = currentStylistRecord?.permissions;
+
+    const canBook = user?.role === 'admin' || isClient ||
+        (isStylist && (stylistPerms?.canBookAppointments ?? true));
+    const canViewClientContact = user?.role === 'admin' || isClient ||
+        (isStylist && (stylistPerms?.viewClientContact ?? true));
+    const isContactRestricted = !canViewClientContact;
 
     const projectedMonthlySpend = useMemo(() => plan.totalCost / 12, [plan.totalCost]);
 
@@ -812,14 +818,14 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 )}
 
                 <div className="flex flex-col gap-4 mb-4">
-                    {!isClient && !isPlanActive && (
+                    {user?.role === 'admin' && !isPlanActive && (
                         <button onClick={handlePublish} disabled={isPublishing} className="w-full py-4 bp-container-compact font-bold text-lg shadow-sm flex items-center justify-center space-x-3 active:scale-95 transition-all bg-accent text-accent-foreground">
                             {isPublishing ? <RefreshIcon className="w-6 h-6 animate-spin" /> : <GlobeIcon className="w-6 h-6" />}
                             <span>PUBLISH TO CLIENT</span>
                         </button>
                     )}
 
-                    {!isClient && membershipConfig.enabled && (
+                    {user?.role === 'admin' && membershipConfig.enabled && (
                         <button
                             onClick={() => setMembershipModalOpen(true)}
                             className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all border-2 border-secondary bg-secondary text-secondary-foreground`}
@@ -829,14 +835,16 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                         </button>
                     )}
 
-                    <button
-                        onClick={handleOpenBooking}
-                        disabled={!canBook}
-                        className={`w-full py-4 bp-container-compact font-bold text-lg shadow-sm active:scale-95 transition-all flex items-center justify-center space-x-3 ${canBook ? 'bg-accent text-accent-foreground' : 'cursor-not-allowed bg-muted text-muted-foreground'}`}
-                    >
-                        <CalendarIcon className="w-6 h-6" />
-                        <span>{isClient ? 'BOOK APPOINTMENT' : canBook ? 'Book an Upcoming Appointment' : 'SYNC DISABLED'}</span>
-                    </button>
+                    {(canBook || user?.role === 'admin') && (
+                        <button
+                            onClick={handleOpenBooking}
+                            disabled={!canBook}
+                            className={`w-full py-4 bp-container-compact font-bold text-lg shadow-sm active:scale-95 transition-all flex items-center justify-center space-x-3 ${canBook ? 'bg-accent text-accent-foreground' : 'cursor-not-allowed bg-muted text-muted-foreground'}`}
+                        >
+                            <CalendarIcon className="w-6 h-6" />
+                            <span>{isClient ? 'BOOK APPOINTMENT' : canBook ? 'Book an Upcoming Appointment' : 'SYNC DISABLED'}</span>
+                        </button>
+                    )}
                 </div>
             </div>
 

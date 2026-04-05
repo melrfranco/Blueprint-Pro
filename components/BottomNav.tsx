@@ -6,6 +6,7 @@ export type Tab = 'dashboard' | 'plans' | 'reports' | 'settings';
 interface BottomNavProps {
   activeTab: string;
   onChange: (tab: Tab) => void;
+  hiddenTabs?: Tab[];
 }
 
 const NAV_ITEMS: { key: Tab; label: string; icon: any }[] = [
@@ -15,12 +16,13 @@ const NAV_ITEMS: { key: Tab; label: string; icon: any }[] = [
   { key: 'settings', label: 'Settings', icon: SettingsIcon },
 ];
 
-export default function BottomNav({ activeTab, onChange }: BottomNavProps) {
+export default function BottomNav({ activeTab, onChange, hiddenTabs = [] }: BottomNavProps) {
+  const visibleItems = NAV_ITEMS.filter(item => !hiddenTabs.includes(item.key));
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-50 bp-bottomnav">
       <div className="flex justify-around max-w-md mx-auto p-2 pb-6 pt-3">
-        {NAV_ITEMS.map(({ key, label, icon: Icon }) => {
+        {visibleItems.map(({ key, label, icon: Icon }) => {
           const isActive = activeTab === key;
 
           return (

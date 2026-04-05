@@ -9,7 +9,18 @@ import PlanWizard from './PlanWizard';
 import ReportsPanel from './ReportsPanel';
 import DashboardCustomization from './DashboardCustomization';
 import { computeReportMetrics, getWidgetValue, DASHBOARD_WIDGETS, DEFAULT_PINNED_STYLIST } from '../utils/reportMetrics';
-import type { GeneratedPlan } from '../types';
+import type { GeneratedPlan, StylistPermissions } from '../types';
+
+const FALLBACK_PERMISSIONS: StylistPermissions = {
+  canBookAppointments: true,
+  canOfferDiscounts: false,
+  requiresDiscountApproval: true,
+  viewGlobalReports: false,
+  viewClientContact: true,
+  viewAllSalonPlans: false,
+  can_book_own_schedule: true,
+  can_book_peer_schedules: false,
+};
 
 export default function StylistDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard');
@@ -18,17 +29,40 @@ export default function StylistDashboard() {
   const [settingsView, setSettingsView] = useState<'menu' | 'account' | 'dashboardCustomization'>('menu');
 
   const { user, logout } = useAuth();
-  const { services: allServices, clients, pinnedReports, updatePinnedReports, saveAll } = useSettings();
+  const { services: allServices, clients, stylists, levels, pinnedReports, updatePinnedReports, saveAll } = useSettings();
   const { plans, bookings } = usePlans();
 
   const stylistId = user?.stylistData?.id || user?.id;
-  const permissions = user?.stylistData?.permissions;
+
+  // Resolve effective permissions: find this stylist in the loaded team list (which has
+  // level-defaults already merged), falling back to user metadata + level defaults.
+  const effectivePermissions = useMemo((): StylistPermissions => {
+    const record = stylists.find(s => s.id === stylistId);
+    if (record?.permissions) return record.permissions as StylistPermissions;
+    const levelId = user?.stylistData?.levelId;
+    const levelDefaults = levels.find(l => l.id === levelId)?.defaultPermissions || FALLBACK_PERMISSIONS;
+    const overrides = (user?.stylistData?.permissions || {}) as Partial<StylistPermissions>;
+    return { ...levelDefaults, ...overrides };
+  }, [stylists, stylistId, user, levels]);
 
   // Filter plans assigned to this stylist
   const myPlans = useMemo(() => {
     if (!stylistId) return plans;
     return plans.filter(p => p.stylistId === stylistId || p.stylistName === user?.name);
   }, [plans, stylistId, user?.name]);
+
+  // Respect viewAllSalonPlans permission
+  const visiblePlans = useMemo(
+    () => effectivePermissions.viewAllSalonPlans ? plans : myPlans,
+    [effectivePermissions.viewAllSalonPlans, plans, myPlans]
+  );
+
+  // Tabs to hide in the bottom nav based on permissions
+  const hiddenNavTabs = useMemo((): Tab[] => {
+    const hidden: Tab[] = [];
+    if (!effectivePermissions.viewGlobalReports) hidden.push('reports');
+    return hidden;
+  }, [effectivePermissions.viewGlobalReports]);
 
   // Upcoming appointments across all my plans
   const upcomingAppointments = useMemo(() => {
@@ -130,13 +164,13 @@ export default function StylistDashboard() {
       {/* Recent Plans */}
       <div>
         <h2 className="bp-section-title mb-4 pl-4">My Plans</h2>
-        {myPlans.length === 0 ? (
+        {visiblePlans.length === 0 ? (
           <div className="bg-card p-6 bp-container-list shadow-sm text-center elevated-card">
             <p className="bp-body-sm text-muted-foreground">No plans yet — create your first one!</p>
           </div>
         ) : (
           <div className="space-y-3">
-            {myPlans.slice(0, 5).map(plan => (
+            {visiblePlans.slice(0, 5).map(plan => (
               <button
                 key={plan.id}
                 onClick={() => setEditingPlan(plan)}
@@ -198,13 +232,13 @@ export default function StylistDashboard() {
       </button>
 
       <div className="space-y-4">
-        {myPlans.length === 0 ? (
+        {visiblePlans.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 bg-card bp-container-list shadow-sm elevated-card">
             <p className="bp-section-title mb-2">No plans yet</p>
             <p className="bp-overline">Create your first plan above!</p>
           </div>
         ) : (
-          myPlans.map(plan => (
+          visiblePlans.map(plan => (
             <button
               key={plan.id}
               onClick={() => setEditingPlan(plan)}
@@ -303,7 +337,9 @@ export default function StylistDashboard() {
     switch (activeTab) {
       case 'dashboard': return renderDashboard();
       case 'plans': return renderPlans();
-      case 'reports': return <ReportsPanel role="stylist" metrics={metrics} />;
+      case 'reports':
+        if (!effectivePermissions.viewGlobalReports) return renderDashboard();
+        return <ReportsPanel role="stylist" metrics={metrics} />;
       case 'settings': return renderSettings();
       default: return renderDashboard();
     }
@@ -319,7 +355,7 @@ export default function StylistDashboard() {
   return (
     <div className="flex flex-col h-full bg-background bp-app-shell">
       {renderActiveTab()}
-      <BottomNav activeTab={activeTab} onChange={handleTabChange} />
+      <BottomNav activeTab={activeTab} onChange={handleTabChange} hiddenTabs={hiddenNavTabs} />
     </div>
   );
 }
