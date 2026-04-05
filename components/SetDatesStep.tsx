@@ -67,7 +67,7 @@ const SetDatesStep: React.FC<SetDatesStepProps> = ({ selectedServices, planDetai
         <h1 className="text-2xl font-bold text-foreground">First Service Date</h1>
       </div>
 
-      <div className="flex-grow overflow-y-auto px-4 pb-4 space-y-6">
+      <div className="flex-grow overflow-y-auto px-4 pt-4 pb-nav space-y-6">
         {selectedServices.map(service => (
           <div key={service.id} className="p-4 bp-container-tall border border shadow-sm bg-muted">
             <h3 className="font-bold text-lg mb-3 text-foreground">{service.name}</h3>

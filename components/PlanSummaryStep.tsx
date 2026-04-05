@@ -598,7 +598,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                     </button>
                 </div>
             )}
-            <div className="flex-grow p-5 overflow-y-auto text-foreground">
+            <div className="flex-grow px-5 pt-5 pb-nav overflow-y-auto text-foreground">
                 <h1 className="bp-page-title">Blueprint Summary</h1>
                 <p className="bp-subtitle">{plan.client.name}</p>
                 <div className="flex justify-end mb-6">

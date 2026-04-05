@@ -288,6 +288,13 @@
   }
 }
 
+@layer utilities {
+  /* Clears the fixed bottom nav in overflow-y-auto scroll containers */
+  .pb-nav {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
 @layer components {
   /* page / layout helpers */
   .bp-page {

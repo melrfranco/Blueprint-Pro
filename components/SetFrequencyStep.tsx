@@ -49,7 +49,7 @@ const SetFrequencyStep: React.FC<SetFrequencyStepProps> = ({ selectedServices, p
         <p className="text-sm text-muted-foreground">How often should these repeat?</p>
       </div>
 
-      <div className="flex-grow overflow-y-auto px-4 pb-4 space-y-4">
+      <div className="flex-grow overflow-y-auto px-4 pt-4 pb-nav space-y-4">
         {selectedServices.map(service => (
           <div key={service.id} className="p-4 bp-container-list border border bg-muted">
             <div className="flex justify-between items-baseline">

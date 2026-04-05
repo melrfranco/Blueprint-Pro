@@ -101,7 +101,7 @@ const SelectServicesStep: React.FC<SelectServicesStepProps> = ({ availableServic
                 </div>
             </div>
 
-            <div className="flex-grow overflow-y-auto px-4 pb-4 pt-4">
+            <div className="flex-grow overflow-y-auto px-4 pt-4 pb-nav">
                 {linkingSuggestion && (
                     <div className="mb-6 bg-secondary text-secondary-foreground p-5 bp-container-list border-b-4 border-black/20 shadow-xl animate-bounce-in flex items-center justify-between">
                         <div className="pr-4">

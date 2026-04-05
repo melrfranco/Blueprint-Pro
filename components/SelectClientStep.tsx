@@ -160,7 +160,7 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
         </div>
       </div>
 
-      <div className="flex-grow overflow-y-auto p-4 space-y-3 bg-background">
+      <div className="flex-grow overflow-y-auto px-4 pt-4 pb-nav space-y-3 bg-background">
         <button
           onClick={() => setIsCreating(true)}
           className="w-full p-4 bp-container-compact font-bold mb-4 shadow-md flex items-center justify-center active:scale-95 transition-all bg-accent text-accent-foreground"
