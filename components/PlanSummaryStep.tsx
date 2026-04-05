@@ -1265,7 +1265,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                             )}
 
                                             <button
-                                                onClick={() => executeBooking(selectedSlotTime, {}, selectedSlotTeamMemberId)}
+                                                onClick={() => selectedSlotTime && executeBooking(selectedSlotTime, remapChoices, selectedSlotTeamMemberId)}
                                                 disabled={isBooking}
                                                 className="w-full font-bold py-5 bp-container-compact shadow-xl flex items-center justify-center space-x-3 active:scale-95 transition-all border-b-8 border-black/20 disabled:opacity-50 bg-accent text-accent-foreground"
                                             >
