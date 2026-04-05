@@ -297,16 +297,14 @@ export default function TeamAccessSettings({ onBack }: TeamAccessSettingsProps) 
     </div>
   );
 
-  const assignedLevels = levels.filter(level => stylists.some(s => s.levelId === level.id));
-
   const renderLevels = () => (
     <div className="space-y-4 pb-8">
-      {assignedLevels.length === 0 ? (
+      {levels.length === 0 ? (
         <div className="p-4 text-center text-sm font-medium bp-container-compact border-2 border-dashed text-foreground bg-muted border">
-          No levels in use. Assign a level to a team member to see it here.
+          No levels yet. Click "Add level" to create one.
         </div>
       ) : (
-        assignedLevels.map((level) => (
+        levels.map((level) => (
           <div key={level.id} className="bp-container-tall border-4 border bp-card-padding-md bg-card space-y-6">
             <div className="grid gap-4 md:grid-cols-2">
               <div>

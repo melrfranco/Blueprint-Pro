@@ -293,6 +293,44 @@
   .pb-nav {
     padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px)) !important;
   }
+
+  /* Toggle switch */
+  .toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 48px;
+    height: 28px;
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    transition: background-color 0.2s, border-color 0.2s;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 0;
+  }
+  .toggle[data-state="on"] {
+    background-color: var(--primary);
+  }
+  .toggle[data-state="off"] {
+    background-color: var(--muted);
+    border-color: var(--border);
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    background-color: white;
+    transition: transform 0.2s;
+    left: 2px;
+  }
+  .toggle[data-state="on"]::after {
+    transform: translateX(20px);
+  }
+  .toggle[data-state="off"]::after {
+    transform: translateX(0);
+  }
 }
 
 @layer components {
