@@ -70,10 +70,13 @@ async function handleGeneratePin(req: any, res: any) {
   const updatedRaw = { ...currentRaw, join_pin: pin, pin_created_at: new Date().toISOString() };
 
   if (existing) {
-    const updateFields: any = { raw: updatedRaw, updated_at: new Date().toISOString() };
+    const updateFields: any = {
+      raw: updatedRaw,
+      updated_at: new Date().toISOString(),
+      supabase_user_id: authData.user.id,
+    };
     if (name) updateFields.name = name;
     if (email) updateFields.email = email;
-    // Always ensure merchant_id is set (UUID from merchant_settings.id)
     if (merchantSettingsId && !existing.merchant_id) updateFields.merchant_id = merchantSettingsId;
     const { error: updateError } = await supabaseAdmin
       .from('square_team_members')
@@ -85,6 +88,7 @@ async function handleGeneratePin(req: any, res: any) {
       .from('square_team_members')
       .insert({
         square_team_member_id: squareTeamMemberId,
+        supabase_user_id: authData.user.id,
         merchant_id: merchantSettingsId,
         name: name || null,
         email: email || null,

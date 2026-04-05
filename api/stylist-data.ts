@@ -38,14 +38,27 @@ export default async function handler(req: any, res: any) {
     const stylistSquareId = userMeta.stylist_id;
     let adminUserId = userMeta.admin_user_id;
 
-    // Fallback: resolve admin from square_team_members
+    // Fallback 1: resolve admin via square_team_members.supabase_user_id
     if (!adminUserId && stylistSquareId) {
       const { data: tmRow } = await supabaseAdmin
         .from('square_team_members')
-        .select('supabase_user_id')
+        .select('supabase_user_id, merchant_id')
         .eq('square_team_member_id', stylistSquareId)
         .maybeSingle();
-      adminUserId = tmRow?.supabase_user_id;
+      adminUserId = tmRow?.supabase_user_id || null;
+
+      // Fallback 2: if supabase_user_id not set on the row, resolve via merchant_id → merchant_settings
+      if (!adminUserId && tmRow?.merchant_id) {
+        const { data: msRow } = await supabaseAdmin
+          .from('merchant_settings')
+          .select('supabase_user_id')
+          .eq('id', tmRow.merchant_id)
+          .maybeSingle();
+        adminUserId = msRow?.supabase_user_id || null;
+        if (adminUserId) {
+          console.log(`[STYLIST-DATA] Resolved admin via merchant_settings (merchant_id: ${tmRow.merchant_id})`);
+        }
+      }
     }
 
     if (!adminUserId) {
