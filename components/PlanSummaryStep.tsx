@@ -46,6 +46,9 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
     const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>('sms');
     const [isSendingInvite, setIsSendingInvite] = useState(false);
     const [inviteSent, setInviteSent] = useState(false);
+    const [activationLink, setActivationLink] = useState<string | null>(null);
+    const [inviteBookingEligible, setInviteBookingEligible] = useState<boolean | null>(null);
+    const [inviteWarning, setInviteWarning] = useState<string | null>(null);
     const [isAccepting, setIsAccepting] = useState(false);
     const [isViewingMembershipDetails, setIsViewingMembershipDetails] = useState(false);
     const [selectedChartVisit, setSelectedChartVisit] = useState<PlanAppointment | null>(null);
@@ -265,12 +268,56 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
         }
 
         setIsSendingInvite(true);
+        setInviteWarning(null);
 
-        const message = invitationMessage;
         const clientPhone = plan.client.phone || '';
         const clientEmail = plan.client.email || '';
 
         try {
+            // Step 1: Create invitation record via server endpoint
+            let linkToShare = '';
+            try {
+                const { data: sessionData } = await supabase.auth.getSession();
+                const token = sessionData?.session?.access_token;
+
+                const res = await fetch('/api/invitations/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    },
+                    body: JSON.stringify({
+                        plan_id: plan.id,
+                        invite_email: clientEmail || plan.client.email,
+                        invite_name: plan.client.name,
+                        invite_phone: clientPhone || null,
+                    }),
+                });
+
+                const result = await res.json();
+
+                if (res.ok && result.activation_link) {
+                    linkToShare = result.activation_link;
+                    setActivationLink(linkToShare);
+                    setInviteBookingEligible(result.booking_eligible);
+
+                    if (!result.booking_eligible) {
+                        setInviteWarning('This client has no Square customer link. They can activate their account but won\'t be able to book until you link a Square customer. Sync clients from Square first, then resend the invitation.');
+                    }
+                } else {
+                    console.warn('[INVITE] Failed to create invitation:', result.message);
+                    // Continue with old flow as fallback
+                }
+            } catch (inviteErr) {
+                console.warn('[INVITE] Invitation API error:', inviteErr);
+                // Continue with old flow as fallback
+            }
+
+            // Step 2: Open delivery channel with activation link included
+            const message = linkToShare
+                ? `${invitationMessage}\n\nActivate your account: ${linkToShare}`
+                : invitationMessage;
+
             if (deliveryMethod === 'sms') {
                 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
                 const separator = isIOS ? '&' : '?';
@@ -895,6 +942,15 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                             <div>
                                                 <p className="bp-caption text-red-600 uppercase tracking-widest">Contact Missing</p>
                                                 <p className="bp-body-sm text-red-800 leading-tight">No {deliveryMethod === 'sms' ? 'phone' : 'email'} found for this client. You can still open the app, but you{"'"}ll need to manually enter the recipient.</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {inviteWarning && (
+                                        <div className="bg-amber-50 p-4 bp-container-list border-2 border-amber-100 flex items-start space-x-3">
+                                            <div className="bg-amber-500 text-white rounded-full p-1 mt-0.5">!</div>
+                                            <div>
+                                                <p className="bp-caption text-amber-600 uppercase tracking-widest">Booking Unavailable</p>
+                                                <p className="bp-body-sm text-amber-900 leading-tight">{inviteWarning}</p>
                                             </div>
                                         </div>
                                     )}
