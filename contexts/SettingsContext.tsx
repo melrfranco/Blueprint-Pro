@@ -21,7 +21,6 @@ import type {
 import { ALL_SERVICES, STYLIST_LEVELS } from '../data/mockData';
 import { supabase } from '../lib/supabase';
 import { canCustomizeBranding } from '../utils/isEnterpriseAccount';
-import { SquareIntegrationService } from '../services/squareIntegration';
 
 // Blueprint default branding - uses Blueprint Design System v1.0.0 palette
 export const BLUEPRINT_DEFAULT_BRANDING: BrandingSettings = {
@@ -249,11 +248,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
             if (dataJson.services?.length > 0) {
               console.log('[Settings] ✅ Loaded', dataJson.services.length, 'services from admin Supabase data');
               setServices(dataJson.services.map((row: any) => ({
-                id: row.square_variation_id || row.square_item_id,
+                id: row.metadata?.square_variation_id || row.metadata?.square_item_id || row.id,
                 name: row.name || 'Unnamed Service',
-                variationName: row.variation_name,
-                cost: row.price_cents != null ? row.price_cents / 100 : 0,
-                duration: row.duration_minutes || 60,
+                variationName: row.metadata?.variation_name,
+                cost: row.cost != null ? Number(row.cost) : (row.metadata?.price_cents != null ? row.metadata.price_cents / 100 : 0),
+                duration: row.duration || 60,
                 category: row.category || '',
               })));
             }
@@ -331,11 +330,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         if (svcRes.ok && svcJson.services && svcJson.services.length > 0) {
           console.log('[Settings] ✅ Loaded', svcJson.services.length, 'services from server');
           const mapped: Service[] = svcJson.services.map((row: any) => ({
-            id: row.square_variation_id || row.square_item_id,
+            id: row.metadata?.square_variation_id || row.metadata?.square_item_id || row.id,
             name: row.name || 'Unnamed Service',
-            variationName: row.variation_name,
-            cost: row.price_cents != null ? row.price_cents / 100 : 0,
-            duration: row.duration_minutes || 60,
+            variationName: row.metadata?.variation_name,
+            cost: row.cost != null ? Number(row.cost) : (row.metadata?.price_cents != null ? row.metadata.price_cents / 100 : 0),
+            duration: row.duration || 60,
             category: row.category || '',
           }));
           setServices(mapped);
@@ -389,16 +388,41 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       // ---- Team ----
       setLoadingTeam(true);
       setTeamError(null);
-      console.log('[Settings] Fetching team from Square...');
+      console.log('[Settings] Syncing team via /api/square/sync...');
       try {
-        const squareTeam = await SquareIntegrationService.fetchTeam();
+        const teamRes = await fetch('/api/square/sync', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-User-Id': user.id,
+          },
+          body: JSON.stringify({ action: 'team' }),
+        });
+        const teamJson = await teamRes.json();
+        console.log('[Settings] /api/square/sync?action=team response:', teamRes.status, 'count:', teamJson.team?.length ?? 0);
+
         if (cancelled) return;
-        if (squareTeam.length > 0) {
-          console.log('[Settings] ✅ Loaded', squareTeam.length, 'team members from Square');
-          setStylists(squareTeam);
+
+        if (teamRes.ok && teamJson.team && teamJson.team.length > 0) {
+          console.log('[Settings] ✅ Loaded', teamJson.team.length, 'team members from sync');
+          setStylists(teamJson.team.map((row: any) => {
+            const levelId = row.level_id || levels[0]?.id || 'lvl_1';
+            const permissionOverrides = row.permission_overrides || row.permissions || {};
+            const levelDefaults = resolveLevelDefaults(levelId);
+            const permissions = { ...levelDefaults, ...permissionOverrides };
+            return {
+              id: row.square_team_member_id,
+              name: row.name,
+              role: row.role || 'Team Member',
+              email: row.email,
+              levelId,
+              permissions,
+              permissionOverrides,
+            };
+          }));
         } else {
-          console.log('[Settings] Square returned 0 team members');
-          // Fallback: try Supabase
+          console.warn('[Settings] ⚠️ No team from sync:', teamJson.message || `inserted=${teamJson.inserted}`);
+          // Fallback: try Supabase directly
           const { data } = await supabase
             .from('square_team_members')
             .select('*')
@@ -424,7 +448,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         }
       } catch (e: any) {
         if (!cancelled) {
-          console.warn('[Settings] ⚠️ Failed to fetch Square team:', e);
+          console.warn('[Settings] ⚠️ Failed to sync team:', e);
           setTeamError(e?.message || 'Failed to load team');
         }
       } finally {

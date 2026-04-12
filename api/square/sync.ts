@@ -366,7 +366,7 @@ async function handleTeam(req: any, res: any, ctx: any) {
     return res.status(500).json({ message: error.message });
   }
 
-  return res.status(200).json({ inserted: rows.length });
+  return res.status(200).json({ inserted: rows.length, team: rows });
 }
 
 // ─── Router ──────────────────────────────────────────────────────────────────

@@ -93,36 +93,32 @@ const MissingCredentialsScreen = () => {
 
       const jwtToken = session.session.access_token;
 
-      // Sync team members
-      const teamRes = await fetch('/api/square/team', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwtToken}`,
-        },
-        body: JSON.stringify({ squareAccessToken: token }),
-      });
+      // Sync team, clients, and services via consolidated /api/square/sync
+      const syncHeaders = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${jwtToken}`,
+      };
+      const syncActions = ['team', 'clients', 'services'] as const;
+      const syncErrors: string[] = [];
 
-      const teamText = await teamRes.text();
-      if (!teamRes.ok) {
-        const data = teamText ? JSON.parse(teamText) : {};
-        throw new Error(data?.message || `Team sync failed (${teamRes.status})`);
+      for (const action of syncActions) {
+        try {
+          const res = await fetch('/api/square/sync', {
+            method: 'POST',
+            headers: syncHeaders,
+            body: JSON.stringify({ action, squareAccessToken: token }),
+          });
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            syncErrors.push(`${action}: ${data?.message || res.status}`);
+          }
+        } catch (err) {
+          syncErrors.push(`${action}: ${err instanceof Error ? err.message : String(err)}`);
+        }
       }
 
-      // Sync clients
-      const clientRes = await fetch('/api/square/clients', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${jwtToken}`,
-        },
-        body: JSON.stringify({ squareAccessToken: token }),
-      });
-
-      const clientText = await clientRes.text();
-      if (!clientRes.ok) {
-        const data = clientText ? JSON.parse(clientText) : {};
-        throw new Error(data?.message || `Client sync failed (${clientRes.status})`);
+      if (syncErrors.length > 0) {
+        throw new Error(`Sync failures: ${syncErrors.join('; ')}`);
       }
 
       // Save the token to merchant_settings so the app knows Square is connected

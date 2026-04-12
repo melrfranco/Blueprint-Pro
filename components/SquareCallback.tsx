@@ -96,36 +96,43 @@ export default function SquareCallback() {
 
       const userId = session.user.id;
 
-      // Step 3: Sync team, clients, and services (blocking - wait so data is available on /admin)
+      // Step 3: Sync team, clients, and services via consolidated /api/square/sync
       console.log('[OAuth Callback] Syncing team, clients, and services...');
 
       const syncHeaders = {
         'Content-Type': 'application/json',
         'X-User-Id': userId,
       };
-      const syncBody = JSON.stringify({ squareAccessToken: squareToken });
 
-      const [teamResult, clientResult, servicesResult] = await Promise.allSettled([
-        fetch('/api/square/team', {
-          method: 'POST',
-          headers: syncHeaders,
-          body: syncBody,
-        }).then(r => r.json()),
-        fetch('/api/square/clients', {
-          method: 'POST',
-          headers: syncHeaders,
-          body: syncBody,
-        }).then(r => r.json()),
-        fetch('/api/square/services', {
-          method: 'POST',
-          headers: syncHeaders,
-          body: syncBody,
-        }).then(r => r.json()),
-      ]);
+      const syncActions = ['team', 'clients', 'services'] as const;
+      const syncResults: Record<string, { ok: boolean; data?: any; error?: string }> = {};
 
-      console.log('[OAuth Callback] Team sync:', teamResult.status, teamResult.status === 'fulfilled' ? teamResult.value : teamResult.reason);
-      console.log('[OAuth Callback] Client sync:', clientResult.status, clientResult.status === 'fulfilled' ? clientResult.value : clientResult.reason);
-      console.log('[OAuth Callback] Services sync:', servicesResult.status, servicesResult.status === 'fulfilled' ? servicesResult.value : servicesResult.reason);
+      for (const action of syncActions) {
+        try {
+          const res = await fetch('/api/square/sync', {
+            method: 'POST',
+            headers: syncHeaders,
+            body: JSON.stringify({ action, squareAccessToken: squareToken }),
+          });
+          const json = await res.json();
+          syncResults[action] = { ok: res.ok, data: json };
+          if (!res.ok) {
+            console.error(`[OAuth Callback] ❌ ${action} sync failed:`, json.message || res.status);
+          } else {
+            console.log(`[OAuth Callback] ✅ ${action} sync ok:`, JSON.stringify(json).substring(0, 120));
+          }
+        } catch (err) {
+          syncResults[action] = { ok: false, error: String(err) };
+          console.error(`[OAuth Callback] ❌ ${action} sync error:`, err);
+        }
+      }
+
+      const failedActions = syncActions.filter(a => !syncResults[a]?.ok);
+      if (failedActions.length > 0) {
+        console.error('[OAuth Callback] ⚠️ Bootstrap sync failures:', failedActions);
+        // Continue to /admin anyway — SettingsContext will retry on load
+      }
+
       console.log('[OAuth Callback] Redirecting to /admin');
 
       // Use regular redirect instead of replace to ensure session is persisted
