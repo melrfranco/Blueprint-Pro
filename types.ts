@@ -48,6 +48,7 @@ export interface Client {
   membershipTierId?: string;
   // FIX: Added optional source property to resolve TypeScript error in SelectClientStep.tsx where source is used to indicate origin
   source?: string;
+  hasAccount?: boolean; // true if client has a Blueprint account (supabase_user_id is set)
 }
 
 export type Step = 'select-client' | 'select-services' | 'set-dates' | 'set-frequency' | 'loading' | 'summary';

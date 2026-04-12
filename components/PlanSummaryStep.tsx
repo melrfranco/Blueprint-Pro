@@ -6,6 +6,7 @@ import { useSettings } from '../contexts/SettingsContext';
 import { usePlans } from '../contexts/PlanContext';
 import { useAuth } from '../contexts/AuthContext';
 import { SquareIntegrationService } from '../services/squareIntegration';
+import { supabase } from '../lib/supabase';
 import { CheckCircleIcon, CalendarIcon, RefreshIcon, GlobeIcon, PlusIcon, ChevronRightIcon, ChevronLeftIcon, ShareIcon, DocumentTextIcon } from './icons';
 
 
@@ -28,6 +29,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
     });
 
     const [isMembershipModalOpen, setMembershipModalOpen] = useState(false);
+    const [membershipModalMode, setMembershipModalMode] = useState<'invite' | 'membership'>('invite');
     const [isBookingModalOpen, setBookingModalOpen] = useState(false);
 
     const [bookingStep, setBookingStep] = useState<BookingStep>('select-visit');
@@ -129,6 +131,12 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
         return `Hi ${firstName}! Based on your maintenance blueprint, you qualify for our ${qualifyingTier.name} membership.\n\nMonthly Cost: ${formatCurrency(projectedMonthlySpend)}/mo\n\nIncluded Services (12-month plan):\n${serviceLines}\n\nMembership Period:\n  ${membershipDates.start} — ${membershipDates.end}\n\nPerks:\n${perkLines}\n\nCheck out your full roadmap here: [Link]`;
     }, [plan, qualifyingTier, serviceSummary, membershipDates, projectedMonthlySpend]);
+
+    const accountInviteMessage = useMemo(() => {
+        if (!plan.client.name) return '';
+        const firstName = plan.client.name.split(' ')[0];
+        return `Hi ${firstName}, your salon roadmap is ready. Set up your Blueprint account to view it: [Link]`;
+    }, [plan.client.name]);
 
     const futureVisits = useMemo(() => {
         const today = new Date();
@@ -262,7 +270,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
         }
     };
 
-    const handleSendInvite = async () => {
+    const handleInviteToBlueprint = async () => {
         if (!canViewClientContact && !isClient) {
             return;
         }
@@ -280,13 +288,14 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 const { data: sessionData } = await supabase.auth.getSession();
                 const token = sessionData?.session?.access_token;
 
-                const res = await fetch('/api/invitations/create', {
+                const res = await fetch('/api/invitations', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         ...(token ? { Authorization: `Bearer ${token}` } : {}),
                     },
                     body: JSON.stringify({
+                        action: 'create',
                         plan_id: plan.id,
                         invite_email: clientEmail || plan.client.email,
                         invite_name: plan.client.name,
@@ -306,17 +315,56 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                     }
                 } else {
                     console.warn('[INVITE] Failed to create invitation:', result.message);
-                    // Continue with old flow as fallback
                 }
             } catch (inviteErr) {
                 console.warn('[INVITE] Invitation API error:', inviteErr);
-                // Continue with old flow as fallback
             }
 
             // Step 2: Open delivery channel with activation link included
             const message = linkToShare
-                ? `${invitationMessage}\n\nActivate your account: ${linkToShare}`
-                : invitationMessage;
+                ? `${accountInviteMessage.replace('[Link]', linkToShare)}`
+                : accountInviteMessage;
+
+            if (deliveryMethod === 'sms') {
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+                const separator = isIOS ? '&' : '?';
+                const cleanPhone = clientPhone.replace(/\D/g, '');
+                window.location.href = `sms:${cleanPhone}${separator}body=${encodeURIComponent(message)}`;
+            } else if (deliveryMethod === 'email') {
+                window.location.href = `mailto:${clientEmail}?subject=${encodeURIComponent("Your Salon Roadmap Is Ready")}&body=${encodeURIComponent(message)}`;
+            } else if (deliveryMethod === 'link') {
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(message);
+                }
+            }
+
+            // Do NOT modify membershipStatus — this is account creation only
+            setInviteSent(true);
+            setTimeout(() => {
+                setMembershipModalOpen(false);
+                setInviteSent(false);
+            }, 1500);
+        } catch (e) {
+            console.error("Failed to send account invite", e);
+        } finally {
+            setIsSendingInvite(false);
+        }
+    };
+
+    const handleOfferMembership = async () => {
+        if (!canViewClientContact && !isClient) {
+            return;
+        }
+
+        setIsSendingInvite(true);
+        setInviteWarning(null);
+
+        const clientPhone = plan.client.phone || '';
+        const clientEmail = plan.client.email || '';
+
+        try {
+            // Membership offer only — no invitation record created
+            const message = invitationMessage;
 
             if (deliveryMethod === 'sms') {
                 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
@@ -338,7 +386,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 setInviteSent(false);
             }, 1500);
         } catch (e) {
-            console.error("Failed to send invite or save status", e);
+            console.error("Failed to offer membership", e);
         } finally {
             setIsSendingInvite(false);
         }
@@ -872,13 +920,23 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                         </button>
                     )}
 
-                    {user?.role === 'admin' && membershipConfig.enabled && (
+                    {user?.role === 'admin' && !plan.client.hasAccount && (
                         <button
-                            onClick={() => setMembershipModalOpen(true)}
+                            onClick={() => { setMembershipModalMode('invite'); setMembershipModalOpen(true); }}
+                            className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all border-2 border-secondary bg-secondary text-secondary-foreground`}
+                        >
+                            <PlusIcon className="w-6 h-6" />
+                            <span>INVITE TO BLUEPRINT</span>
+                        </button>
+                    )}
+
+                    {user?.role === 'admin' && plan.client.hasAccount && membershipConfig.enabled && (
+                        <button
+                            onClick={() => { setMembershipModalMode('membership'); setMembershipModalOpen(true); }}
                             className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all border-2 border-secondary bg-secondary text-secondary-foreground`}
                         >
                             {isMemberOffered || isMemberActive ? <CheckCircleIcon className="w-6 h-6" /> : <PlusIcon className="w-6 h-6" />}
-                            <span>{isMemberOffered ? 'INVITATION SENT' : isMemberActive ? 'MEMBERSHIP ACTIVE' : 'SEND MEMBERSHIP INVITATION'}</span>
+                            <span>{isMemberOffered ? 'OFFER SENT' : isMemberActive ? 'MEMBERSHIP ACTIVE' : 'OFFER MEMBERSHIP'}</span>
                         </button>
                     )}
 
@@ -899,8 +957,12 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 <div className="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-6 backdrop-blur-md">
                     <div className="bg-card w-full max-w-sm bp-container-tall shadow-2xl relative overflow-hidden border-4 flex flex-col border-primary">
                         <div className="p-7 text-center bg-primary">
-                            <h2 className="text-2xl font-bold tracking-tight text-primary-foreground">Membership Invitation</h2>
-                            <p className="bp-caption uppercase tracking-widest mt-1 text-primary-foreground/80">{"Upgrade "}{plan.client.name.split(' ')[0]}{"'s Experience"}</p>
+                            <h2 className="text-2xl font-bold tracking-tight text-primary-foreground">
+                                {membershipModalMode === 'invite' ? 'Invite to Blueprint' : 'Membership Invitation'}
+                            </h2>
+                            <p className="bp-caption uppercase tracking-widest mt-1 text-primary-foreground/80">
+                                {membershipModalMode === 'invite' ? `Set up ${plan.client.name.split(' ')[0]}'s account` : `Upgrade ${plan.client.name.split(' ')[0]}'s Experience`}
+                            </p>
                         </div>
 
                         <div className="p-6">
@@ -908,7 +970,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                 <div className="py-12 text-center animate-bounce-in">
                                     <CheckCircleIcon className="w-20 h-20 text-accent mx-auto mb-4" />
                                     <p className="text-2xl font-bold text-foreground">INVITE SENT!</p>
-                                    <p className="bp-body-sm mt-2 text-muted-foreground">{"Client marked as 'Offered'"}</p>
+                                    <p className="bp-body-sm mt-2 text-muted-foreground">{membershipModalMode === 'invite' ? 'Account invitation sent!' : "Client marked as 'Offered'"}</p>
                                     <button
                                         onClick={() => { setMembershipModalOpen(false); setInviteSent(false); }}
                                         className="mt-6 px-8 py-3 font-bold bp-container-compact bg-primary text-primary-foreground active:scale-95 transition-all"
@@ -955,29 +1017,31 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                         </div>
                                     )}
 
-                                    <div className="p-4 bp-container-list border-2 bg-muted border">
-                                        <p className="bp-caption uppercase mb-2 tracking-widest text-muted-foreground">Projected membership pricing</p>
-                                        <div className="flex flex-col gap-3 text-foreground">
-                                            <div>
-                                                <p className="bp-caption uppercase tracking-widest text-muted-foreground">Projected yearly total</p>
-                                                <p className="text-lg font-bold">{formatCurrency(plan.totalCost)}</p>
-                                            </div>
-                                            <div>
-                                                <p className="bp-caption uppercase tracking-widest text-muted-foreground">Estimated monthly membership</p>
-                                                <p className="text-lg font-bold">{formatCurrency(projectedMonthlySpend)}</p>
+                                    {membershipModalMode === 'membership' && (
+                                        <div className="p-4 bp-container-list border-2 bg-muted border">
+                                            <p className="bp-caption uppercase mb-2 tracking-widest text-muted-foreground">Projected membership pricing</p>
+                                            <div className="flex flex-col gap-3 text-foreground">
+                                                <div>
+                                                    <p className="bp-caption uppercase tracking-widest text-muted-foreground">Projected yearly total</p>
+                                                    <p className="text-lg font-bold">{formatCurrency(plan.totalCost)}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="bp-caption uppercase tracking-widest text-muted-foreground">Estimated monthly membership</p>
+                                                    <p className="text-lg font-bold">{formatCurrency(projectedMonthlySpend)}</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    )}
 
                                     <div className="p-4 bp-container-list border-2 bg-muted border">
                                         <p className="bp-caption uppercase mb-2 tracking-widest text-muted-foreground">Message Preview</p>
                                         <div className="bg-card p-4 bp-container-list border-2 text-xs font-bold leading-relaxed shadow-inner border text-muted-foreground whitespace-pre-wrap">
-                                            {invitationMessage}
+                                            {membershipModalMode === 'invite' ? accountInviteMessage : invitationMessage}
                                         </div>
                                     </div>
 
                                     <button
-                                        onClick={handleSendInvite}
+                                        onClick={membershipModalMode === 'invite' ? handleInviteToBlueprint : handleOfferMembership}
                                         disabled={isSendingInvite || isContactRestricted}
                                         className="w-full font-bold py-5 bp-container-compact shadow-xl flex items-center justify-center space-x-3 active:scale-95 transition-all border-b-8 border-black/20 disabled:opacity-50 bg-primary text-primary-foreground"
                                     >

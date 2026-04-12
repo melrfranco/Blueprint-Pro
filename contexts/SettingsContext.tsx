@@ -270,6 +270,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
                 avatarUrl: row.avatar_url,
                 historicalData: [],
                 source: 'square',
+                hasAccount: !!row.supabase_user_id,
               })));
             }
 
@@ -374,6 +375,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
             avatarUrl: row.avatar_url,
             historicalData: [],
             source: 'square',
+            hasAccount: !!row.supabase_user_id,
           })));
         } else {
           console.warn('[Settings] ⚠️ No clients from server:', syncJson.message || `inserted=${syncJson.inserted}`);
