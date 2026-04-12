@@ -70,11 +70,12 @@ export default async function handler(req: any, res: any) {
 
     console.log(`[STYLIST-DATA] Stylist ${userIdHeader} → Admin ${adminUserId}`);
 
-    // Fetch services that the admin synced
+    // Fetch services that the admin synced (stored in metadata->admin_user_id)
     const { data: services, error: svcErr } = await supabaseAdmin
       .from('services')
       .select('*')
-      .eq('supabase_user_id', adminUserId);
+      .eq('source', 'square')
+      .contains('metadata', { admin_user_id: adminUserId });
 
     if (svcErr) {
       console.error('[STYLIST-DATA] Services query error:', svcErr);

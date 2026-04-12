@@ -312,17 +312,18 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       console.log('[Settings] ADMIN path — syncing from Square API');
 
       // ---- Services ----
-      console.log('[Settings] Fetching services via /api/square/services for user:', user.id);
+      console.log('[Settings] Fetching services via /api/square/sync for user:', user.id);
       try {
-        const svcRes = await fetch('/api/square/services', {
+        const svcRes = await fetch('/api/square/sync', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'X-User-Id': user.id,
           },
+          body: JSON.stringify({ action: 'services' }),
         });
         const svcJson = await svcRes.json();
-        console.log('[Settings] /api/square/services response:', svcRes.status, 'count:', svcJson.services?.length ?? 0);
+        console.log('[Settings] /api/square/sync?action=services response:', svcRes.status, 'count:', svcJson.services?.length ?? 0);
 
         if (cancelled) return;
 
@@ -341,23 +342,24 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
           console.warn('[Settings] ⚠️ No services from server:', svcJson.message || `inserted=${svcJson.inserted}`);
         }
       } catch (e) {
-        if (!cancelled) console.warn('[Settings] ⚠️ /api/square/services failed:', e);
+        if (!cancelled) console.warn('[Settings] ⚠️ /api/square/sync?action=services failed:', e);
       }
 
       if (cancelled) return;
 
       // ---- Clients ----
-      console.log('[Settings] Fetching clients via /api/square/clients for user:', user.id);
+      console.log('[Settings] Fetching clients via /api/square/sync for user:', user.id);
       try {
-        const syncRes = await fetch('/api/square/clients', {
+        const syncRes = await fetch('/api/square/sync', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'X-User-Id': user.id,
           },
+          body: JSON.stringify({ action: 'clients' }),
         });
         const syncJson = await syncRes.json();
-        console.log('[Settings] /api/square/clients response:', syncRes.status, JSON.stringify(syncJson).substring(0, 200));
+        console.log('[Settings] /api/square/sync?action=clients response:', syncRes.status, JSON.stringify(syncJson).substring(0, 200));
 
         if (cancelled) return;
 
@@ -377,7 +379,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
           console.warn('[Settings] ⚠️ No clients from server:', syncJson.message || `inserted=${syncJson.inserted}`);
         }
       } catch (e) {
-        if (!cancelled) console.warn('[Settings] ⚠️ /api/square/clients failed:', e);
+        if (!cancelled) console.warn('[Settings] ⚠️ /api/square/sync?action=clients failed:', e);
       }
 
       if (cancelled) return;

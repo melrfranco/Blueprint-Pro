@@ -304,7 +304,7 @@ export default async function handler(req: any, res: any) {
       console.log('[OAUTH TOKEN] User already exists, updating instead...');
 
       // Find the user by email using list (since we can't query by email directly)
-      const { data: usersList } = await supabaseAdmin.auth.admin.listUsers({
+      const { data: usersList } = await (supabaseAdmin.auth as any).admin.listUsers({
         page: 1,
         perPage: 1000,
       });

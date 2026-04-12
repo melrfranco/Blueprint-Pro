@@ -110,7 +110,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
         if (shouldCheckMerchant) {
           try {
-            const response = await fetch('/api/square/has-merchant', {
+            const response = await fetch('/api/square/status?action=has-merchant', {
               method: 'GET',
               headers: {
                 'Authorization': `Bearer ${session.access_token}`,
