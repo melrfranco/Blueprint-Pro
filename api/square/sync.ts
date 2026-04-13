@@ -53,6 +53,7 @@ async function resolveAuth(req: any) {
   // Resolve user ID
   let supabaseUserId: string | undefined;
   const userIdHeader = req.headers['x-user-id'] as string | undefined;
+  console.log(`[SYNC:resolveAuth] X-User-Id header:`, userIdHeader || '(missing)');
   if (userIdHeader) {
     supabaseUserId = userIdHeader;
   } else {
@@ -64,7 +65,10 @@ async function resolveAuth(req: any) {
     }
   }
 
+  console.log(`[SYNC:resolveAuth] resolved supabaseUserId:`, supabaseUserId || '(missing)');
+
   if (!supabaseUserId) {
+    console.error('[SYNC:resolveAuth] RETURN 401 — no user ID resolved');
     return { error: { status: 401, message: 'Missing auth. Provide X-User-Id or Bearer token.' } };
   }
 
@@ -74,29 +78,47 @@ async function resolveAuth(req: any) {
 
   if (!squareAccessToken) {
     // 1. Try caller's own merchant_settings (admin path)
-    const { data: ms } = await supabaseAdmin
+    const { data: ms, error: msErr } = await supabaseAdmin
       .from('merchant_settings')
       .select('id, square_access_token, settings')
       .eq('supabase_user_id', supabaseUserId)
       .maybeSingle();
 
+    console.log(`[SYNC:resolveAuth] merchant_settings lookup for user ${supabaseUserId}:`, {
+      found: !!ms,
+      hasToken: !!ms?.square_access_token,
+      tokenLength: ms?.square_access_token?.length ?? 0,
+      error: msErr?.message || null,
+    });
+
     merchantId = ms?.id;
 
     if (ms?.square_access_token) {
       squareAccessToken = ms.square_access_token;
+      console.log(`[SYNC:resolveAuth] token found in merchant_settings.square_access_token`);
     } else {
       // 2. Try settings JSON fallback (team sync pattern)
       squareAccessToken =
         ms?.settings?.square_access_token ??
         ms?.settings?.oauth?.access_token ??
         undefined;
+      console.log(`[SYNC:resolveAuth] settings JSON fallback:`, {
+        hasSettingsSquareToken: !!ms?.settings?.square_access_token,
+        hasSettingsOauthToken: !!ms?.settings?.oauth?.access_token,
+      });
     }
 
     if (!squareAccessToken) {
       // 3. Caller might be a stylist — resolve admin's token
+      console.log(`[SYNC:resolveAuth] no token from own merchant_settings, trying stylist→admin fallback`);
       const { data: userData } = await (supabaseAdmin.auth as any).admin.getUserById(supabaseUserId);
       const stylistSquareId = userData?.user?.user_metadata?.stylist_id;
       let resolvedAdminId = userData?.user?.user_metadata?.admin_user_id;
+      console.log(`[SYNC:resolveAuth] user metadata:`, {
+        metadataRole: userData?.user?.user_metadata?.role,
+        stylistSquareId: stylistSquareId || null,
+        adminUserId: resolvedAdminId || null,
+      });
 
       if (!resolvedAdminId && stylistSquareId) {
         const { data: tmRow } = await supabaseAdmin
@@ -105,24 +127,33 @@ async function resolveAuth(req: any) {
           .eq('square_team_member_id', stylistSquareId)
           .maybeSingle();
         resolvedAdminId = tmRow?.supabase_user_id;
+        console.log(`[SYNC:resolveAuth] resolved admin via team_members:`, resolvedAdminId || null);
       }
 
       if (resolvedAdminId) {
         adminUserId = resolvedAdminId;
-        const { data: adminMs } = await supabaseAdmin
+        const { data: adminMs, error: adminMsErr } = await supabaseAdmin
           .from('merchant_settings')
           .select('id, square_access_token')
           .eq('supabase_user_id', resolvedAdminId)
           .maybeSingle();
 
+        console.log(`[SYNC:resolveAuth] admin merchant_settings lookup for ${resolvedAdminId}:`, {
+          found: !!adminMs,
+          hasToken: !!adminMs?.square_access_token,
+          error: adminMsErr?.message || null,
+        });
+
         merchantId = adminMs?.id;
         if (adminMs?.square_access_token) {
           squareAccessToken = adminMs.square_access_token;
+          console.log(`[SYNC:resolveAuth] token found via admin fallback`);
         }
       }
     }
 
     if (!squareAccessToken) {
+      console.error('[SYNC:resolveAuth] RETURN 401 — could not resolve Square access token for user or their admin');
       return { error: { status: 401, message: 'Could not resolve Square access token for this user or their admin.' } };
     }
   } else {
