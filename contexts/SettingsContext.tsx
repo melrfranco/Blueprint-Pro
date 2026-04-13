@@ -157,6 +157,13 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
     let lastLoadedUserId: string | null = null;
 
     const loadForUser = async (passedUser?: any) => {
+      console.log('[Settings] loadForUser ENTRY', {
+        passedUserId: passedUser?.id || 'none',
+        passedRole: passedUser?.user_metadata?.role || 'none',
+        isLoading,
+        lastLoadedUserId,
+      });
+
       // Prevent duplicate runs for the same user
       if (passedUser?.id && passedUser.id === lastLoadedUserId) {
         console.log('[Settings] loadForUser skipped (already loaded for user:', passedUser.id, ')');
@@ -167,20 +174,21 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         return;
       }
       isLoading = true;
-      console.log('[Settings] loadForUser called, passedUser:', passedUser?.id || 'none');
+      console.log('[Settings] loadForUser proceeding, passedUser:', passedUser?.id || 'none');
 
       let user = passedUser;
 
       // If no user passed directly, try to get from session
       if (!user) {
         const { data: sessionData } = await supabase.auth.getSession();
-        if (cancelled) return;
+        if (cancelled) { isLoading = false; return; }
         user = sessionData?.session?.user;
       }
 
       if (!user) {
         console.log('[Settings] No authenticated user, skipping data load');
         setNeedsSquareConnect(false);
+        isLoading = false;  // FIX: was missing — caused isLoading to stay true forever
         return;
       }
 
@@ -199,7 +207,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         error: msError?.message || null,
       });
 
-      if (cancelled) return;
+      if (cancelled) { isLoading = false; return; }
 
       const hasSquareFromDb = !!merchantSettings?.square_access_token;
       const hasSquareFromMeta = !!user.user_metadata?.merchant_id;
@@ -214,6 +222,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
       // ---- Determine data loading strategy based on role ----
       const isStylist = user.user_metadata?.role === 'stylist';
+      console.log('[Settings] BRANCH DECISION', { isStylist, metadataRole: user.user_metadata?.role, userId: user.id });
 
       if (isStylist) {
         // ═══════════════════════════════════════════════════════════
