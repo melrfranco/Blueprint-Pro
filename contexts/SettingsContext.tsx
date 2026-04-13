@@ -318,10 +318,23 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       // ═══════════════════════════════════════════════════════════
       // ADMIN PATH: Sync fresh data from Square API into Supabase
       // ═══════════════════════════════════════════════════════════
-      console.log('[Settings] ADMIN path — syncing from Square API');
+      console.log('[Settings] ADMIN path — syncing from Square API', {
+        userId: user.id,
+        role: user.user_metadata?.role,
+        merchantId: user.user_metadata?.merchant_id,
+        hasSquareFromDb,
+        hasSquareFromMeta,
+      });
+
+      // Guard: skip sync if user.id is not yet resolved (prevents 401s from premature calls)
+      if (!user.id) {
+        console.warn('[Settings] ADMIN path skipped — user.id is falsy');
+        isLoading = false;
+        return;
+      }
 
       // ---- Services ----
-      console.log('[Settings] Fetching services via /api/square/sync for user:', user.id);
+      console.log('[Settings] Fetching services via /api/square/sync', { userId: user.id, hasUserId: !!user.id });
       try {
         const svcRes = await fetch('/api/square/sync', {
           method: 'POST',
@@ -332,7 +345,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
           body: JSON.stringify({ action: 'services' }),
         });
         const svcJson = await svcRes.json();
-        console.log('[Settings] /api/square/sync?action=services response:', svcRes.status, 'count:', svcJson.services?.length ?? 0);
+        console.log('[Settings] /api/square/sync?action=services response:', svcRes.status, {
+          count: svcJson.services?.length ?? 0,
+          message: svcJson.message || null,
+        });
 
         if (cancelled) return;
 
@@ -357,7 +373,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       if (cancelled) return;
 
       // ---- Clients ----
-      console.log('[Settings] Fetching clients via /api/square/sync for user:', user.id);
+      console.log('[Settings] Fetching clients via /api/square/sync', { userId: user.id });
       try {
         const syncRes = await fetch('/api/square/sync', {
           method: 'POST',
@@ -368,7 +384,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
           body: JSON.stringify({ action: 'clients' }),
         });
         const syncJson = await syncRes.json();
-        console.log('[Settings] /api/square/sync?action=clients response:', syncRes.status, JSON.stringify(syncJson).substring(0, 200));
+        console.log('[Settings] /api/square/sync?action=clients response:', syncRes.status, {
+          count: syncJson.clients?.length ?? 0,
+          inserted: syncJson.inserted ?? null,
+          message: syncJson.message || null,
+        });
 
         if (cancelled) return;
 
