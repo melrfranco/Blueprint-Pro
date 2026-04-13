@@ -72,12 +72,13 @@ export default async function handler(req: any, res: any) {
 
     // ── Resolve salonId from admin's salon row ──
     let salonId: string | null = null;
-    const { data: salonRow } = await supabaseAdmin
+    const { data: salonRow, error: salonErr } = await supabaseAdmin
       .from('salons')
       .select('id')
       .eq('owner_user_id', adminUserId)
       .maybeSingle();
     salonId = salonRow?.id || null;
+    console.log(`[STYLIST-DATA] salonId resolved: ${salonId}`, salonErr ? `(error: ${salonErr.message})` : '');
 
     // ── Fetch services ──
     let services: any[] | null = null;
@@ -102,6 +103,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // ── Fetch clients ──
+    // Query by both salon_id AND supabase_user_id to tolerate any scoping gap
     let clients: any[] | null = null;
     if (salonId) {
       const { data, error: clientErr } = await supabaseAdmin
@@ -109,16 +111,28 @@ export default async function handler(req: any, res: any) {
         .select('*')
         .eq('salon_id', salonId);
       if (clientErr) console.error('[STYLIST-DATA] Clients query error (salon_id):', clientErr);
+      console.log(`[STYLIST-DATA] Clients by salon_id=${salonId}: ${data?.length ?? 'null'} rows`);
       clients = data;
     }
-    if (!clients || clients.length === 0) {
-      console.warn(`[FALLBACK:stylist-data:clients] salon_id=${salonId} returned 0 rows, falling back to supabase_user_id=${adminUserId}`);
-      const { data, error: clientErr } = await supabaseAdmin
-        .from('clients')
-        .select('*')
-        .eq('supabase_user_id', adminUserId);
-      if (clientErr) console.error('[STYLIST-DATA] Clients query error (fallback):', clientErr);
-      clients = data;
+    // Also fetch by supabase_user_id and merge (avoids gaps from salon_id mismatches)
+    const { data: legacyClients, error: legacyErr } = await supabaseAdmin
+      .from('clients')
+      .select('*')
+      .eq('supabase_user_id', adminUserId);
+    if (legacyErr) console.error('[STYLIST-DATA] Clients query error (supabase_user_id):', legacyErr);
+    console.log(`[STYLIST-DATA] Clients by supabase_user_id=${adminUserId}: ${legacyClients?.length ?? 'null'} rows`);
+
+    // Merge: prefer salon_id rows, add any supabase_user_id rows not already included
+    if (clients && clients.length > 0 && legacyClients && legacyClients.length > 0) {
+      const clientIds = new Set(clients.map((c: any) => c.id));
+      const extras = legacyClients.filter((c: any) => !clientIds.has(c.id));
+      if (extras.length > 0) {
+        console.warn(`[FALLBACK:stylist-data:clients] merged ${extras.length} extra rows from supabase_user_id path`);
+        clients = [...clients, ...extras];
+      }
+    } else if ((!clients || clients.length === 0) && legacyClients && legacyClients.length > 0) {
+      console.warn(`[FALLBACK:stylist-data:clients] salon_id=${salonId} returned 0 rows, using supabase_user_id=${adminUserId} (${legacyClients.length} rows)`);
+      clients = legacyClients;
     }
 
     // ── Fetch team members ──
