@@ -106,7 +106,7 @@ const MissingCredentialsScreen = () => {
           const res = await fetch('/api/square/sync', {
             method: 'POST',
             headers: syncHeaders,
-            body: JSON.stringify({ action, squareAccessToken: token }),
+            body: JSON.stringify({ action, squareAccessToken: token, salon_id: session.session.user.user_metadata?.salon_id }),
           });
           if (!res.ok) {
             const data = await res.json().catch(() => ({}));

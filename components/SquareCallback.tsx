@@ -50,7 +50,7 @@ export default function SquareCallback() {
         throw new Error(tokenData?.message || 'Square login failed');
       }
 
-      const { access_token: squareToken, merchant_id, supabase_auth } = tokenData;
+      const { access_token: squareToken, merchant_id, supabase_auth, salon_id: oauthSalonId } = tokenData;
 
       if (!squareToken) {
         throw new Error('No Square access token received');
@@ -112,7 +112,7 @@ export default function SquareCallback() {
           const res = await fetch('/api/square/sync', {
             method: 'POST',
             headers: syncHeaders,
-            body: JSON.stringify({ action, squareAccessToken: squareToken }),
+            body: JSON.stringify({ action, squareAccessToken: squareToken, salon_id: oauthSalonId }),
           });
           const json = await res.json();
           syncResults[action] = { ok: res.ok, data: json };

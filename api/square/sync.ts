@@ -135,7 +135,36 @@ async function resolveAuth(req: any) {
     merchantId = ms?.id;
   }
 
-  return { supabaseUserId, adminUserId, squareAccessToken, supabaseAdmin, merchantId };
+  // ── Resolve salon_id ──
+  // Priority: body param > salon_memberships > salons.owner_user_id
+  let salonId: string | undefined = body?.salon_id;
+
+  if (!salonId) {
+    // 1. Try salon_memberships for the admin user
+    const { data: membership } = await supabaseAdmin
+      .from('salon_memberships')
+      .select('salon_id')
+      .eq('user_id', adminUserId)
+      .eq('role', 'owner')
+      .maybeSingle();
+    salonId = membership?.salon_id;
+  }
+
+  if (!salonId) {
+    // 2. Fallback: salons.owner_user_id
+    const { data: salon } = await supabaseAdmin
+      .from('salons')
+      .select('id')
+      .eq('owner_user_id', adminUserId)
+      .maybeSingle();
+    salonId = salon?.id;
+  }
+
+  if (!salonId) {
+    console.warn('[SYNC] ⚠️ No salon_id resolved for admin:', adminUserId, '— rows will lack salon_id');
+  }
+
+  return { supabaseUserId, adminUserId, squareAccessToken, supabaseAdmin, merchantId, salonId };
 }
 
 // ─── CLIENTS SYNC ────────────────────────────────────────────────────────────
@@ -163,6 +192,7 @@ async function handleClients(req: any, res: any, ctx: any) {
 
   const rows = customers.map((c: any) => ({
     supabase_user_id: adminUserId,
+    salon_id: ctx.salonId || null,
     name: [c.given_name, c.family_name].filter(Boolean).join(' ') || 'Client',
     email: c.email_address || null,
     phone: c.phone_number || null,
@@ -245,6 +275,7 @@ async function handleServices(req: any, res: any, ctx: any) {
       const priceMoney = vData.price_money;
 
       rows.push({
+        salon_id: ctx.salonId || null,
         name: `${itemData.name || 'Unnamed Service'}${vData.name && vData.name !== 'Regular' ? ` — ${vData.name}` : ''}`,
         cost: priceMoney?.amount ? Number(priceMoney.amount) / 100 : null,
         duration: vData.service_duration ? Math.round(Number(vData.service_duration) / 60000) : null,
@@ -347,6 +378,7 @@ async function handleTeam(req: any, res: any, ctx: any) {
 
   const rows = teamMembers.map((m: any) => ({
     supabase_user_id: supabaseUserId,
+    salon_id: ctx.salonId || null,
     merchant_id: ctx.merchantId || merchantId,
     square_team_member_id: m.id,
     name: [m.given_name, m.family_name].filter(Boolean).join(' ') || 'Team Member',

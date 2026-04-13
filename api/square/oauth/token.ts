@@ -361,12 +361,57 @@ export default async function handler(req: any, res: any) {
       throw new Error(`Failed to save merchant settings: ${upsertError.message}`);
     }
 
+    // ── Ensure salon row exists for this admin ──
+    let salonId: string | undefined;
+    const { data: existingSalon } = await supabaseAdmin
+      .from('salons')
+      .select('id')
+      .eq('owner_user_id', user.id)
+      .maybeSingle();
+
+    if (existingSalon) {
+      salonId = existingSalon.id;
+      console.log('[OAUTH TOKEN] ✅ Existing salon found:', salonId);
+    } else {
+      const slugBase = (business_name || 'my-salon').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const slug = `${slugBase}-${user.id.substring(0, 8)}`;
+      const { data: newSalon, error: salonErr } = await supabaseAdmin
+        .from('salons')
+        .insert([{ name: business_name || 'My Salon', slug, owner_user_id: user.id }])
+        .select('id')
+        .single();
+
+      if (salonErr) {
+        console.error('[OAUTH TOKEN] ⚠️ Failed to create salon (non-fatal):', salonErr.message);
+      } else {
+        salonId = newSalon?.id;
+        console.log('[OAUTH TOKEN] ✅ Salon created:', salonId);
+      }
+    }
+
+    // ── Ensure owner membership exists ──
+    if (salonId) {
+      const { error: memErr } = await supabaseAdmin
+        .from('salon_memberships')
+        .upsert(
+          { user_id: user.id, salon_id: salonId, role: 'owner', status: 'active' },
+          { onConflict: 'user_id,salon_id,role' }
+        );
+
+      if (memErr) {
+        console.error('[OAUTH TOKEN] ⚠️ Failed to create owner membership (non-fatal):', memErr.message);
+      } else {
+        console.log('[OAUTH TOKEN] ✅ Owner membership ensured');
+      }
+    }
+
     console.log('[OAUTH TOKEN] ✅ OAuth flow completed successfully');
 
     return res.status(200).json({
       merchant_id,
       business_name,
       access_token,
+      salon_id: salonId,
       // Return credentials for client-side signInWithPassword
       // (server-side sessions produce refresh tokens that fail client-side)
       supabase_auth: {
