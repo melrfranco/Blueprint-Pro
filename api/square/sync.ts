@@ -154,7 +154,21 @@ async function resolveAuth(req: any) {
 
     if (!squareAccessToken) {
       console.error('[SYNC:resolveAuth] RETURN 401 — could not resolve Square access token for user or their admin');
-      return { error: { status: 401, message: 'Could not resolve Square access token for this user or their admin.' } };
+      return {
+        error: {
+          status: 401,
+          message: 'Could not resolve Square access token for this user or their admin.',
+          debug: {
+            supabaseUserId,
+            msFound: !!ms,
+            msHasToken: !!ms?.square_access_token,
+            msTokenLength: ms?.square_access_token?.length ?? 0,
+            msError: msErr?.message || null,
+            settingsSquareToken: !!ms?.settings?.square_access_token,
+            settingsOauthToken: !!ms?.settings?.oauth?.access_token,
+          },
+        },
+      };
     }
   } else {
     // Token was provided — look up merchant_id for team sync
@@ -461,7 +475,7 @@ export default async function handler(req: any, res: any) {
   try {
     const ctx = await resolveAuth(req);
     if (ctx.error) {
-      return res.status(ctx.error.status).json({ message: ctx.error.message });
+      return res.status(ctx.error.status).json({ message: ctx.error.message, debug: ctx.error.debug });
     }
 
     const body = parseBody(req);
