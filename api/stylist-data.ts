@@ -70,35 +70,75 @@ export default async function handler(req: any, res: any) {
 
     console.log(`[STYLIST-DATA] Stylist ${userIdHeader} → Admin ${adminUserId}`);
 
-    // Fetch services that the admin synced (stored in metadata->admin_user_id)
-    const { data: services, error: svcErr } = await supabaseAdmin
-      .from('services')
-      .select('*')
-      .eq('source', 'square')
-      .contains('metadata', { admin_user_id: adminUserId });
+    // ── Resolve salonId from admin's salon row ──
+    let salonId: string | null = null;
+    const { data: salonRow } = await supabaseAdmin
+      .from('salons')
+      .select('id')
+      .eq('owner_user_id', adminUserId)
+      .maybeSingle();
+    salonId = salonRow?.id || null;
 
-    if (svcErr) {
-      console.error('[STYLIST-DATA] Services query error:', svcErr);
+    // ── Fetch services ──
+    let services: any[] | null = null;
+    if (salonId) {
+      const { data, error: svcErr } = await supabaseAdmin
+        .from('services')
+        .select('*')
+        .eq('salon_id', salonId)
+        .eq('source', 'square');
+      if (svcErr) console.error('[STYLIST-DATA] Services query error (salon_id):', svcErr);
+      services = data;
+    }
+    if (!services || services.length === 0) {
+      console.warn(`[FALLBACK:stylist-data:services] salon_id=${salonId} returned 0 rows, falling back to supabase_user_id=${adminUserId}`);
+      const { data, error: svcErr } = await supabaseAdmin
+        .from('services')
+        .select('*')
+        .eq('source', 'square')
+        .contains('metadata', { admin_user_id: adminUserId });
+      if (svcErr) console.error('[STYLIST-DATA] Services query error (fallback):', svcErr);
+      services = data;
     }
 
-    // Fetch clients that the admin synced
-    const { data: clients, error: clientErr } = await supabaseAdmin
-      .from('clients')
-      .select('*')
-      .eq('supabase_user_id', adminUserId);
-
-    if (clientErr) {
-      console.error('[STYLIST-DATA] Clients query error:', clientErr);
+    // ── Fetch clients ──
+    let clients: any[] | null = null;
+    if (salonId) {
+      const { data, error: clientErr } = await supabaseAdmin
+        .from('clients')
+        .select('*')
+        .eq('salon_id', salonId);
+      if (clientErr) console.error('[STYLIST-DATA] Clients query error (salon_id):', clientErr);
+      clients = data;
+    }
+    if (!clients || clients.length === 0) {
+      console.warn(`[FALLBACK:stylist-data:clients] salon_id=${salonId} returned 0 rows, falling back to supabase_user_id=${adminUserId}`);
+      const { data, error: clientErr } = await supabaseAdmin
+        .from('clients')
+        .select('*')
+        .eq('supabase_user_id', adminUserId);
+      if (clientErr) console.error('[STYLIST-DATA] Clients query error (fallback):', clientErr);
+      clients = data;
     }
 
-    // Fetch team members under the admin
-    const { data: team, error: teamErr } = await supabaseAdmin
-      .from('square_team_members')
-      .select('*')
-      .eq('supabase_user_id', adminUserId);
-
-    if (teamErr) {
-      console.error('[STYLIST-DATA] Team query error:', teamErr);
+    // ── Fetch team members ──
+    let team: any[] | null = null;
+    if (salonId) {
+      const { data, error: teamErr } = await supabaseAdmin
+        .from('square_team_members')
+        .select('*')
+        .eq('salon_id', salonId);
+      if (teamErr) console.error('[STYLIST-DATA] Team query error (salon_id):', teamErr);
+      team = data;
+    }
+    if (!team || team.length === 0) {
+      console.warn(`[FALLBACK:stylist-data:team] salon_id=${salonId} returned 0 rows, falling back to supabase_user_id=${adminUserId}`);
+      const { data, error: teamErr } = await supabaseAdmin
+        .from('square_team_members')
+        .select('*')
+        .eq('supabase_user_id', adminUserId);
+      if (teamErr) console.error('[STYLIST-DATA] Team query error (fallback):', teamErr);
+      team = data;
     }
 
     console.log(`[STYLIST-DATA] Results: ${services?.length || 0} services, ${clients?.length || 0} clients, ${team?.length || 0} team members`);

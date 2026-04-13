@@ -106,24 +106,36 @@ async function handleCreate(req: any, res: any) {
   }
 
   // Verify the plan belongs to the caller's salon
-  const { data: salon } = await supabaseAdmin
-    .from('salons')
-    .select('owner_user_id')
-    .eq('id', salonId)
-    .maybeSingle();
-
-  if (!salon?.owner_user_id) {
-    return res.status(403).json({ message: 'Cannot verify salon ownership for authorization' });
-  }
-
+  // Primary: check client.salon_id matches caller's salonId
+  // Fallback: if client.salon_id is null, check supabase_user_id === salon.owner_user_id
   if (plan.client_id) {
     const { data: planClient } = await supabaseAdmin
       .from('clients')
-      .select('supabase_user_id')
+      .select('salon_id, supabase_user_id')
       .eq('id', plan.client_id)
       .maybeSingle();
 
-    if (!planClient || planClient.supabase_user_id !== salon.owner_user_id) {
+    if (!planClient) {
+      return res.status(403).json({ message: 'This plan does not belong to your salon' });
+    }
+
+    // Primary path: salon_id match
+    if (planClient.salon_id && planClient.salon_id === salonId) {
+      // Verified — client belongs to caller's salon
+    } else if (planClient.salon_id === null) {
+      // Fallback: client has no salon_id yet, check via owner_user_id
+      console.warn(`[FALLBACK:invitations:ownership] client_id=${plan.client_id} has no salon_id, falling back to salons.owner_user_id`);
+      const { data: salon } = await supabaseAdmin
+        .from('salons')
+        .select('owner_user_id')
+        .eq('id', salonId)
+        .maybeSingle();
+
+      if (!salon?.owner_user_id || planClient.supabase_user_id !== salon.owner_user_id) {
+        return res.status(403).json({ message: 'This plan does not belong to your salon' });
+      }
+    } else {
+      // client.salon_id is set but doesn't match caller's salon
       return res.status(403).json({ message: 'This plan does not belong to your salon' });
     }
   }

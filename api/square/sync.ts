@@ -299,12 +299,31 @@ async function handleServices(req: any, res: any, ctx: any) {
     for (const row of rows) {
       const variationId = row.metadata.square_variation_id;
 
-      const { data: existing } = await supabaseAdmin
-        .from('services')
-        .select('id')
-        .eq('source', 'square')
-        .contains('metadata', { square_variation_id: variationId })
-        .maybeSingle();
+      let existing: any = null;
+
+      // Primary: dedup by salon_id + source + variation_id
+      if (ctx.salonId) {
+        const { data } = await supabaseAdmin
+          .from('services')
+          .select('id')
+          .eq('salon_id', ctx.salonId)
+          .eq('source', 'square')
+          .contains('metadata', { square_variation_id: variationId })
+          .maybeSingle();
+        existing = data;
+      }
+
+      // Fallback: if no match with salon_id, retry without it
+      if (!existing) {
+        console.warn(`[FALLBACK:sync:dedup] salon_id=${ctx.salonId} found 0 existing services for variation ${variationId}, falling back to source-only lookup`);
+        const { data } = await supabaseAdmin
+          .from('services')
+          .select('id')
+          .eq('source', 'square')
+          .contains('metadata', { square_variation_id: variationId })
+          .maybeSingle();
+        existing = data;
+      }
 
       if (existing) {
         await supabaseAdmin
