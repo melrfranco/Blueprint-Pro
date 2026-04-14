@@ -406,7 +406,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
             source: 'square',
             hasAccount: !!row.supabase_user_id,
           }));
-          console.log('[Settings] setClients called with', mappedClients.length, 'clients');
+          console.log('[Settings] setClients called with', mappedClients.length, 'clients, first 3 names:', mappedClients.slice(0,3).map(c => c.name));
           setClients(mappedClients);
         } else {
           console.warn('[Settings] ⚠️ No clients from server:', syncJson.message || `inserted=${syncJson.inserted}`);
@@ -719,7 +719,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
 
   const value = useMemo<SettingsContextType>(
-    () => ({
+    () => {
+      console.log('[Settings] CONTEXT VALUE updated — clients:', clients.length, 'services:', services.length, 'stylists:', stylists.length);
+      return {
       services,
       levels,
       stylists,
@@ -750,7 +752,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       createClient,
       resolveClientByExternalId,
       saveAll,
-    }),
+    };},
     [
       services,
       levels,

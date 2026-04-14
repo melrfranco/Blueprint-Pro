@@ -39,6 +39,7 @@ export default function AdminDashboardV2({ role }: { role: UserRole }) {
     pinnedReports, updatePinnedReports,
     saveAll
   } = useSettings();
+  console.log('[AdminDashboardV2] render — clients:', clients.length, 'plans:', plans.length);
   const { toastVisible, showToast, hideToast } = useSaveToast();
   const { plans, bookings, getStats } = usePlans();
   const { user, updateUser, logout } = useAuth();
