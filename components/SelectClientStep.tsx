@@ -27,13 +27,14 @@ const SelectClientStep: React.FC<SelectClientStepProps> = ({
 
   const isAdmin = user?.role === 'admin';
 
+  console.log('[SelectClientStep] propClients received:', propClients?.length ?? 0, 'first 2:', (propClients || []).slice(0,2).map(c => ({ id: c.id, name: c.name, avatarUrl: c.avatarUrl, avatar_url: (c as any).avatar_url })));
   const clients: Client[] = useMemo(() => {
     return (propClients || []).map((c: any) => ({
       id: c.id,
       name: c.name,
       email: c.email,
       phone: c.phone,
-      avatarUrl: c.avatar_url,
+      avatarUrl: c.avatar_url || c.avatarUrl,
       source: 'square',
       historicalData: [],
     }));
