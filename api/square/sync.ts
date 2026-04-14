@@ -80,7 +80,7 @@ async function resolveAuth(req: any) {
     // 1. Try caller's own merchant_settings (admin path)
     const { data: ms, error: msErr } = await supabaseAdmin
       .from('merchant_settings')
-      .select('id, square_access_token, settings')
+      .select('id, square_access_token')
       .eq('supabase_user_id', supabaseUserId)
       .maybeSingle();
 
@@ -96,16 +96,6 @@ async function resolveAuth(req: any) {
     if (ms?.square_access_token) {
       squareAccessToken = ms.square_access_token;
       console.log(`[SYNC:resolveAuth] token found in merchant_settings.square_access_token`);
-    } else {
-      // 2. Try settings JSON fallback (team sync pattern)
-      squareAccessToken =
-        ms?.settings?.square_access_token ??
-        ms?.settings?.oauth?.access_token ??
-        undefined;
-      console.log(`[SYNC:resolveAuth] settings JSON fallback:`, {
-        hasSettingsSquareToken: !!ms?.settings?.square_access_token,
-        hasSettingsOauthToken: !!ms?.settings?.oauth?.access_token,
-      });
     }
 
     if (!squareAccessToken) {
@@ -164,8 +154,6 @@ async function resolveAuth(req: any) {
             msHasToken: !!ms?.square_access_token,
             msTokenLength: ms?.square_access_token?.length ?? 0,
             msError: msErr?.message || null,
-            settingsSquareToken: !!ms?.settings?.square_access_token,
-            settingsOauthToken: !!ms?.settings?.oauth?.access_token,
           },
         },
       };
