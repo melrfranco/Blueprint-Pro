@@ -392,9 +392,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
         if (cancelled) return;
 
+        console.log('[Settings] CLIENTS CHECK', { ok: syncRes.ok, hasClients: !!syncJson.clients, count: syncJson.clients?.length ?? 0, cancelled });
         if (syncRes.ok && syncJson.clients && syncJson.clients.length > 0) {
-          console.log('[Settings] ✅ Loaded', syncJson.clients.length, 'clients from server');
-          setClients(syncJson.clients.map((row: any) => ({
+          console.log('[Settings] ✅ Loaded', syncJson.clients.length, 'clients from server — calling setClients');
+          const mappedClients = syncJson.clients.map((row: any) => ({
             id: row.external_id || row.id,
             externalId: row.external_id,
             name: row.name || 'Client',
@@ -404,7 +405,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
             historicalData: [],
             source: 'square',
             hasAccount: !!row.supabase_user_id,
-          })));
+          }));
+          console.log('[Settings] setClients called with', mappedClients.length, 'clients');
+          setClients(mappedClients);
         } else {
           console.warn('[Settings] ⚠️ No clients from server:', syncJson.message || `inserted=${syncJson.inserted}`);
         }
