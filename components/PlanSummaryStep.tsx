@@ -274,86 +274,84 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
         }
     };
 
-    const handleInviteToBlueprint = async () => {
-        if (!canViewClientContact && !isClient) {
-            return;
-        }
-
-        setIsSendingInvite(true);
+    const handleOpenInviteModal = async () => {
+        setClaimCode(null);
+        setActivationLink(null);
         setInviteWarning(null);
-
-        const clientPhone = plan.client.phone || '';
-        const clientEmail = plan.client.email || '';
+        setInviteBookingEligible(null);
+        setMembershipModalMode('invite');
+        setMembershipModalOpen(true);
+        setIsSendingInvite(true);
 
         try {
-            // Step 1: Create invitation record via server endpoint
-            let linkToShare = '';
-            try {
-                const { data: sessionData } = await supabase.auth.getSession();
-                const token = sessionData?.session?.access_token;
+            const { data: sessionData } = await supabase.auth.getSession();
+            const token = sessionData?.session?.access_token;
 
-                const res = await fetch('/api/invitations', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-                    },
-                    body: JSON.stringify({
-                        action: 'create',
-                        plan_id: plan.id,
-                        invite_email: clientEmail || plan.client.email,
-                        invite_name: plan.client.name,
-                        invite_phone: clientPhone || null,
-                    }),
-                });
+            const res = await fetch('/api/invitations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({
+                    action: 'create',
+                    plan_id: plan.id,
+                    invite_email: plan.client.email || '',
+                    invite_name: plan.client.name,
+                    invite_phone: plan.client.phone || null,
+                }),
+            });
 
-                const result = await res.json();
+            const result = await res.json();
 
-                if (res.ok && result.activation_link) {
-                    linkToShare = result.activation_link;
-                    setActivationLink(linkToShare);
-                    if (result.claim_code) setClaimCode(result.claim_code);
-                    setInviteBookingEligible(result.booking_eligible);
-
-                    if (!result.booking_eligible) {
-                        setInviteWarning('This client has no Square customer link. They can activate their account but won\'t be able to book until you link a Square customer. Sync clients from Square first, then resend the invitation.');
-                    }
-                } else {
-                    console.warn('[INVITE] Failed to create invitation:', result.message);
+            if (res.ok && result.activation_link) {
+                setActivationLink(result.activation_link);
+                if (result.claim_code) setClaimCode(result.claim_code);
+                setInviteBookingEligible(result.booking_eligible);
+                if (!result.booking_eligible) {
+                    setInviteWarning('This client has no Square customer link. They can activate their account but booking will be unavailable until you link a Square customer.');
                 }
-            } catch (inviteErr) {
-                console.warn('[INVITE] Invitation API error:', inviteErr);
+            } else {
+                console.warn('[INVITE] Failed to create invitation:', result.message);
+                setInviteWarning(result.message || 'Failed to generate invite. Please try again.');
             }
-
-            // Step 2: Open delivery channel with activation link included
-            const message = linkToShare
-                ? `${accountInviteMessage.replace('[Link]', linkToShare)}`
-                : accountInviteMessage;
-
-            if (deliveryMethod === 'sms') {
-                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-                const separator = isIOS ? '&' : '?';
-                const cleanPhone = clientPhone.replace(/\D/g, '');
-                window.location.href = `sms:${cleanPhone}${separator}body=${encodeURIComponent(message)}`;
-            } else if (deliveryMethod === 'email') {
-                window.location.href = `mailto:${clientEmail}?subject=${encodeURIComponent("Your Salon Roadmap Is Ready")}&body=${encodeURIComponent(message)}`;
-            } else if (deliveryMethod === 'link') {
-                if (navigator.clipboard) {
-                    navigator.clipboard.writeText(message);
-                }
-            }
-
-            // Do NOT modify membershipStatus — this is account creation only
-            setInviteSent(true);
-            setTimeout(() => {
-                setMembershipModalOpen(false);
-                setInviteSent(false);
-            }, 1500);
-        } catch (e) {
-            console.error("Failed to send account invite", e);
+        } catch (err) {
+            console.warn('[INVITE] Invitation API error:', err);
+            setInviteWarning('Could not create invitation. Please try again.');
         } finally {
             setIsSendingInvite(false);
         }
+    };
+
+    const handleInviteToBlueprint = async () => {
+        if (!canViewClientContact && !isClient) return;
+
+        const clientPhone = plan.client.phone || '';
+        const clientEmail = plan.client.email || '';
+        const linkToShare = activationLink || '';
+
+        const message = linkToShare
+            ? `${accountInviteMessage.replace('[Link]', linkToShare)}`
+            : accountInviteMessage;
+
+        if (deliveryMethod === 'sms') {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const separator = isIOS ? '&' : '?';
+            const cleanPhone = clientPhone.replace(/\D/g, '');
+            window.location.href = `sms:${cleanPhone}${separator}body=${encodeURIComponent(message)}`;
+        } else if (deliveryMethod === 'email') {
+            window.location.href = `mailto:${clientEmail}?subject=${encodeURIComponent('Your Salon Roadmap Is Ready')}&body=${encodeURIComponent(message)}`;
+        } else if (deliveryMethod === 'link') {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(message);
+            }
+        }
+
+        setInviteSent(true);
+        setTimeout(() => {
+            setMembershipModalOpen(false);
+            setInviteSent(false);
+        }, 1500);
     };
 
     const handleOfferMembership = async () => {
@@ -927,7 +925,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
 
                     {user?.role === 'admin' && !liveClient?.hasAccount && (
                         <button
-                            onClick={() => { setMembershipModalMode('invite'); setMembershipModalOpen(true); }}
+                            onClick={handleOpenInviteModal}
                             className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all border-2 border-secondary bg-secondary text-secondary-foreground`}
                         >
                             <PlusIcon className="w-6 h-6" />
