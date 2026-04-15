@@ -66,7 +66,8 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
     const [pendingBookingAction, setPendingBookingAction] = useState<null | { type: 'availability'; visit: PlanAppointment } | { type: 'book'; slotTime: string } | { type: 'slots'; date: Date }>(null);
     const [isApplyingRemap, setIsApplyingRemap] = useState(false);
 
-    const { membershipConfig, integration, services: allServices, stylists: allStylists, cancellationPolicy } = useSettings();
+    const { membershipConfig, integration, services: allServices, stylists: allStylists, cancellationPolicy, clients: allClients } = useSettings();
+    const liveClient = allClients.find(c => c.id === plan.client.id);
     const { savePlan, saveBooking, plans: allPlans } = usePlans();
     const { user } = useAuth();
 
@@ -920,7 +921,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                         </button>
                     )}
 
-                    {user?.role === 'admin' && !plan.client.hasAccount && (
+                    {user?.role === 'admin' && !liveClient?.hasAccount && (
                         <button
                             onClick={() => { setMembershipModalMode('invite'); setMembershipModalOpen(true); }}
                             className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all border-2 border-secondary bg-secondary text-secondary-foreground`}
