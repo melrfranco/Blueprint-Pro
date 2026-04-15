@@ -270,7 +270,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
             if (dataJson.clients?.length > 0) {
               console.log('[Settings] ✅ Loaded', dataJson.clients.length, 'clients from admin Supabase data');
               setClients(dataJson.clients.map((row: any) => ({
-                id: row.external_id || row.id,
+                id: row.id,
                 externalId: row.external_id,
                 name: row.name || 'Client',
                 email: row.email,
@@ -396,7 +396,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         if (syncRes.ok && syncJson.clients && syncJson.clients.length > 0) {
           console.log('[Settings] ✅ Loaded', syncJson.clients.length, 'clients from server — calling setClients');
           const mappedClients = syncJson.clients.map((row: any) => ({
-            id: row.external_id || row.id,
+            id: row.id,
             externalId: row.external_id,
             name: row.name || 'Client',
             email: row.email,
