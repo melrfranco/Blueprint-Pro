@@ -269,6 +269,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
             // Clients
             if (dataJson.clients?.length > 0) {
               console.log('[Settings] ✅ Loaded', dataJson.clients.length, 'clients from admin Supabase data');
+              const adminId = dataJson.adminUserId;
               setClients(dataJson.clients.map((row: any) => ({
                 id: row.id,
                 externalId: row.external_id,
@@ -278,7 +279,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
                 avatarUrl: row.avatar_url,
                 historicalData: [],
                 source: 'square',
-                hasAccount: !!row.supabase_user_id,
+                hasAccount: !!row.supabase_user_id && row.supabase_user_id !== adminId,
               })));
             }
 
@@ -404,7 +405,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
             avatarUrl: row.avatar_url,
             historicalData: [],
             source: 'square',
-            hasAccount: !!row.supabase_user_id,
+            hasAccount: !!row.supabase_user_id && row.supabase_user_id !== user.id,
           }));
           console.log('[Settings] setClients called with', mappedClients.length, 'clients, first 3 names:', mappedClients.slice(0,3).map(c => c.name));
           setClients(mappedClients);
