@@ -935,7 +935,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                         </button>
                     )}
 
-                    {user?.role === 'admin' && liveClient?.hasAccount && membershipConfig.enabled && (
+                    {user?.role === 'admin' && membershipConfig.enabled && (
                         <button
                             onClick={() => { setMembershipModalMode('membership'); setMembershipModalOpen(true); }}
                             className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all border-2 border-secondary bg-secondary text-secondary-foreground`}
@@ -1018,6 +1018,16 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                             <div>
                                                 <p className="bp-caption text-amber-600 uppercase tracking-widest">Booking Unavailable</p>
                                                 <p className="bp-body-sm text-amber-900 leading-tight">{inviteWarning}</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {membershipModalMode === 'membership' && !liveClient?.hasAccount && (
+                                        <div className="bg-amber-50 p-4 bp-container-list border-2 border-amber-200 flex items-start space-x-3">
+                                            <div className="bg-amber-500 text-white rounded-full p-1 mt-0.5 flex-shrink-0">!</div>
+                                            <div>
+                                                <p className="bp-caption text-amber-600 uppercase tracking-widest">Account Required</p>
+                                                <p className="bp-body-sm text-amber-900 leading-tight">This client does not have a Blueprint account yet. Send them an account invite first so they can view and accept the membership.</p>
                                             </div>
                                         </div>
                                     )}
