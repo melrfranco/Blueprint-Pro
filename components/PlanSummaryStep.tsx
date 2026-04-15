@@ -49,6 +49,9 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
     const [isSendingInvite, setIsSendingInvite] = useState(false);
     const [inviteSent, setInviteSent] = useState(false);
     const [activationLink, setActivationLink] = useState<string | null>(null);
+    const [claimCode, setClaimCode] = useState<string | null>(null);
+    const [codeCopied, setCodeCopied] = useState(false);
+    const [linkCopied, setLinkCopied] = useState(false);
     const [inviteBookingEligible, setInviteBookingEligible] = useState<boolean | null>(null);
     const [inviteWarning, setInviteWarning] = useState<string | null>(null);
     const [isAccepting, setIsAccepting] = useState(false);
@@ -309,6 +312,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 if (res.ok && result.activation_link) {
                     linkToShare = result.activation_link;
                     setActivationLink(linkToShare);
+                    if (result.claim_code) setClaimCode(result.claim_code);
                     setInviteBookingEligible(result.booking_eligible);
 
                     if (!result.booking_eligible) {
@@ -1030,6 +1034,37 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                                                     <p className="bp-caption uppercase tracking-widest text-muted-foreground">Estimated monthly membership</p>
                                                     <p className="text-lg font-bold">{formatCurrency(projectedMonthlySpend)}</p>
                                                 </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {membershipModalMode === 'invite' && claimCode && (
+                                        <div className="p-4 bp-container-list border-2 bg-muted border">
+                                            <p className="bp-caption uppercase mb-2 tracking-widest text-muted-foreground">Claim Code</p>
+                                            <div className="flex items-center justify-between gap-3">
+                                                <span className="text-3xl font-black tracking-[0.25em] text-foreground">{claimCode}</span>
+                                                <button
+                                                    onClick={() => { navigator.clipboard?.writeText(claimCode); setCodeCopied(true); setTimeout(() => setCodeCopied(false), 2000); }}
+                                                    className="px-4 py-2 bp-container-compact text-xs font-bold bg-primary text-primary-foreground active:scale-95 transition-all"
+                                                >
+                                                    {codeCopied ? 'COPIED!' : 'COPY'}
+                                                </button>
+                                            </div>
+                                            <p className="bp-caption text-muted-foreground mt-2">Client enters this code in the Blueprint app to claim their plan.</p>
+                                        </div>
+                                    )}
+
+                                    {membershipModalMode === 'invite' && activationLink && (
+                                        <div className="p-4 bp-container-list border-2 bg-muted border">
+                                            <p className="bp-caption uppercase mb-2 tracking-widest text-muted-foreground">Activation Link</p>
+                                            <div className="flex items-center justify-between gap-3">
+                                                <span className="text-xs text-muted-foreground truncate flex-1">{activationLink}</span>
+                                                <button
+                                                    onClick={() => { navigator.clipboard?.writeText(activationLink); setLinkCopied(true); setTimeout(() => setLinkCopied(false), 2000); }}
+                                                    className="px-4 py-2 bp-container-compact text-xs font-bold bg-primary text-primary-foreground active:scale-95 transition-all flex-shrink-0"
+                                                >
+                                                    {linkCopied ? 'COPIED!' : 'COPY'}
+                                                </button>
                                             </div>
                                         </div>
                                     )}
