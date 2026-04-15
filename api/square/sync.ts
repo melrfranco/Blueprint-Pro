@@ -246,7 +246,19 @@ async function handleClients(req: any, res: any, ctx: any) {
     }
   }
 
-  return res.status(200).json({ inserted: rows.length, clients: rows });
+  const externalIds = rows.map((r: any) => r.external_id).filter(Boolean);
+  const { data: dbRows, error: fetchError } = await ctx.supabaseAdmin
+    .from('clients')
+    .select('id, external_id, name, email, phone, avatar_url, supabase_user_id')
+    .in('external_id', externalIds)
+    .eq('supabase_user_id', ctx.adminUserId);
+
+  if (fetchError) {
+    console.error('[SYNC:clients] Post-upsert fetch failed:', fetchError);
+    return res.status(500).json({ message: fetchError.message });
+  }
+
+  return res.status(200).json({ inserted: rows.length, clients: dbRows || [] });
 }
 
 // ─── SERVICES SYNC ────────────────────────────────────────────────────────────
