@@ -931,7 +931,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                         </button>
                     )}
 
-                    {user?.role === 'admin' && plan.client.hasAccount && membershipConfig.enabled && (
+                    {user?.role === 'admin' && liveClient?.hasAccount && membershipConfig.enabled && (
                         <button
                             onClick={() => { setMembershipModalMode('membership'); setMembershipModalOpen(true); }}
                             className={`w-full py-4 bp-container-compact font-bold text-lg flex items-center justify-center space-x-3 shadow-sm active:scale-95 transition-all border-2 border-secondary bg-secondary text-secondary-foreground`}
