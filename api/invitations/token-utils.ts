@@ -25,3 +25,17 @@ export function generateRawToken(): string {
 export function hashToken(rawToken: string): string {
   return createHash('sha256').update(rawToken).digest('hex');
 }
+
+/**
+ * Generate a short 6-character uppercase alphanumeric claim code.
+ * Stored in plaintext for in-person verbal/visual handoff.
+ */
+export function generateClaimCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // omit 0/O/1/I for readability
+  let code = '';
+  const bytes = randomBytes(6);
+  for (let i = 0; i < 6; i++) {
+    code += chars[bytes[i] % chars.length];
+  }
+  return code;
+}

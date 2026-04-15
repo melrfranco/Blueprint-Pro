@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { generateRawToken, hashToken } from './token-utils';
+import { generateRawToken, hashToken, generateClaimCode } from './token-utils';
 import { log } from '../lib/logger';
 
 /**
@@ -230,6 +230,8 @@ async function handleCreate(req: any, res: any) {
   const hashedToken = hashToken(rawToken);
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
+  const claimCode = generateClaimCode();
+
   const { data: invitation, error: insertError } = await supabaseAdmin
     .from('client_invitations')
     .insert({
@@ -242,6 +244,7 @@ async function handleCreate(req: any, res: any) {
       activation_token: hashedToken,
       activation_expires_at: expiresAt,
       provider_customer_id: providerCustomerId,
+      claim_code: claimCode,
       status: 'pending',
     })
     .select('id')
@@ -260,6 +263,7 @@ async function handleCreate(req: any, res: any) {
     code: 'INVITATION_CREATED',
     id: invitation.id,
     activation_link: activationLink,
+    claim_code: claimCode,
     provider_customer_id: providerCustomerId,
     booking_eligible: !!providerCustomerId,
     message: providerCustomerId
@@ -327,9 +331,10 @@ async function handleResend(req: any, res: any) {
     }
   }
 
-  // Generate new hashed token and extend expiry
+  // Generate new hashed token, new claim code, and extend expiry
   const rawToken = generateRawToken();
   const hashedToken = hashToken(rawToken);
+  const newClaimCode = generateClaimCode();
   const newExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
   const { error: updateError } = await supabaseAdmin
@@ -338,6 +343,7 @@ async function handleResend(req: any, res: any) {
       activation_token: hashedToken,
       activation_expires_at: newExpiresAt,
       provider_customer_id: providerCustomerId,
+      claim_code: newClaimCode,
     })
     .eq('id', invitation.id);
 
@@ -354,6 +360,7 @@ async function handleResend(req: any, res: any) {
     code: 'INVITATION_RESENT',
     id: invitation.id,
     activation_link: activationLink,
+    claim_code: newClaimCode,
     provider_customer_id: providerCustomerId,
     booking_eligible: !!providerCustomerId,
     message: providerCustomerId
