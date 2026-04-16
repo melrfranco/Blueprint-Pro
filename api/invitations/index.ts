@@ -195,6 +195,7 @@ async function handleCreate(req: any, res: any) {
     log('INVITE_REGENERATE', { salonId, inviteEmail: invite_email, existingId: existingInvite.id });
     const rawToken = generateRawToken();
     const hashedToken = hashToken(rawToken);
+    const newClaimCode = generateClaimCode();
     const newExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
     const { error: updateError } = await supabaseAdmin
@@ -204,6 +205,7 @@ async function handleCreate(req: any, res: any) {
         activation_expires_at: newExpiresAt,
         provider_customer_id: providerCustomerId,
         invited_by_user_id: callerUserId,
+        claim_code: newClaimCode,
       })
       .eq('id', existingInvite.id);
 
@@ -216,6 +218,7 @@ async function handleCreate(req: any, res: any) {
     return res.status(200).json({
       id: existingInvite.id,
       activation_link: activationLink,
+      claim_code: newClaimCode,
       provider_customer_id: providerCustomerId,
       booking_eligible: !!providerCustomerId,
       message: providerCustomerId
