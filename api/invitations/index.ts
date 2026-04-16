@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { generateRawToken, hashToken, generateClaimCode } from './token-utils.js';
-import { log } from '../lib/logger';
+import { log } from '../lib/logger.js';
 
 /**
  * POST /api/invitations
