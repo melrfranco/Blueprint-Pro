@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { generateRawToken, hashToken, generateClaimCode } from './token-utils';
+import { generateRawToken, hashToken, generateClaimCode } from './token-utils.js';
 import { log } from '../lib/logger';
 
 /**
