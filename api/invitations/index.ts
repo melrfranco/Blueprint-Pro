@@ -173,7 +173,7 @@ async function handleCreate(req: any, res: any) {
   // Check for existing pending invitation (idempotency)
   const { data: existingInvite } = await supabaseAdmin
     .from('client_invitations')
-    .select('id, status, created_at')
+    .select('id, status, created_at, claim_code')
     .eq('salon_id', salonId)
     .eq('invite_email', invite_email)
     .eq('status', 'pending')
@@ -195,7 +195,9 @@ async function handleCreate(req: any, res: any) {
     log('INVITE_REGENERATE', { salonId, inviteEmail: invite_email, existingId: existingInvite.id });
     const rawToken = generateRawToken();
     const hashedToken = hashToken(rawToken);
-    const newClaimCode = generateClaimCode();
+    // Reuse existing claim code if present so previously-shared codes stay valid.
+    // Only generate a new one for legacy invitations that predate the claim_code column.
+    const reusedClaimCode = existingInvite.claim_code || generateClaimCode();
     const newExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
     const { error: updateError } = await supabaseAdmin
@@ -205,7 +207,7 @@ async function handleCreate(req: any, res: any) {
         activation_expires_at: newExpiresAt,
         provider_customer_id: providerCustomerId,
         invited_by_user_id: callerUserId,
-        claim_code: newClaimCode,
+        claim_code: reusedClaimCode,
       })
       .eq('id', existingInvite.id);
 
@@ -218,7 +220,7 @@ async function handleCreate(req: any, res: any) {
     return res.status(200).json({
       id: existingInvite.id,
       activation_link: activationLink,
-      claim_code: newClaimCode,
+      claim_code: reusedClaimCode,
       provider_customer_id: providerCustomerId,
       booking_eligible: !!providerCustomerId,
       message: providerCustomerId
