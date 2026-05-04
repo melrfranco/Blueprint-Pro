@@ -222,14 +222,15 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
 
       // ---- Determine data loading strategy based on role ----
       const isStylist = user.user_metadata?.role === 'stylist';
-      console.log('[Settings] BRANCH DECISION', { isStylist, metadataRole: user.user_metadata?.role, userId: user.id });
+      const isClient = user.user_metadata?.role === 'client';
+      console.log('[Settings] BRANCH DECISION', { isStylist, isClient, metadataRole: user.user_metadata?.role, userId: user.id });
 
-      if (isStylist) {
+      if (isStylist || isClient) {
         // ═══════════════════════════════════════════════════════════
-        // STYLIST PATH: Read from Supabase (admin already synced data)
+        // STYLIST/CLIENT PATH: Read from Supabase (admin already synced data)
         // No Square API calls — just read what the admin imported.
         // ═══════════════════════════════════════════════════════════
-        console.log('[Settings] STYLIST path — reading admin data from Supabase');
+        console.log('[Settings] STYLIST/CLIENT path — reading admin data from Supabase');
         setLoadingTeam(true);
 
         try {

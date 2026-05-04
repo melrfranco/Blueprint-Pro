@@ -171,11 +171,13 @@ async function handleCreate(req: any, res: any) {
   }
 
   // Check for existing pending invitation (idempotency)
+  // Match by plan_id, not just email — two different clients/plans must
+  // never share an invitation even if they happen to have the same email.
   const { data: existingInvite } = await supabaseAdmin
     .from('client_invitations')
     .select('id, status, created_at, claim_code')
     .eq('salon_id', salonId)
-    .eq('invite_email', invite_email)
+    .eq('plan_id', plan_id)
     .eq('status', 'pending')
     .maybeSingle();
 
@@ -208,6 +210,11 @@ async function handleCreate(req: any, res: any) {
         provider_customer_id: providerCustomerId,
         invited_by_user_id: callerUserId,
         claim_code: reusedClaimCode,
+        // Always refresh name/email from the latest client data so stale
+        // info (e.g. from a duplicate-email situation) gets corrected.
+        invite_name: invite_name,
+        invite_email: invite_email,
+        invite_phone: invite_phone || null,
       })
       .eq('id', existingInvite.id);
 

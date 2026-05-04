@@ -36,6 +36,7 @@ export default async function handler(req: any, res: any) {
 
     const userMeta = userData.user.user_metadata || {};
     const stylistSquareId = userMeta.stylist_id;
+    const userRole = userMeta.role;
     let adminUserId = userMeta.admin_user_id;
 
     // Fallback 1: resolve admin via square_team_members.supabase_user_id
@@ -57,6 +58,52 @@ export default async function handler(req: any, res: any) {
         adminUserId = msRow?.supabase_user_id || null;
         if (adminUserId) {
           console.log(`[STYLIST-DATA] Resolved admin via merchant_settings (merchant_id: ${tmRow.merchant_id})`);
+        }
+      }
+    }
+
+    // Fallback 3: client user — resolve admin via clients table → salon owner
+    if (!adminUserId && userRole === 'client') {
+      console.log(`[STYLIST-DATA] No stylist metadata, checking client→admin path`);
+      const { data: clientRow } = await supabaseAdmin
+        .from('clients')
+        .select('salon_id')
+        .eq('supabase_user_id', userIdHeader)
+        .maybeSingle();
+
+      if (clientRow?.salon_id) {
+        const { data: salonOwner } = await supabaseAdmin
+          .from('salons')
+          .select('owner_user_id')
+          .eq('id', clientRow.salon_id)
+          .maybeSingle();
+
+        if (salonOwner?.owner_user_id) {
+          adminUserId = salonOwner.owner_user_id;
+          console.log(`[STYLIST-DATA] Resolved admin via client→salon owner: ${adminUserId}`);
+        }
+      }
+
+      // Fallback: try salon_memberships
+      if (!adminUserId) {
+        const { data: membership } = await supabaseAdmin
+          .from('salon_memberships')
+          .select('salon_id')
+          .eq('user_id', userIdHeader)
+          .maybeSingle();
+
+        if (membership?.salon_id) {
+          const { data: ownerMembership } = await supabaseAdmin
+            .from('salon_memberships')
+            .select('user_id')
+            .eq('salon_id', membership.salon_id)
+            .eq('role', 'owner')
+            .maybeSingle();
+
+          if (ownerMembership?.user_id) {
+            adminUserId = ownerMembership.user_id;
+            console.log(`[STYLIST-DATA] Resolved admin via client→salon membership: ${adminUserId}`);
+          }
         }
       }
     }

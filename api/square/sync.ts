@@ -84,31 +84,18 @@ async function resolveAuth(req: any) {
       .eq('supabase_user_id', supabaseUserId)
       .maybeSingle();
 
-    console.log(`[SYNC:resolveAuth] merchant_settings lookup for user ${supabaseUserId}:`, {
-      found: !!ms,
-      hasToken: !!ms?.square_access_token,
-      tokenLength: ms?.square_access_token?.length ?? 0,
-      error: msErr?.message || null,
-    });
-
-    merchantId = ms?.id;
+    console.log(`[SYNC:resolveAuth] Supabase lookup for user ${supabaseUserId}:`, { found: !!ms, hasToken: !!ms?.square_access_token });
 
     if (ms?.square_access_token) {
       squareAccessToken = ms.square_access_token;
-      console.log(`[SYNC:resolveAuth] token found in merchant_settings.square_access_token`);
-    }
-
-    if (!squareAccessToken) {
-      // 3. Caller might be a stylist — resolve admin's token
-      console.log(`[SYNC:resolveAuth] no token from own merchant_settings, trying stylist→admin fallback`);
+      merchantId = ms.id;
+      console.log(`[SYNC:resolveAuth] Using token from own merchant_settings`);
+    } else {
+      // 2. Caller might be a stylist — resolve admin's token via metadata/square_team_members
+      console.log(`[SYNC:resolveAuth] No own merchant_settings, checking stylist→admin path`);
       const { data: userData } = await (supabaseAdmin.auth as any).admin.getUserById(supabaseUserId);
       const stylistSquareId = userData?.user?.user_metadata?.stylist_id;
       let resolvedAdminId = userData?.user?.user_metadata?.admin_user_id;
-      console.log(`[SYNC:resolveAuth] user metadata:`, {
-        metadataRole: userData?.user?.user_metadata?.role,
-        stylistSquareId: stylistSquareId || null,
-        adminUserId: resolvedAdminId || null,
-      });
 
       if (!resolvedAdminId && stylistSquareId) {
         const { data: tmRow } = await supabaseAdmin
@@ -117,7 +104,7 @@ async function resolveAuth(req: any) {
           .eq('square_team_member_id', stylistSquareId)
           .maybeSingle();
         resolvedAdminId = tmRow?.supabase_user_id;
-        console.log(`[SYNC:resolveAuth] resolved admin via team_members:`, resolvedAdminId || null);
+        console.log(`[SYNC:resolveAuth] Resolved admin from square_team_members:`, resolvedAdminId);
       }
 
       if (resolvedAdminId) {
@@ -140,6 +127,75 @@ async function resolveAuth(req: any) {
           console.log(`[SYNC:resolveAuth] token found via admin fallback`);
         }
       }
+
+      // 3. Caller might be a client — resolve admin via clients table
+      if (!squareAccessToken) {
+        const userRole = userData?.user?.user_metadata?.role;
+        if (userRole === 'client') {
+          console.log(`[SYNC:resolveAuth] No stylist path resolved, checking client→admin path`);
+          const { data: clientRow } = await supabaseAdmin
+            .from('clients')
+            .select('salon_id')
+            .eq('supabase_user_id', supabaseUserId)
+            .maybeSingle();
+
+          if (clientRow?.salon_id) {
+            const { data: salonOwner } = await supabaseAdmin
+              .from('salons')
+              .select('owner_user_id')
+              .eq('id', clientRow.salon_id)
+              .maybeSingle();
+
+            if (salonOwner?.owner_user_id) {
+              adminUserId = salonOwner.owner_user_id;
+              const { data: ownerMs } = await supabaseAdmin
+                .from('merchant_settings')
+                .select('id, square_access_token')
+                .eq('supabase_user_id', salonOwner.owner_user_id)
+                .maybeSingle();
+
+              merchantId = ownerMs?.id;
+              if (ownerMs?.square_access_token) {
+                squareAccessToken = ownerMs.square_access_token;
+                console.log(`[SYNC:resolveAuth] token found via client→salon owner path`);
+              }
+            }
+          }
+
+          // Fallback: try salon_memberships
+          if (!squareAccessToken) {
+            const { data: membership } = await supabaseAdmin
+              .from('salon_memberships')
+              .select('salon_id')
+              .eq('user_id', supabaseUserId)
+              .maybeSingle();
+
+            if (membership?.salon_id) {
+              const { data: ownerMembership } = await supabaseAdmin
+                .from('salon_memberships')
+                .select('user_id')
+                .eq('salon_id', membership.salon_id)
+                .eq('role', 'owner')
+                .maybeSingle();
+
+              if (ownerMembership?.user_id) {
+                adminUserId = ownerMembership.user_id;
+                const { data: ownerMs } = await supabaseAdmin
+                  .from('merchant_settings')
+                  .select('id, square_access_token')
+                  .eq('supabase_user_id', ownerMembership.user_id)
+                  .maybeSingle();
+
+                merchantId = ownerMs?.id;
+                if (ownerMs?.square_access_token) {
+                  squareAccessToken = ownerMs.square_access_token;
+                  console.log(`[SYNC:resolveAuth] token found via client→salon membership path`);
+                }
+              }
+            }
+          }
+        }
+      }
     }
 
     if (!squareAccessToken) {
@@ -150,10 +206,6 @@ async function resolveAuth(req: any) {
           message: 'Could not resolve Square access token for this user or their admin.',
           debug: {
             supabaseUserId,
-            msFound: !!ms,
-            msHasToken: !!ms?.square_access_token,
-            msTokenLength: ms?.square_access_token?.length ?? 0,
-            msError: msErr?.message || null,
           },
         },
       };
@@ -204,61 +256,124 @@ async function resolveAuth(req: any) {
 async function handleClients(req: any, res: any, ctx: any) {
   const { adminUserId, squareAccessToken } = ctx;
 
-  const squareRes = await fetch(
-    'https://connect.squareup.com/v2/customers',
-    {
-      method: 'GET',
+  const env = (process.env.VITE_SQUARE_ENV || 'production').toLowerCase();
+  const squareBase = env === 'sandbox'
+    ? 'https://connect.squareupsandbox.com'
+    : 'https://connect.squareup.com';
+
+  // Use /v2/customers/search with pagination (same as frontend fetchCustomers)
+  const allCustomers: any[] = [];
+  let cursor: string | undefined;
+
+  do {
+    const body: any = {
+      query: { sort: { field: 'CREATED_AT', order: 'DESC' } },
+      limit: 100,
+    };
+    if (cursor) body.cursor = cursor;
+
+    const squareRes = await fetch(`${squareBase}/v2/customers/search`, {
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${squareAccessToken}`,
         'Content-Type': 'application/json',
-        'Square-Version': '2023-10-20',
+        'Square-Version': '2025-10-16',
       },
-    }
-  );
+      body: JSON.stringify(body),
+    });
 
-  const json = await squareRes.json();
-  if (!squareRes.ok) {
-    return res.status(squareRes.status).json(json);
+    if (!squareRes.ok) {
+      const err = await squareRes.json();
+      console.error('[SYNC:clients] Square API error:', err);
+      return res.status(squareRes.status).json({ message: 'Failed to fetch customers from Square', details: err });
+    }
+
+    const data = await squareRes.json();
+    if (data.customers) {
+      console.log('[SYNC:clients] Got', data.customers.length, 'customers');
+      allCustomers.push(...data.customers);
+    }
+    cursor = data.cursor;
+  } while (cursor);
+
+  console.log('[SYNC:clients] Total customers fetched:', allCustomers.length);
+
+  if (allCustomers.length === 0) {
+    return res.status(200).json({ inserted: 0, clients: [] });
   }
 
-  const customers = json.customers || [];
+  // Pre-fetch existing clients so we can:
+  // 1. Preserve supabase_user_id for claimed clients
+  // 2. Use two-step upsert (find existing → update or insert) to avoid
+  //    relying on onConflict which requires a unique constraint
+  const externalIds = allCustomers.map((c: any) => c.id).filter(Boolean);
+  const { data: existingClients } = await ctx.supabaseAdmin
+    .from('clients')
+    .select('id, external_id, supabase_user_id')
+    .in('external_id', externalIds);
+  const existingByExternalId = new Map<string, { id: string; supabase_user_id: string | null }>();
+  for (const row of existingClients || []) {
+    existingByExternalId.set(row.external_id, { id: row.id, supabase_user_id: row.supabase_user_id });
+  }
 
-  const rows = customers.map((c: any) => ({
-    supabase_user_id: adminUserId,
-    salon_id: ctx.salonId || null,
-    name: [c.given_name, c.family_name].filter(Boolean).join(' ') || 'Client',
-    email: c.email_address || null,
-    phone: c.phone_number || null,
-    avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-      [c.given_name, c.family_name].filter(Boolean).join(' ') || 'C'
-    )}&background=random`,
-    external_id: c.id,
-  }));
+  // Two-step upsert: update existing rows, insert new ones
+  let updated = 0;
+  let inserted = 0;
 
-  if (rows.length > 0) {
-    const { error } = await ctx.supabaseAdmin
-      .from('clients')
-      .upsert(rows, { onConflict: 'external_id' });
+  for (const c of allCustomers) {
+    const existing = existingByExternalId.get(c.id);
+    const isClaimedClient = existing?.supabase_user_id && existing.supabase_user_id !== adminUserId;
+    const row = {
+      supabase_user_id: isClaimedClient ? existing!.supabase_user_id : adminUserId,
+      salon_id: ctx.salonId || null,
+      name: [c.given_name, c.family_name].filter(Boolean).join(' ') || 'Client',
+      email: c.email_address || null,
+      phone: c.phone_number || null,
+      avatar_url: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        [c.given_name, c.family_name].filter(Boolean).join(' ') || 'C'
+      )}&background=random`,
+      external_id: c.id,
+    };
 
-    if (error) {
-      console.error('[SYNC:clients] Insert failed:', error);
-      return res.status(500).json({ message: error.message });
+    if (existing) {
+      // Update existing row — always refresh name/email/phone from Square
+      const { error } = await ctx.supabaseAdmin
+        .from('clients')
+        .update(row)
+        .eq('id', existing.id);
+      if (error) {
+        console.error('[SYNC:clients] Update failed for external_id:', c.id, error);
+      } else {
+        updated++;
+      }
+    } else {
+      // Insert new row
+      const { error } = await ctx.supabaseAdmin
+        .from('clients')
+        .insert(row);
+      if (error) {
+        console.error('[SYNC:clients] Insert failed for external_id:', c.id, error);
+      } else {
+        inserted++;
+      }
     }
   }
 
-  const externalIds = rows.map((r: any) => r.external_id).filter(Boolean);
+  console.log(`[SYNC:clients] Upsert complete: ${updated} updated, ${inserted} inserted`);
+
+  // Fetch all synced clients regardless of supabase_user_id so claimed
+  // clients (with their own auth ID) are included in the response.
   const { data: dbRows, error: fetchError } = await ctx.supabaseAdmin
     .from('clients')
     .select('id, external_id, name, email, phone, avatar_url, supabase_user_id')
-    .in('external_id', externalIds)
-    .eq('supabase_user_id', ctx.adminUserId);
+    .in('external_id', externalIds);
 
   if (fetchError) {
     console.error('[SYNC:clients] Post-upsert fetch failed:', fetchError);
     return res.status(500).json({ message: fetchError.message });
   }
 
-  return res.status(200).json({ inserted: rows.length, clients: dbRows || [] });
+  return res.status(200).json({ inserted: inserted, updated, clients: dbRows || [] });
 }
 
 // ─── SERVICES SYNC ────────────────────────────────────────────────────────────

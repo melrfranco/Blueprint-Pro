@@ -68,6 +68,7 @@ export default async function handler(req: any, res: any) {
           console.log(`[SQUARE PROXY] No own merchant_settings, checking stylist→admin path`);
           const { data: userData } = await (supabaseAdmin.auth as any).admin.getUserById(userId);
           const stylistSquareId = userData?.user?.user_metadata?.stylist_id;
+          const userRole = userData?.user?.user_metadata?.role;
           let resolvedAdminId = userData?.user?.user_metadata?.admin_user_id;
 
           if (!resolvedAdminId && stylistSquareId) {
@@ -90,6 +91,68 @@ export default async function handler(req: any, res: any) {
             if (adminMs?.square_access_token) {
               squareAccessToken = adminMs.square_access_token;
               console.log(`[SQUARE PROXY] Using token from admin merchant_settings (admin: ${resolvedAdminId})`);
+            }
+          }
+
+          // 3. Caller might be a client — resolve admin via clients table
+          if (!squareAccessToken && userRole === 'client') {
+            console.log(`[SQUARE PROXY] No stylist path resolved, checking client→admin path`);
+            const { data: clientRow } = await supabaseAdmin
+              .from('clients')
+              .select('salon_id')
+              .eq('supabase_user_id', userId)
+              .maybeSingle();
+
+            if (clientRow?.salon_id) {
+              const { data: salonOwner } = await supabaseAdmin
+                .from('salons')
+                .select('owner_user_id')
+                .eq('id', clientRow.salon_id)
+                .maybeSingle();
+
+              if (salonOwner?.owner_user_id) {
+                const { data: ownerMs } = await supabaseAdmin
+                  .from('merchant_settings')
+                  .select('square_access_token')
+                  .eq('supabase_user_id', salonOwner.owner_user_id)
+                  .maybeSingle();
+
+                if (ownerMs?.square_access_token) {
+                  squareAccessToken = ownerMs.square_access_token;
+                  console.log(`[SQUARE PROXY] Using token from salon owner merchant_settings (owner: ${salonOwner.owner_user_id})`);
+                }
+              }
+            }
+
+            // Fallback: try salon_memberships if no salon_id on client row
+            if (!squareAccessToken) {
+              const { data: membership } = await supabaseAdmin
+                .from('salon_memberships')
+                .select('salon_id')
+                .eq('user_id', userId)
+                .maybeSingle();
+
+              if (membership?.salon_id) {
+                const { data: ownerMembership } = await supabaseAdmin
+                  .from('salon_memberships')
+                  .select('user_id')
+                  .eq('salon_id', membership.salon_id)
+                  .eq('role', 'owner')
+                  .maybeSingle();
+
+                if (ownerMembership?.user_id) {
+                  const { data: ownerMs } = await supabaseAdmin
+                    .from('merchant_settings')
+                    .select('square_access_token')
+                    .eq('supabase_user_id', ownerMembership.user_id)
+                    .maybeSingle();
+
+                  if (ownerMs?.square_access_token) {
+                    squareAccessToken = ownerMs.square_access_token;
+                    console.log(`[SQUARE PROXY] Using token from salon membership owner (owner: ${ownerMembership.user_id})`);
+                  }
+                }
+              }
             }
           }
         }
