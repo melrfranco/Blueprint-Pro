@@ -81,6 +81,7 @@ export interface GeneratedPlan {
     membershipStatus: MembershipStatus;
     membershipOfferSentAt?: string | null;
     membershipOfferAcceptedAt?: string | null;
+    membershipTier?: MembershipTier | null;
     createdAt: string;
     stylistId: string;
     stylistName: string;

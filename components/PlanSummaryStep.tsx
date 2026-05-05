@@ -382,7 +382,7 @@ const PlanSummaryStep: React.FC<PlanSummaryStepProps> = ({ plan, role, onEditPla
                 }
             }
 
-            await savePlan({ ...plan, membershipStatus: 'offered', membershipOfferSentAt: new Date().toISOString() });
+            await savePlan({ ...plan, membershipStatus: 'offered', membershipOfferSentAt: new Date().toISOString(), membershipTier: qualifyingTier || null });
             setInviteSent(true);
             setTimeout(() => {
                 setMembershipModalOpen(false);
