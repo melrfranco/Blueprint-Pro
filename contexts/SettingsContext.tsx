@@ -197,15 +197,25 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       // --- Check Square Connection Status (informational only) ---
       const { data: merchantSettings, error: msError } = await supabase
         .from('merchant_settings')
-        .select('square_access_token')
+        .select('square_access_token, settings')
         .eq('supabase_user_id', user.id)
         .maybeSingle();
 
       console.log('[Settings] merchant_settings query:', {
         found: !!merchantSettings,
         hasToken: !!merchantSettings?.square_access_token,
+        hasSettings: !!merchantSettings?.settings,
         error: msError?.message || null,
       });
+
+      // Load membership config from Supabase (persists across devices/sessions)
+      if (merchantSettings?.settings?.membershipConfig) {
+        const savedConfig = merchantSettings.settings.membershipConfig as MembershipConfig;
+        if (savedConfig.tiers && savedConfig.tiers.length > 0) {
+          console.log('[Settings] Loaded membershipConfig from Supabase:', savedConfig.tiers.length, 'tiers');
+          setMembershipConfig(savedConfig);
+        }
+      }
 
       if (cancelled) { isLoading = false; return; }
 
@@ -715,6 +725,39 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       localStorage.setItem('admin_text_size', String(textSize));
       localStorage.setItem('admin_push_alerts_enabled', String(pushAlertsEnabled));
       localStorage.setItem('admin_pinned_reports', JSON.stringify(pinnedReports));
+
+      // Persist membership config to Supabase so client/stylist apps can access it
+      if (supabase) {
+        try {
+          const { data: userData } = await (supabase.auth as any).getUser();
+          const userId = userData?.user?.id;
+          if (userId) {
+            // Merge membershipConfig into the existing settings JSONB — don't overwrite other columns
+            const { error: updateErr } = await supabase
+              .from('merchant_settings')
+              .update({ settings: { membershipConfig } })
+              .eq('supabase_user_id', userId);
+            if (updateErr) {
+              // Row may not exist yet — try upsert
+              const { error: upsertErr } = await supabase
+                .from('merchant_settings')
+                .upsert({
+                  supabase_user_id: userId,
+                  settings: { membershipConfig },
+                }, { onConflict: 'supabase_user_id' });
+              if (upsertErr) {
+                console.error('[Settings] Failed to persist membershipConfig to Supabase:', upsertErr.message);
+              } else {
+                console.log('[Settings] Persisted membershipConfig to Supabase (upsert)');
+              }
+            } else {
+              console.log('[Settings] Persisted membershipConfig to Supabase');
+            }
+          }
+        } catch (e) {
+          console.error('[Settings] Failed to persist membershipConfig to Supabase:', e);
+        }
+      }
     } catch (e) {
       console.error('[Settings] Failed to save locally:', e);
     }
