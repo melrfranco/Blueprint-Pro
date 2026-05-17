@@ -197,24 +197,49 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       // --- Check Square Connection Status (informational only) ---
       const { data: merchantSettings, error: msError } = await supabase
         .from('merchant_settings')
-        .select('square_access_token, settings')
+        .select('square_access_token')
         .eq('supabase_user_id', user.id)
         .maybeSingle();
 
       console.log('[Settings] merchant_settings query:', {
         found: !!merchantSettings,
         hasToken: !!merchantSettings?.square_access_token,
-        hasSettings: !!merchantSettings?.settings,
         error: msError?.message || null,
       });
 
-      // Load membership config from Supabase (persists across devices/sessions)
-      if (merchantSettings?.settings?.membershipConfig) {
-        const savedConfig = merchantSettings.settings.membershipConfig as MembershipConfig;
-        if (savedConfig.tiers && savedConfig.tiers.length > 0) {
-          console.log('[Settings] Loaded membershipConfig from Supabase:', savedConfig.tiers.length, 'tiers');
-          setMembershipConfig(savedConfig);
+      // Load membership tiers from the dedicated membership_tiers table
+      try {
+        const { data: salonRow } = await supabase
+          .from('salons')
+          .select('id')
+          .eq('owner_user_id', user.id)
+          .maybeSingle();
+
+        if (salonRow?.id) {
+          const { data: tiers, error: tiersError } = await supabase
+            .from('membership_tiers')
+            .select('*')
+            .eq('salon_id', salonRow.id)
+            .order('position', { ascending: true });
+
+          if (tiersError) {
+            console.warn('[Settings] Failed to load membership_tiers:', tiersError.message);
+          } else if (tiers && tiers.length > 0) {
+            console.log('[Settings] Loaded', tiers.length, 'membership tiers from Supabase');
+            setMembershipConfig({
+              enabled: true,
+              tiers: tiers.map((t: any) => ({
+                id: t.id,
+                name: t.name,
+                minSpend: Number(t.min_spend) || 0,
+                perks: Array.isArray(t.perks) ? t.perks : [],
+                color: t.color || '#6AA4BC',
+              })),
+            });
+          }
         }
+      } catch (e) {
+        console.warn('[Settings] Failed to load membership tiers:', e);
       }
 
       if (cancelled) { isLoading = false; return; }
@@ -726,36 +751,57 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
       localStorage.setItem('admin_push_alerts_enabled', String(pushAlertsEnabled));
       localStorage.setItem('admin_pinned_reports', JSON.stringify(pinnedReports));
 
-      // Persist membership config to Supabase so client/stylist apps can access it
+      // Persist membership tiers to the dedicated membership_tiers table in Supabase
       if (supabase) {
         try {
           const { data: userData } = await (supabase.auth as any).getUser();
           const userId = userData?.user?.id;
           if (userId) {
-            // Merge membershipConfig into the existing settings JSONB — don't overwrite other columns
-            const { error: updateErr } = await supabase
-              .from('merchant_settings')
-              .update({ settings: { membershipConfig } })
-              .eq('supabase_user_id', userId);
-            if (updateErr) {
-              // Row may not exist yet — try upsert
-              const { error: upsertErr } = await supabase
-                .from('merchant_settings')
-                .upsert({
-                  supabase_user_id: userId,
-                  settings: { membershipConfig },
-                }, { onConflict: 'supabase_user_id' });
-              if (upsertErr) {
-                console.error('[Settings] Failed to persist membershipConfig to Supabase:', upsertErr.message);
+            // Resolve salon_id for this admin
+            const { data: salonRow } = await supabase
+              .from('salons')
+              .select('id')
+              .eq('owner_user_id', userId)
+              .maybeSingle();
+
+            if (salonRow?.id) {
+              const salonId = salonRow.id;
+
+              // Delete existing tiers for this salon, then re-insert
+              const { error: deleteErr } = await supabase
+                .from('membership_tiers')
+                .delete()
+                .eq('salon_id', salonId);
+
+              if (deleteErr) {
+                console.error('[Settings] Failed to clear old membership_tiers:', deleteErr.message);
+              } else if (membershipConfig.tiers.length > 0) {
+                const rows = membershipConfig.tiers.map((tier, index) => ({
+                  salon_id: salonId,
+                  name: tier.name,
+                  min_spend: tier.minSpend,
+                  perks: tier.perks,
+                  color: tier.color,
+                  position: index,
+                  enabled: true,
+                }));
+
+                const { error: insertErr } = await supabase
+                  .from('membership_tiers')
+                  .insert(rows);
+
+                if (insertErr) {
+                  console.error('[Settings] Failed to insert membership_tiers:', insertErr.message);
+                } else {
+                  console.log('[Settings] Persisted', rows.length, 'membership tiers to Supabase');
+                }
               } else {
-                console.log('[Settings] Persisted membershipConfig to Supabase (upsert)');
+                console.log('[Settings] Cleared membership tiers (none configured)');
               }
-            } else {
-              console.log('[Settings] Persisted membershipConfig to Supabase');
             }
           }
         } catch (e) {
-          console.error('[Settings] Failed to persist membershipConfig to Supabase:', e);
+          console.error('[Settings] Failed to persist membership tiers to Supabase:', e);
         }
       }
     } catch (e) {
