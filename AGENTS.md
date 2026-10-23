@@ -11,7 +11,7 @@ there when the request concerns this live app, and do not merge its 208 unrelate
 commits as an accessibility fix. Preserve separate Git histories and environments.
 
 Run `pnpm check:target` before edits intended for release. Build and tests use
-pnpm 9.15.4 with Node 20. Run `pnpm build` and `pnpm test:a11y` before publishing.
+pnpm 9.15.4 with Node 22. Run `pnpm build` and `pnpm test:a11y` before publishing.
 The target guard refuses the wrong origin or Vercel Git identity. The existing
 domain and Square redirect URI in .blueprint-project.json must stay unchanged.
 

@@ -8,7 +8,7 @@ export default defineConfig({
   workers: process.env.CI ? 2 : undefined,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: 'http://127.0.0.1:4180',
+    baseURL: 'http://127.0.0.1:4181',
     trace: 'retain-on-failure', screenshot: 'only-on-failure',
     contextOptions: { reducedMotion: 'reduce' },
   },
@@ -17,8 +17,8 @@ export default defineConfig({
     { name: 'mobile-chromium', use: { browserName: 'chromium', viewport: { width: 390, height: 844 }, isMobile: true } },
   ],
   webServer: {
-    command: 'pnpm exec vite preview --config tests/a11y/vite.config.ts --host 127.0.0.1 --port 4180 --strictPort',
-    url: 'http://127.0.0.1:4180/tests/a11y/',
+    command: 'pnpm exec vite preview --config tests/a11y/vite.config.ts --host 127.0.0.1 --port 4181 --strictPort',
+    url: 'http://127.0.0.1:4181/tests/a11y/',
     reuseExistingServer: false,
   },
 });

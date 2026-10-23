@@ -54,7 +54,7 @@ semantic resolver, not a new global color injector.
 
 1. From the parent workspace run `node scripts/pro.mjs status`. It always chooses
    this checkout and checks its origin against the deployment contract.
-2. Run `node scripts/pro.mjs install` using Node 20 and pnpm 9.15.4.
+2. Run `node scripts/pro.mjs install` using Node 22 and pnpm 9.15.4.
 3. Run `node scripts/pro.mjs build`, then `node scripts/pro.mjs test`.
 4. Run `node scripts/pro.mjs preview` and open
    `http://127.0.0.1:4180/tests/a11y/` for the synthetic-data preview.
